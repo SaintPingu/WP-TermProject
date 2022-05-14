@@ -137,10 +137,18 @@ protected:
 
 public:
 	void Paint(HDC hdc);
-	POINT GetPosCenter() const;
-	void ShowHitbox();
-
+	
 	bool IsCollide(const RECT* rectSrc) const;
+
+	inline POINT GetPosCenter() const
+	{
+		return posCenter;
+	}
+
+	inline void ShowHitbox()
+	{
+		isShowHitbox = !(isShowHitbox);
+	}
 };
 
 class IMovable abstract {

@@ -28,15 +28,6 @@ void GameObject::Paint(HDC hdc)
 		FrameRect(hdc, &rectBody, (HBRUSH)GetStockObject(BLACK_BRUSH));
 	}
 }
-POINT GameObject::GetPosCenter() const
-{
-	return posCenter;
-}
-
-void GameObject::ShowHitbox()
-{
-	isShowHitbox = !(isShowHitbox);
-}
 
 bool GameObject::IsCollide(const RECT* rectSrc) const
 {

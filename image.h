@@ -20,5 +20,14 @@ public:
 	void Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint, POINT bodySize);
 	void Paint(HDC hdc, const RECT* rectBody);
 	void ScaleImage(double scaleX, double scaleY);
-	POINT GetBodySize() const;
+
+	inline POINT GetBodySize() const
+	{
+		return bodySize;
+	}
+};
+
+class IAnimatable abstract {
+private:
+public:
 };

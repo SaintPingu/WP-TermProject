@@ -19,8 +19,12 @@ public:
 	void Paint(HDC hdc);
 
 	void SetDirection(Dir dir);
-	virtual void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc);
-	virtual void Move(HWND hWnd, int timerID);
-	virtual void Stop(HWND hWnd, Dir dir);
-	virtual bool IsMove() const;
+	void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc);
+	void Move(HWND hWnd, int timerID);
+	void Stop(HWND hWnd, Dir dir);
+
+	inline bool IsMove() const
+	{
+		return isMove;
+	}
 };

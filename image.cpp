@@ -46,15 +46,10 @@ void ObjectImage::Paint(HDC hdc, const RECT* rectBody)
 
 void ObjectImage::ScaleImage(double scaleX, double scaleY)
 {
-	drawSize.x *= scaleX;
-	drawSize.y *= scaleY;
-	bodyDrawPoint.x *= scaleX;
-	bodyDrawPoint.y *= scaleY;
-	bodySize.x *= scaleX;
-	bodySize.y *= scaleY;
-}
-
-POINT ObjectImage::GetBodySize() const
-{
-	return bodySize;
+	drawSize.x = (LONG)((double)drawSize.x * scaleX);
+	drawSize.y = (LONG)((double)drawSize.y * scaleY);
+	bodyDrawPoint.x = (LONG)((double)bodyDrawPoint.x * scaleX);
+	bodyDrawPoint.y = (LONG)((double)bodyDrawPoint.y * scaleY);
+	bodySize.x = (LONG)((double)bodySize.x * scaleX);
+	bodySize.y = (LONG)((double)bodySize.y * scaleY);
 }

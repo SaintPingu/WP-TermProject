@@ -171,10 +171,4 @@ void FlyPokemon::Stop(HWND hWnd, Dir inputDir)
 		break;
 	}
 	direction = direction - inputDir;
-	int a = 0;
-}
-
-inline bool FlyPokemon::IsMove() const
-{
-	return isMove;
 }
