@@ -45,6 +45,7 @@ void ObjectImage::Paint(HDC hdc, const RECT* rectBody, const RECT* rectImage) co
 
 	AlphaBlend(hdc, rectDraw.left, rectDraw.top, (rectDraw.right - rectDraw.left), (rectDraw.bottom - rectDraw.top),
 		memDC, rectImage->left, rectImage->top, (rectImage->right - rectImage->left), (rectImage->bottom - rectImage->top), bFunction);
+	//FrameRect(hdc, &rectDraw, (HBRUSH)GetStockObject(BLACK_BRUSH));
 	DeleteDC(memDC);
 }
 

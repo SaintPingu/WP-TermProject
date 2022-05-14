@@ -31,7 +31,7 @@ void BulletController::Bullet::Create(POINT center, POINT bulletSize, Dir dir)
 }
 bool BulletController::Bullet::Move(const RECT* rectWindow)
 {
-	constexpr int moveAmount = 15;
+	constexpr int moveAmount = 10;
 	int moveX = 0;
 	int moveY = 0;
 	switch (dir)
@@ -46,6 +46,22 @@ bool BulletController::Bullet::Move(const RECT* rectWindow)
 		moveY = -moveAmount;
 		break;
 	case Dir::Down:
+		moveY = moveAmount;
+		break;
+	case Dir::LU:
+		moveX = -moveAmount;
+		moveY = -moveAmount;
+		break;
+	case Dir::LD:
+		moveX = -moveAmount;
+		moveY = moveAmount;
+		break;
+	case Dir::RU:
+		moveX = moveAmount;
+		moveY = -moveAmount;
+		break;
+	case Dir::RD:
+		moveX = moveAmount;
 		moveY = moveAmount;
 		break;
 	default:

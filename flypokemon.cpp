@@ -27,7 +27,7 @@ void FlyPokemon::Paint(HDC hdc)
 
 void FlyPokemon::SetPosDest()
 {
-	constexpr int amount = 15;
+	constexpr int amount = 10;
 	switch (direction)
 	{
 	case Dir::Left:
@@ -129,6 +129,7 @@ void FlyPokemon::Move(HWND hWnd, int timerID)
 	POINT posNext = Lerp(posCenter, posDst, alpha);
 
 	SetPos(posNext);
+	posCenter = GetPosCenter();
 	vector.x = posDst.x - posCenter.x;
 	vector.y = posDst.y - posCenter.y;
 
@@ -205,9 +206,9 @@ void FlyPokemon::Shot()
 	POINT bulletPos;
 	bulletPos.y = rectBody.top;
 
-	bulletPos.x = rectBody.left;
+	bulletPos.x = rectBody.left - 10;
 	bulletController->CreateBullet(bulletPos, Dir::Up);
-	bulletPos.x = rectBody.right;
+	bulletPos.x = rectBody.right + 10;
 	bulletController->CreateBullet(bulletPos, Dir::Up);
 }
 
