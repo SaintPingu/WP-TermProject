@@ -20,7 +20,7 @@ constexpr Dir operator-(Dir lhs, Dir rhs)
 		rhs = temp;
 	}
 
-	Dir result = lhs;
+	Dir result = Dir::Empty;
 	switch (lhs)
 	{
 	case Dir::LD:
@@ -126,17 +126,18 @@ private:
 	ObjectImage image;
 	bool isShowHitbox = false;
 
+	POINT posCenter;
 	POINT bodySize = { 0, };
 	RECT rectBody = { 0, };
 
 protected:
-	POINT posCenter;
 
 	GameObject(ObjectImage image, double scaleX, double scaleY, POINT pos = { 0, 0 });
 	void SetPos(POINT pos);
 
 public:
 	void Paint(HDC hdc);
+	POINT GetPosCenter() const;
 	void ShowHitbox();
 
 	bool IsCollide(const RECT* rectSrc) const;

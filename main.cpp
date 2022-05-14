@@ -5,7 +5,6 @@
 #include <atlImage.h>
 #include <cassert>
 #include "interface.h"
-#include "timer.h"
 
 #define DEBUG_MODE false
 
@@ -79,6 +78,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	static RECT rectWindow;
 	static ObjectImage moltres;
+	static GameData gameData;
 
 	switch (uMsg)
 	{
@@ -101,12 +101,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case _T('H'):
-			flyPokemon->ShowHitbox();
-			break;
-		}
+		CheckKeyDown(hWnd, wParam, &gameData, flyPokemon);
+		break;
+	case WM_KEYUP:
+		CheckKeyUp(hWnd, wParam, &gameData, flyPokemon);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);

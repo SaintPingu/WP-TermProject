@@ -51,6 +51,7 @@ void FlyPokemon::SetPosDest()
 		break;
 	}
 
+	POINT posCenter = GetPosCenter();
 	posDst.x = posCenter.x + vector.x;
 	posDst.y = posCenter.y + vector.y;
 }
@@ -115,8 +116,10 @@ void FlyPokemon::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc
 }
 void FlyPokemon::Move(HWND hWnd, int timerID)
 {
+	POINT posCenter = GetPosCenter();
 	POINT posNext = Lerp(posCenter, posDst, alpha);
 
+	SetPos(posNext);
 	vector.x = posDst.x - posCenter.x;
 	vector.y = posDst.y - posCenter.y;
 
@@ -168,6 +171,7 @@ void FlyPokemon::Stop(HWND hWnd, Dir inputDir)
 		break;
 	}
 	direction = direction - inputDir;
+	int a = 0;
 }
 
 inline bool FlyPokemon::IsMove() const
