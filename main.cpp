@@ -85,8 +85,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 	{
 		GetClientRect(hWnd, &rectWindow);
-		moltres.Load(L"paint_moltres.png", { 85, 77 }, { 36, 26 });
-		flyPokemon = new FlyPokemon(hWnd, moltres, { 15, 35 }, { 300, 300 });
+		moltres.Load(L"paint_moltres.png", { 85, 77 }, { 35, 25 }, { 15,35 });
+		flyPokemon = new FlyPokemon(hWnd, moltres, 1.5f, 1.5f, { 300, 300 });
 
 		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
 	}

@@ -1,9 +1,11 @@
 #include "object.h"
 
-GameObject::GameObject(ObjectImage image, POINT bodySize, POINT pos)
+GameObject::GameObject(ObjectImage image, double scaleX, double scaleY, POINT pos)
 {
 	this->image = image;
-	this->bodySize = bodySize;
+	this->image.ScaleImage(scaleX, scaleY);
+	bodySize = this->image.GetBodySize();
+
 	SetPos(pos);
 }
 

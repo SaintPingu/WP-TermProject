@@ -14,8 +14,11 @@ private:
 	RECT rectImg = { 0, };
 	POINT bodyDrawPoint = { 0, };
 	POINT drawSize = { 0, };
+	POINT bodySize = { 0, };
 
 public:
-	void Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint);
+	void Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint, POINT bodySize);
 	void Paint(HDC hdc, const RECT* rectBody);
+	void ScaleImage(double scaleX, double scaleY);
+	POINT GetBodySize() const;
 };

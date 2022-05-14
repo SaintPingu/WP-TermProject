@@ -1,7 +1,7 @@
 #include "flyPokemon.h"
 
 
-FlyPokemon::FlyPokemon(HWND hWnd, ObjectImage image, POINT bodySize, POINT pos) : GameObject(image, bodySize, pos)
+FlyPokemon::FlyPokemon(HWND hWnd, ObjectImage image, double scaleX, double scaleY, POINT pos) : GameObject(image, scaleX, scaleY, pos)
 {
 	direction = Dir::Empty;
 	posDst = { 0, };

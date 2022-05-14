@@ -132,11 +132,10 @@ private:
 protected:
 	POINT posCenter;
 
-	GameObject(ObjectImage image, POINT bodySize, POINT pos = { 0, 0 });
+	GameObject(ObjectImage image, double scaleX, double scaleY, POINT pos = { 0, 0 });
 	void SetPos(POINT pos);
 
 public:
-	void Init(POINT bodySize);
 	void Paint(HDC hdc);
 	void ShowHitbox();
 

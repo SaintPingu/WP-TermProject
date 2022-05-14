@@ -15,7 +15,7 @@ private:
 	virtual void SetPosDest();
 	POINT Lerp(POINT src, POINT dst, double alpha);
 public:
-	FlyPokemon(HWND hWnd, ObjectImage image, POINT bodySize, POINT pos = { 0, 0 });
+	FlyPokemon(HWND hWnd, ObjectImage image, double scaleX, double scaleY, POINT pos = { 0, 0 });
 	void Paint(HDC hdc);
 
 	void SetDirection(Dir dir);
