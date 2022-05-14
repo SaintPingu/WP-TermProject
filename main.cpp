@@ -89,6 +89,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		flyPokemon = new FlyPokemon(hWnd, moltres, 1.5f, 1.5f, { 300, 300 });
 
 		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
+		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
 	}
 	break;
 	case WM_ERASEBKGND:

@@ -18,9 +18,21 @@ private:
 
 public:
 	void Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint, POINT bodySize);
-	void Paint(HDC hdc, const RECT* rectBody);
+	void Paint(HDC hdc, const RECT* rectBody, const RECT* rectImg = nullptr) const;
 	void ScaleImage(double scaleX, double scaleY);
 
+	inline RECT GetRectImg() const
+	{
+		return rectImg;
+	}
+	inline POINT GetBodyDrawPoint() const
+	{
+		return bodyDrawPoint;
+	}
+	inline POINT GetDrawSize() const
+	{
+		return drawSize;
+	}
 	inline POINT GetBodySize() const
 	{
 		return bodySize;
@@ -28,6 +40,9 @@ public:
 };
 
 class IAnimatable abstract {
-private:
+protected:
+	int frame = 0;
+	RECT GetRectImage(const ObjectImage* image) const;
 public:
+	virtual void Animate(HWND hWnd) abstract;
 };

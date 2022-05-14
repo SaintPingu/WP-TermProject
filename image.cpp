@@ -23,8 +23,13 @@ void ObjectImage::Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint
 	this->bodySize = bodySize;
 }
 
-void ObjectImage::Paint(HDC hdc, const RECT* rectBody)
+void ObjectImage::Paint(HDC hdc, const RECT* rectBody, const RECT* rectImg) const
 {
+	if (rectImg == nullptr)
+	{
+		rectImg = &this->rectImg;
+	}
+
 	HDC memDC = CreateCompatibleDC(hdc);;
 
 	BITMAP bitmap;
@@ -39,7 +44,7 @@ void ObjectImage::Paint(HDC hdc, const RECT* rectBody)
 	rectDraw.bottom = rectDraw.top + drawSize.y;
 
 	AlphaBlend(hdc, rectDraw.left, rectDraw.top, (rectDraw.right - rectDraw.left), (rectDraw.bottom - rectDraw.top),
-		memDC, rectImg.left, rectImg.top, (rectImg.right - rectImg.left), (rectImg.bottom - rectImg.top), bFunction);
+		memDC, rectImg->left, rectImg->top, (rectImg->right - rectImg->left), (rectImg->bottom - rectImg->top), bFunction);
 	FrameRect(hdc, &rectDraw, (HBRUSH)GetStockObject(BLACK_BRUSH));
 	DeleteDC(memDC);
 }
@@ -53,3 +58,16 @@ void ObjectImage::ScaleImage(double scaleX, double scaleY)
 	bodySize.x = (LONG)((double)bodySize.x * scaleX);
 	bodySize.y = (LONG)((double)bodySize.y * scaleY);
 }
+
+
+RECT IAnimatable::GetRectImage(const ObjectImage* image) const
+{
+	POINT drawSize = image->GetDrawSize();
+	RECT rectImg = image->GetRectImg();
+	int width = (rectImg.right - rectImg.left) - 1;
+	rectImg.left += (width * frame);
+	rectImg.right += (width * frame);
+
+	return rectImg;
+}
+

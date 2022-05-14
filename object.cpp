@@ -20,9 +20,9 @@ void GameObject::SetPos(POINT pos)
 	rectBody.bottom = rectBody.top + bodySize.y;
 }
 
-void GameObject::Paint(HDC hdc)
+void GameObject::Paint(HDC hdc, const RECT* rectImg)
 {
-	image.Paint(hdc, &rectBody);
+	image.Paint(hdc, &rectBody, rectImg);
 	if (isShowHitbox == true)
 	{
 		FrameRect(hdc, &rectBody, (HBRUSH)GetStockObject(BLACK_BRUSH));

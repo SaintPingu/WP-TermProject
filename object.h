@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include "image.h"
 
+enum class Action { Idle, Attack, Hury, Death };
 enum class Dir { Empty = 0, Left, Right, Up, Down, LD, LU, RD, RU };
 
 // Direction 연산자 오버로딩
@@ -124,19 +125,26 @@ constexpr Dir operator+(Dir lhs, Dir rhs)
 class GameObject abstract {
 private:
 	ObjectImage image;
-	bool isShowHitbox = false;
 
 	POINT posCenter;
 	POINT bodySize = { 0, };
 	RECT rectBody = { 0, };
 
+	bool isShowHitbox = false;
+
 protected:
+	Dir direction = Dir::Empty;
 
 	GameObject(ObjectImage image, double scaleX, double scaleY, POINT pos = { 0, 0 });
 	void SetPos(POINT pos);
 
+	inline const ObjectImage* GetImage()
+	{
+		return &image;
+	}
+
 public:
-	void Paint(HDC hdc);
+	void Paint(HDC hdc, const RECT* rectImg = nullptr);
 	
 	bool IsCollide(const RECT* rectSrc) const;
 

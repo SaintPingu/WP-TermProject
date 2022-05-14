@@ -9,11 +9,13 @@ FlyPokemon::FlyPokemon(HWND hWnd, ObjectImage image, double scaleX, double scale
 
 	alpha = 0;
 	isMove = false;
+
+	rectImg = image.GetRectImg();
 }
 
 void FlyPokemon::Paint(HDC hdc)
 {
-	GameObject::Paint(hdc);
+	GameObject::Paint(hdc, &rectImg);
 }
 
 void FlyPokemon::SetPosDest()
@@ -171,4 +173,21 @@ void FlyPokemon::Stop(HWND hWnd, Dir inputDir)
 		break;
 	}
 	direction = direction - inputDir;
+}
+
+void FlyPokemon::Animate(HWND hWnd)
+{
+	++frame;
+	switch (action)
+	{
+	case Action::Idle:
+		if (frame > 2)
+		{
+			frame = 0;
+		}
+		break;
+	}
+
+	const ObjectImage* image = GetImage();
+	rectImg = GetRectImage(image);
 }

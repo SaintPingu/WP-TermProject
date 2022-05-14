@@ -3,9 +3,11 @@
 #include "object.h"
 #include "timer.h"
 
-class FlyPokemon : public GameObject, public IMovable {
+class FlyPokemon : public GameObject, public IMovable, public IAnimatable {
 private:
-	Dir direction = Dir::Empty;
+	Action action = Action::Idle;
+
+	RECT rectImg;
 	POINT posDst = { 0, };
 	POINT vector = { 0, };
 
@@ -22,6 +24,7 @@ public:
 	void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc);
 	void Move(HWND hWnd, int timerID);
 	void Stop(HWND hWnd, Dir dir);
+	void Animate(HWND hWnd);
 
 	inline bool IsMove() const
 	{
