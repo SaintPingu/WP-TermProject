@@ -74,10 +74,44 @@ bool BulletController::Bullet::Move(const RECT* rectWindow)
 	rectBullet.top += moveY;
 	rectBullet.bottom += moveY;
 
-	if (rectBullet.left < 0 || rectBullet.right < 0 || rectBullet.top < 0 || rectBullet.bottom < 0 ||
-		rectBullet.left > rectWindow->right || rectBullet.right > rectWindow->right || rectBullet.top > rectWindow->bottom || rectBullet.bottom > rectWindow->bottom)
+	switch (dir)
 	{
-		return false;
+	case Dir::Left:
+	case Dir::LU:
+	case Dir::LD:
+		if (rectBullet.right < 0)
+		{
+			return false;
+		}
+		break;
+	case Dir::Right:
+	case Dir::RU:
+	case Dir::RD:
+		if (rectBullet.left > rectWindow->right)
+		{
+			return false;
+		}
+		break;
+	}
+
+	switch (dir)
+	{
+	case Dir::Up:
+	case Dir::LU:
+	case Dir::RU:
+		if (rectBullet.bottom < 0)
+		{
+			return false;
+		}
+		break;
+	case Dir::Down:
+	case Dir::LD:
+	case Dir::RD:
+		if (rectBullet.top > rectWindow->bottom)
+		{
+			return false;
+		}
+		break;
 	}
 
 	return true;
