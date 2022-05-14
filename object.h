@@ -142,9 +142,13 @@ protected:
 	{
 		return &image;
 	}
+	inline RECT GetRectBody() const
+	{
+		return rectBody;
+	}
 
 public:
-	void Paint(HDC hdc, const RECT* rectImg = nullptr);
+	void Paint(HDC hdc, const RECT* rectImage = nullptr);
 	
 	bool IsCollide(const RECT* rectSrc) const;
 

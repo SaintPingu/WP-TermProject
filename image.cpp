@@ -16,18 +16,18 @@ void ObjectImage::Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint
 	bFunction.SourceConstantAlpha = 0xff;
 	bFunction.AlphaFormat = AC_SRC_ALPHA;
 
-	this->rectImg = { 0, 0, imgSize.x, imgSize.y };
+	this->rectImage = { 0, 0, imgSize.x, imgSize.y };
 	this->bodyDrawPoint = bodyDrawPoint;
-	drawSize.x = rectImg.right - rectImg.left;
-	drawSize.y = rectImg.bottom - rectImg.top;
+	drawSize.x = rectImage.right - rectImage.left;
+	drawSize.y = rectImage.bottom - rectImage.top;
 	this->bodySize = bodySize;
 }
 
-void ObjectImage::Paint(HDC hdc, const RECT* rectBody, const RECT* rectImg) const
+void ObjectImage::Paint(HDC hdc, const RECT* rectBody, const RECT* rectImage) const
 {
-	if (rectImg == nullptr)
+	if (rectImage == nullptr)
 	{
-		rectImg = &this->rectImg;
+		rectImage = &this->rectImage;
 	}
 
 	HDC memDC = CreateCompatibleDC(hdc);;
@@ -44,8 +44,7 @@ void ObjectImage::Paint(HDC hdc, const RECT* rectBody, const RECT* rectImg) cons
 	rectDraw.bottom = rectDraw.top + drawSize.y;
 
 	AlphaBlend(hdc, rectDraw.left, rectDraw.top, (rectDraw.right - rectDraw.left), (rectDraw.bottom - rectDraw.top),
-		memDC, rectImg->left, rectImg->top, (rectImg->right - rectImg->left), (rectImg->bottom - rectImg->top), bFunction);
-	FrameRect(hdc, &rectDraw, (HBRUSH)GetStockObject(BLACK_BRUSH));
+		memDC, rectImage->left, rectImage->top, (rectImage->right - rectImage->left), (rectImage->bottom - rectImage->top), bFunction);
 	DeleteDC(memDC);
 }
 
@@ -60,14 +59,14 @@ void ObjectImage::ScaleImage(double scaleX, double scaleY)
 }
 
 
-RECT IAnimatable::GetRectImage(const ObjectImage* image) const
+RECT ISprite::GetRectImage(const ObjectImage* image, int frame) const
 {
 	POINT drawSize = image->GetDrawSize();
-	RECT rectImg = image->GetRectImg();
-	int width = (rectImg.right - rectImg.left) - 1;
-	rectImg.left += (width * frame);
-	rectImg.right += (width * frame);
+	RECT rectImage = image->GetRectImage();
+	int width = (rectImage.right - rectImage.left) - 1;
+	rectImage.left += (width * frame);
+	rectImage.right += (width * frame);
 
-	return rectImg;
+	return rectImage;
 }
 

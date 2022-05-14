@@ -11,19 +11,19 @@ private:
 	HBITMAP hBitmap{};
 	BLENDFUNCTION bFunction{};
 
-	RECT rectImg = { 0, };
+	RECT rectImage = { 0, };
 	POINT bodyDrawPoint = { 0, };
 	POINT drawSize = { 0, };
 	POINT bodySize = { 0, };
 
 public:
 	void Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint, POINT bodySize);
-	void Paint(HDC hdc, const RECT* rectBody, const RECT* rectImg = nullptr) const;
+	void Paint(HDC hdc, const RECT* rectBody, const RECT* rectImage = nullptr) const;
 	void ScaleImage(double scaleX, double scaleY);
 
-	inline RECT GetRectImg() const
+	inline RECT GetRectImage() const
 	{
-		return rectImg;
+		return rectImage;
 	}
 	inline POINT GetBodyDrawPoint() const
 	{
@@ -39,10 +39,14 @@ public:
 	}
 };
 
-class IAnimatable abstract {
+class ISprite abstract {
+protected:
+	RECT GetRectImage(const ObjectImage* image, int frame) const;
+};
+
+class IAnimatable abstract : public ISprite {
 protected:
 	int frame = 0;
-	RECT GetRectImage(const ObjectImage* image) const;
 public:
 	virtual void Animate(HWND hWnd) abstract;
 };

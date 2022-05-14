@@ -78,6 +78,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	static RECT rectWindow;
 	static ObjectImage moltres;
+	static ObjectImage bullet;
 	static GameData gameData;
 
 	switch (uMsg)
@@ -85,11 +86,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 	{
 		GetClientRect(hWnd, &rectWindow);
-		moltres.Load(L"paint_moltres.png", { 85, 77 }, { 35, 25 }, { 15,35 });
-		flyPokemon = new FlyPokemon(hWnd, moltres, 1.5f, 1.5f, { 300, 300 });
+		moltres.Load(L"sprite_moltres.png", { 85, 77 }, { 35, 25 }, { 15,35 });
+		bullet.Load(L"sprite_bullet.png", { 20, 20 }, { 5, 2 }, { 10, 16 });
+		flyPokemon = new FlyPokemon(hWnd, &rectWindow, moltres, 1.5f, 1.5f, { 450, 800 });
 
 		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
 		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
+		SetTimer(hWnd, TIMERID_SHOOT_BULLET, ELAPSE_SHOOT_BULLET, T_ShotBullet);
+		SetTimer(hWnd, TIMERID_MOVE_BULLET, ELAPSE_MOVE_BULLET, T_MoveBullet);
 	}
 	break;
 	case WM_ERASEBKGND:

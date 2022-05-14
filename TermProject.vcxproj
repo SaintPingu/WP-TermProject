@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="bullet.cpp" />
     <ClCompile Include="flypokemon.cpp" />
     <ClCompile Include="image.cpp" />
     <ClCompile Include="interface.cpp" />
@@ -27,6 +28,7 @@
     <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bullet.h" />
     <ClInclude Include="flypokemon.h" />
     <ClInclude Include="image.h" />
     <ClInclude Include="interface.h" />

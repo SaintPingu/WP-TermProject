@@ -1,8 +1,10 @@
 #include "flyPokemon.h"
 
 
-FlyPokemon::FlyPokemon(HWND hWnd, ObjectImage image, double scaleX, double scaleY, POINT pos) : GameObject(image, scaleX, scaleY, pos)
+FlyPokemon::FlyPokemon(HWND hWnd, const RECT* rectWindow, ObjectImage image, double scaleX, double scaleY, POINT pos) : GameObject(image, scaleX, scaleY, pos)
 {
+	this->rectWindow = rectWindow;
+
 	direction = Dir::Empty;
 	posDst = { 0, };
 	vector = { 0, };
@@ -10,12 +12,17 @@ FlyPokemon::FlyPokemon(HWND hWnd, ObjectImage image, double scaleX, double scale
 	alpha = 0;
 	isMove = false;
 
-	rectImg = image.GetRectImg();
+	rectImage = image.GetRectImage();
+
+	ObjectImage bulletImage;
+	bulletImage.Load(L"sprite_bullet.png", { 20,20 }, { 6,2 }, { 10,16 });
+	bulletController = new BulletController(rectWindow, &bulletImage);
 }
 
 void FlyPokemon::Paint(HDC hdc)
 {
-	GameObject::Paint(hdc, &rectImg);
+	GameObject::Paint(hdc, &rectImage);
+	bulletController->Paint(hdc);
 }
 
 void FlyPokemon::SetPosDest()
@@ -189,5 +196,22 @@ void FlyPokemon::Animate(HWND hWnd)
 	}
 
 	const ObjectImage* image = GetImage();
-	rectImg = GetRectImage(image);
+	rectImage = GetRectImage(image, frame);
+}
+
+void FlyPokemon::Shot()
+{
+	RECT rectBody = GetRectBody();
+	POINT bulletPos;
+	bulletPos.y = rectBody.top;
+
+	bulletPos.x = rectBody.left;
+	bulletController->CreateBullet(bulletPos, Dir::Up);
+	bulletPos.x = rectBody.right;
+	bulletController->CreateBullet(bulletPos, Dir::Up);
+}
+
+void FlyPokemon::MoveBullets()
+{
+	bulletController->Move();
 }
