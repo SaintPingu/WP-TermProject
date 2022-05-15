@@ -3,6 +3,9 @@
 #include "math.h"
 #include "image.h"
 
+#define PI 3.141592
+#define RADIAN_TO_DEGREE(radian) ((180/PI) * (radian))
+
 enum class Dir { Empty = 0, Left, Right, Up, Down, LD, LU, RD, RU };
 
 // Direction 연산자 오버로딩

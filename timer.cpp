@@ -6,10 +6,12 @@ void CALLBACK T_Invalidate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 }
 
 extern Player* player;
+extern Enemy* enemy;
 
 void CALLBACK T_Animate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	player->Animate();
+	enemy->Animate();
 }
 
 void CALLBACK T_MovePlayer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
@@ -27,7 +29,6 @@ void CALLBACK T_MoveBullet(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 	player->MoveBullets();
 }
 
-extern Enemy* enemy;
 void CALLBACK T_MoveEnemy(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	enemy->Move();

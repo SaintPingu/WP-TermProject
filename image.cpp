@@ -60,14 +60,18 @@ void ObjectImage::ScaleImage(double scaleX, double scaleY)
 }
 
 
-RECT ISprite::GetRectImage(const ObjectImage& image, int frame) const
+RECT ISprite::GetRectImage(const ObjectImage& image, int frame, int spriteRow) const
 {
 	POINT drawSize = image.GetDrawSize();
 	RECT rectImage = image.GetRectImage();
+
 	int width = (rectImage.right - rectImage.left) - 1;
 	rectImage.left += (width * frame);
 	rectImage.right += (width * frame);
 
+	int height = (rectImage.bottom - rectImage.top) - 1;
+	rectImage.top += (height * spriteRow);
+	rectImage.bottom += (height * spriteRow);
+
 	return rectImage;
 }
-

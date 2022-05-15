@@ -43,7 +43,7 @@ public:
 
 class ISprite abstract {
 protected:
-	RECT GetRectImage(const ObjectImage& image, int frame) const;
+	RECT GetRectImage(const ObjectImage& image, int frame, int spriteRow = 0) const;
 };
 
 class IAnimatable abstract : public ISprite {
