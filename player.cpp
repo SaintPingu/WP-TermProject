@@ -6,8 +6,8 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage image, double scal
 	this->rectWindow = &rectWindow;
 
 	direction = Dir::Empty;
-	posDst = { 0, };
-	vector = { 0, };
+	posDest = { 0, };
+	vectorMove = { 0, };
 
 	alpha = 0;
 	isMove = false;
@@ -25,43 +25,43 @@ void Player::Paint(HDC hdc)
 	bulletController->Paint(hdc);
 }
 
-void Player::SetPosDest()
+void Player::SetVectorDest()
 {
 	constexpr int amount = 10;
 	switch (direction)
 	{
 	case Dir::Left:
-		vector.x = -amount;
+		vectorMove.x = -amount;
 		break;
 	case Dir::Right:
-		vector.x = amount;
+		vectorMove.x = amount;
 		break;
 	case Dir::Up:
-		vector.y = -amount;
+		vectorMove.y = -amount;
 		break;
 	case Dir::Down:
-		vector.y = amount;
+		vectorMove.y = amount;
 		break;
 	case Dir::LD:
-		vector.x = -amount;
-		vector.y = amount;
+		vectorMove.x = -amount;
+		vectorMove.y = amount;
 		break;
 	case Dir::LU:
-		vector.x = -amount;
-		vector.y = -amount;
+		vectorMove.x = -amount;
+		vectorMove.y = -amount;
 		break;
 	case Dir::RD:
-		vector.x = amount;
-		vector.y = amount;
+		vectorMove.x = amount;
+		vectorMove.y = amount;
 		break;
 	case Dir::RU:
-		vector.x = amount;
-		vector.y = -amount;
+		vectorMove.x = amount;
+		vectorMove.y = -amount;
 		break;
 	}
 
 	Vector2 posCenter = GetPosCenter();
-	posDst = posCenter + vector;
+	posDest = posCenter + vectorMove;
 }
 
 void Player::SetDirection(Dir inputDir)
@@ -103,7 +103,7 @@ void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 		return;
 	}
 
-	SetPosDest();
+	SetVectorDest();
 
 	if (isMove == false && alpha == 0)
 	{
@@ -118,24 +118,24 @@ void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 void Player::Move(HWND hWnd, int timerID)
 {
 	Vector2 posCenter = GetPosCenter();
-	Vector2 posNext = Lerp(posCenter, posDst, alpha);
+	Vector2 posNext = Lerp(posCenter, posDest, alpha);
 
 	SetPos(posNext);
 	posCenter = GetPosCenter();
-	vector = posDst - posCenter;
+	vectorMove = posDest - posCenter;
 
 	alpha += 0.1f;
 	if (alpha > 0.5f)
 	{
 		if (direction != Dir::Empty)
 		{
-			SetPosDest();
+			SetVectorDest();
 
 			alpha = 0.5f;
 		}
 		else if (alpha > 1)
 		{
-			vector = { 0, };
+			vectorMove = { 0, };
 			isMove = false;
 			alpha = 0;
 			KillTimer(hWnd, timerID);

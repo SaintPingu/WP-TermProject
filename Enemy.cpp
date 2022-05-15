@@ -5,30 +5,26 @@ Enemy::Enemy(const Player& player, ObjectImage image, double scaleX, double scal
 	this->player = &player;
 }
 
-void Enemy::SetPosDest()
+void Enemy::SetVectorDest()
 {
 	Vector2 posCenter = GetPosCenter();
-	Vector2 vector = posCenter - player->GetPosCenter();
-	Vector2 vectorOrigin = vector;
+	Vector2 vectorMove = posCenter - player->GetPosCenter();
 
-	const double theta = atan2(vector.y, vector.x);	// Get absolute angle
-	double radius = GetSqrt(vector.x, vector.y);
+	const double theta = atan2(vectorMove.y, vectorMove.x);	// atan2 : Get absolute angle
+	double radius = GetSqrt(vectorMove.x, vectorMove.y);
 
-	Vector2 unitVector = { 0, }; // Get unit vector
-	unitVector.x = vector.x / radius;
-	unitVector.y = vector.y / radius;
+	Vector2 unitVector = vectorMove / radius;
 
 	constexpr int moveScale = 3;
 
-	posDst.x = posCenter.x - (unitVector.x * moveScale);
-	posDst.y = posCenter.y - (unitVector.y * moveScale);
+	posDest = posCenter - (unitVector * moveScale);
 }
 
 void Enemy::Move()
 {
-	SetPosDest();
+	SetVectorDest();
 
-	SetPos(posDst);
+	SetPos(posDest);
 }
 void Enemy::Stop()
 {

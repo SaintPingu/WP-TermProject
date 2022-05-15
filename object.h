@@ -146,7 +146,16 @@ struct Vector2 {
 	{
 		return { this->x - rhs.x, this->y - rhs.y };
 	}
+	inline constexpr Vector2 operator*(const double& rhs)
+	{
+		return { this->x * rhs, this->y * rhs };
+	}
+	inline constexpr Vector2 operator/(const double& rhs)
+	{
+		return { this->x / rhs, this->y / rhs };
+	}
 };
+
 
 class GameObject abstract {
 private:
@@ -197,7 +206,7 @@ inline double GetSqrt(double x, double y)
 
 class IControllable abstract {
 private:
-	virtual void SetPosDest() abstract;
+	virtual void SetVectorDest() abstract;
 protected:
 	bool isMove = false;
 public:
@@ -213,7 +222,7 @@ public:
 
 class IMovable abstract {
 private:
-	virtual void SetPosDest() abstract;
+	virtual void SetVectorDest() abstract;
 protected:
 	bool isMove = false;
 public:
