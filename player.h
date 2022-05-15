@@ -23,6 +23,7 @@ public:
 	void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc) override;
 	void Move(HWND hWnd, int timerID) override;
 	void Stop(Dir dir) override;
+	Vector2 CheckCollideWindow(Vector2 pos) const;
 
 	void Animate() override;
 	void Shot();

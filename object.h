@@ -157,6 +157,10 @@ struct Vector2 {
 	{
 		return { this->x / rhs, this->y / rhs };
 	}
+	inline constexpr operator POINT ()
+	{
+		return { (LONG)this->x, (LONG)this->y };
+	}
 };
 
 
@@ -187,7 +191,8 @@ protected:
 
 public:
 	void Paint(HDC hdc, const RECT* rectImage = nullptr);
-	
+	RECT GetRectBody(POINT pos) const;
+
 	bool IsCollide(const RECT& rectSrc) const;
 
 	inline Vector2 GetPosCenter() const

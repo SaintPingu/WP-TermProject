@@ -29,6 +29,16 @@ void GameObject::Paint(HDC hdc, const RECT* rectImage)
 	}
 }
 
+RECT GameObject::GetRectBody(POINT pos) const
+{
+	RECT rectBody = { 0, };
+	rectBody.left = pos.x - (bodySize.x / 2);
+	rectBody.right = rectBody.left + bodySize.x;
+	rectBody.top = pos.y - (bodySize.y / 2);
+	rectBody.bottom = rectBody.top + bodySize.y;
+	return rectBody;
+}
+
 bool GameObject::IsCollide(const RECT& rectSrc) const
 {
 	RECT notuse;

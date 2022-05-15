@@ -115,11 +115,13 @@ void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 	}
 	isMove = true;
 }
+
 void Player::Move(HWND hWnd, int timerID)
 {
 	Vector2 posCenter = GetPosCenter();
 	Vector2 posNext = Lerp(posCenter, posDest, alpha);
 
+	posNext = CheckCollideWindow(posNext);
 	SetPos(posNext);
 	posCenter = GetPosCenter();
 	vectorMove = posDest - posCenter;
@@ -142,6 +144,7 @@ void Player::Move(HWND hWnd, int timerID)
 		}
 	}
 }
+
 void Player::Stop(Dir inputDir)
 {
 	switch (direction)
@@ -172,6 +175,31 @@ void Player::Stop(Dir inputDir)
 		break;
 	}
 	direction = direction - inputDir;
+}
+
+Vector2 Player::CheckCollideWindow(Vector2 pos) const
+{
+	RECT rectBody = GetRectBody(pos);
+
+	Vector2 corrValue = { 0, };
+	if (rectBody.left < 0)
+	{
+		corrValue.x = -rectBody.left;
+	}
+	else if (rectBody.right > rectWindow->right)
+	{
+		corrValue.x = rectWindow->right - rectBody.right;
+	}
+	if (rectBody.top < 0)
+	{
+		corrValue.y = -rectBody.top;
+	}
+	else if (rectBody.bottom > rectWindow->bottom)
+	{
+		corrValue.y = rectWindow->bottom - rectBody.bottom;
+	}
+
+	return { pos.x + corrValue.x, pos.y + corrValue.y };
 }
 
 void Player::Animate()

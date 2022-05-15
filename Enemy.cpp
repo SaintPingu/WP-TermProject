@@ -86,6 +86,7 @@ void Enemy::Move()
 
 	SetPos(posDest);
 }
+
 void Enemy::Stop()
 {
 	
