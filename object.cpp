@@ -1,6 +1,6 @@
 #include "object.h"
 
-GameObject::GameObject(ObjectImage image, double scaleX, double scaleY, POINT pos)
+GameObject::GameObject(ObjectImage image, double scaleX, double scaleY, Vector2 pos)
 {
 	this->image = image;
 	this->image.ScaleImage(scaleX, scaleY);
@@ -9,13 +9,13 @@ GameObject::GameObject(ObjectImage image, double scaleX, double scaleY, POINT po
 	SetPos(pos);
 }
 
-void GameObject::SetPos(POINT pos)
+void GameObject::SetPos(Vector2 pos)
 {
 	posCenter.x = pos.x;
 	posCenter.y = pos.y;
 
-	rectBody.left = posCenter.x - (bodySize.x / 2);
-	rectBody.top = posCenter.y - (bodySize.y / 2);
+	rectBody.left = (LONG)posCenter.x - (bodySize.x / 2);
+	rectBody.top = (LONG)posCenter.y - (bodySize.y / 2);
 	rectBody.right = rectBody.left + bodySize.x;
 	rectBody.bottom = rectBody.top + bodySize.y;
 }
@@ -36,10 +36,10 @@ bool GameObject::IsCollide(const RECT& rectSrc) const
 }
 
 
-POINT Lerp(POINT src, POINT dst, double alpha)
+Vector2 Lerp(Vector2 src, Vector2 dst, double alpha)
 {
-	POINT transform;
-	transform.x = (LONG)((src.x * (1 - alpha)) + (dst.x * alpha));
-	transform.y = (LONG)((src.y * (1 - alpha)) + (dst.y * alpha));
+	Vector2 transform;
+	transform.x = (src.x * (1 - alpha)) + (dst.x * alpha);
+	transform.y = (src.y * (1 - alpha)) + (dst.y * alpha);
 	return transform;
 }

@@ -1,54 +1,27 @@
 #include "enemy.h"
 
-Enemy::Enemy(const Player& player, ObjectImage image, double scaleX, double scaleY, POINT pos) : GameObject(image, scaleX, scaleY, pos)
+Enemy::Enemy(const Player& player, ObjectImage image, double scaleX, double scaleY, Vector2 pos) : GameObject(image, scaleX, scaleY, pos)
 {
 	this->player = &player;
 }
 
 void Enemy::SetPosDest()
 {
-	POINT posCenter = GetPosCenter();
-	POINT vector = posCenter - player->GetPosCenter();
-	POINT vectorOrigin = vector;
+	Vector2 posCenter = GetPosCenter();
+	Vector2 vector = posCenter - player->GetPosCenter();
+	Vector2 vectorOrigin = vector;
 
-	constexpr int moveAmount = 3;
-	int moveX = 0;
-	int moveY = 0;
-
-	if (abs(vector.y) > abs(vector.x))
-	{
-		if (vector.y > 0)
-		{
-			moveY = moveAmount;
-		}
-		else
-		{
-			moveY = -moveAmount;
-		}
-	}
-	else
-	{
-		if (vector.x > 0)
-		{
-			moveX = moveAmount;
-		}
-		else
-		{
-			moveX = -moveAmount;
-		}
-	}
-
-	const double theta = atan2(vector.y, vector.x);	// 절대 각도를 구한다.
+	const double theta = atan2(vector.y, vector.x);	// Get absolute angle
 	double radius = GetSqrt(vector.x, vector.y);
 
-	vector.x += moveX;
-	vector.y += moveY;
+	Vector2 unitVector = { 0, }; // Get unit vector
+	unitVector.x = vector.x / radius;
+	unitVector.y = vector.y / radius;
 
-	radius = GetSqrt(vector.x, vector.y);
-	vector.y = (LONG)(radius * sin(theta));
-	vector.x = (LONG)(radius * cos(theta));
+	constexpr int moveScale = 3;
 
-	posDst = posCenter + (vectorOrigin - vector);
+	posDst.x = posCenter.x - (unitVector.x * moveScale);
+	posDst.y = posCenter.y - (unitVector.y * moveScale);
 }
 
 void Enemy::Move()

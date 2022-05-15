@@ -134,11 +134,25 @@ inline constexpr POINT operator+(const POINT& lhs, const POINT& rhs)
 	return { lhs.x + rhs.x, lhs.y + rhs.y };
 }
 
+struct Vector2 {
+	double x = 0;
+	double y = 0;
+
+	inline constexpr Vector2 operator+(const Vector2& rhs)
+	{
+		return { this->x + rhs.x, this->y + rhs.y };
+	}
+	inline constexpr Vector2 operator-(const Vector2& rhs)
+	{
+		return { this->x - rhs.x, this->y - rhs.y };
+	}
+};
+
 class GameObject abstract {
 private:
 	ObjectImage image;
 
-	POINT posCenter;
+	Vector2 posCenter;
 	POINT bodySize = { 0, };
 	RECT rectBody = { 0, };
 
@@ -147,8 +161,8 @@ private:
 protected:
 	Dir direction = Dir::Empty;
 
-	GameObject(ObjectImage image, double scaleX, double scaleY, POINT pos = { 0, 0 });
-	void SetPos(POINT pos);
+	GameObject(ObjectImage image, double scaleX, double scaleY, Vector2 pos = { 0, 0 });
+	void SetPos(Vector2 pos);
 
 	inline const ObjectImage& GetImage()
 	{
@@ -164,7 +178,7 @@ public:
 	
 	bool IsCollide(const RECT& rectSrc) const;
 
-	inline POINT GetPosCenter() const
+	inline Vector2 GetPosCenter() const
 	{
 		return posCenter;
 	}
@@ -175,7 +189,7 @@ public:
 	}
 };
 
-POINT Lerp(POINT src, POINT dst, double alpha);
+Vector2 Lerp(Vector2 src, Vector2 dst, double alpha);
 inline double GetSqrt(double x, double y)
 {
 	return sqrt((x * x) + (y * y));

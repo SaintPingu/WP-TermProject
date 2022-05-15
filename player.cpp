@@ -1,7 +1,7 @@
 #include "player.h"
 
 
-Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage image, double scaleX, double scaleY, POINT pos) : GameObject(image, scaleX, scaleY, pos)
+Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage image, double scaleX, double scaleY, Vector2 pos) : GameObject(image, scaleX, scaleY, pos)
 {
 	this->rectWindow = &rectWindow;
 
@@ -60,7 +60,7 @@ void Player::SetPosDest()
 		break;
 	}
 
-	POINT posCenter = GetPosCenter();
+	Vector2 posCenter = GetPosCenter();
 	posDst = posCenter + vector;
 }
 
@@ -117,8 +117,8 @@ void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 }
 void Player::Move(HWND hWnd, int timerID)
 {
-	POINT posCenter = GetPosCenter();
-	POINT posNext = Lerp(posCenter, posDst, alpha);
+	Vector2 posCenter = GetPosCenter();
+	Vector2 posNext = Lerp(posCenter, posDst, alpha);
 
 	SetPos(posNext);
 	posCenter = GetPosCenter();
