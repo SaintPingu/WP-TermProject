@@ -14,7 +14,7 @@ private:
 
 	BulletController* bulletController = nullptr;
 
-	void SetVectorDest() override;
+	void SetPosDest() override;
 public:
 	Player(HWND hWnd, const RECT& rectWindow, ObjectImage image, double scaleX, double scaleY, Vector2 pos = { 0, 0 });
 	void Paint(HDC hdc);

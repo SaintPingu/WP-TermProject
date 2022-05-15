@@ -25,7 +25,7 @@ void Player::Paint(HDC hdc)
 	bulletController->Paint(hdc);
 }
 
-void Player::SetVectorDest()
+void Player::SetPosDest()
 {
 	constexpr int amount = 10;
 	switch (direction)
@@ -103,7 +103,7 @@ void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 		return;
 	}
 
-	SetVectorDest();
+	SetPosDest();
 
 	if (isMove == false && alpha == 0)
 	{
@@ -129,7 +129,7 @@ void Player::Move(HWND hWnd, int timerID)
 	{
 		if (direction != Dir::Empty)
 		{
-			SetVectorDest();
+			SetPosDest();
 
 			alpha = 0.5f;
 		}

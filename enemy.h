@@ -11,7 +11,7 @@ private:
 	const Player* player;
 	Vector2 posDest = { 0, };
 
-	void SetVectorDest() override;
+	void SetPosDest() override;
 public:
 	Enemy(const Player& player, ObjectImage image, double scaleX, double scaleY, Vector2 pos = { 0, 0 });
 	void Move() override;

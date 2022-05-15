@@ -199,14 +199,14 @@ public:
 };
 
 Vector2 Lerp(Vector2 src, Vector2 dst, double alpha);
-inline double GetSqrt(double x, double y)
+inline double GetRadius(double x, double y)
 {
 	return sqrt((x * x) + (y * y));
 }
 
 class IControllable abstract {
 private:
-	virtual void SetVectorDest() abstract;
+	virtual void SetPosDest() abstract;
 protected:
 	bool isMove = false;
 public:
@@ -222,7 +222,7 @@ public:
 
 class IMovable abstract {
 private:
-	virtual void SetVectorDest() abstract;
+	virtual void SetPosDest() abstract;
 protected:
 	bool isMove = false;
 public:
