@@ -61,8 +61,7 @@ void Player::SetPosDest()
 	}
 
 	POINT posCenter = GetPosCenter();
-	posDst.x = posCenter.x + vector.x;
-	posDst.y = posCenter.y + vector.y;
+	posDst = posCenter + vector;
 }
 
 void Player::SetDirection(Dir inputDir)
@@ -123,8 +122,7 @@ void Player::Move(HWND hWnd, int timerID)
 
 	SetPos(posNext);
 	posCenter = GetPosCenter();
-	vector.x = posDst.x - posCenter.x;
-	vector.y = posDst.y - posCenter.y;
+	vector = posDst - posCenter;
 
 	alpha += 0.1f;
 	if (alpha > 0.5f)
@@ -203,7 +201,7 @@ void Player::Animate()
 		break;
 	}
 
-	const ObjectImage* image = GetImage();
+	const ObjectImage& image = GetImage();
 	rectImage = GetRectImage(image, frame);
 }
 

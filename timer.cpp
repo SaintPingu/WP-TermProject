@@ -26,3 +26,9 @@ void CALLBACK T_MoveBullet(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	player->MoveBullets();
 }
+
+extern Enemy* enemy;
+void CALLBACK T_MoveEnemy(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+{
+	enemy->Move();
+}

@@ -70,6 +70,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 }
 
 Player* player;
+Enemy* enemy;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
@@ -91,11 +92,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		bullet.Load(L"sprite_bullet.png", { 20, 20 }, { 5, 2 }, { 10, 16 });
 		beedrill.Load(L"sprite_beedrill.png", { 35,35 }, { 7,6 }, { 21,22 });
 		player = new Player(hWnd, rectWindow, moltres, 1.5f, 1.5f, { 450, 800 });
+		enemy = new Enemy(*player, beedrill, 1.5f, 1.5f, { 800, 100 });
 
 		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
 		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
 		SetTimer(hWnd, TIMERID_SHOOT_BULLET, ELAPSE_SHOOT_BULLET, T_ShotBullet);
 		SetTimer(hWnd, TIMERID_MOVE_BULLET, ELAPSE_MOVE_BULLET, T_MoveBullet);
+		SetTimer(hWnd, TIMERID_MOVE_ENEMY, ELAPSE_MOVE_ENEMY, T_MoveEnemy);
 	}
 	break;
 	case WM_ERASEBKGND:
@@ -104,6 +107,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		InitPaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
 		player->Paint(memDC);
+		enemy->Paint(memDC);
 		ReleasePaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
 	}
 	break;

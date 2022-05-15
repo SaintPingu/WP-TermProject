@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include "player.h"
+#include "enemy.h"
 
 #define TIMERID_INVALIDATE 0
 #define ELAPSE_INVALIDATE 10
@@ -17,8 +18,12 @@
 #define TIMERID_MOVE_BULLET 4
 #define ELAPSE_MOVE_BULLET 10
 
+#define TIMERID_MOVE_ENEMY 5
+#define ELAPSE_MOVE_ENEMY 10
+
 void CALLBACK T_Invalidate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 void CALLBACK T_Animate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 void CALLBACK T_MovePlayer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 void CALLBACK T_ShotBullet(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 void CALLBACK T_MoveBullet(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
+void CALLBACK T_MoveEnemy(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);

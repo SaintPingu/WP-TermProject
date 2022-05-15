@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <tchar.h>
 #include "player.h"
+#include "enemy.h"
 
 #define WINDOWSIZE_X 900
 #define WINDOWSIZE_Y 1200

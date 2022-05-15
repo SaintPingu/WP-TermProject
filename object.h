@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include "math.h"
 #include "image.h"
 
 enum class Dir { Empty = 0, Left, Right, Up, Down, LD, LU, RD, RU };
@@ -121,6 +122,18 @@ constexpr Dir operator+(Dir lhs, Dir rhs)
 	return Dir::Empty;
 }
 
+// POINT 연산자 오버로딩
+// ex) POINT a,b;
+// possible : a - b, a + b;
+inline constexpr POINT operator-(const POINT& lhs, const POINT& rhs)
+{
+	return { lhs.x - rhs.x, lhs.y - rhs.y };
+}
+inline constexpr POINT operator+(const POINT& lhs, const POINT& rhs)
+{
+	return { lhs.x + rhs.x, lhs.y + rhs.y };
+}
+
 class GameObject abstract {
 private:
 	ObjectImage image;
@@ -137,9 +150,9 @@ protected:
 	GameObject(ObjectImage image, double scaleX, double scaleY, POINT pos = { 0, 0 });
 	void SetPos(POINT pos);
 
-	inline const ObjectImage* GetImage()
+	inline const ObjectImage& GetImage()
 	{
-		return &image;
+		return image;
 	}
 	inline RECT GetRectBody() const
 	{
@@ -163,22 +176,38 @@ public:
 };
 
 POINT Lerp(POINT src, POINT dst, double alpha);
+inline double GetSqrt(double x, double y)
+{
+	return sqrt((x * x) + (y * y));
+}
 
 class IControllable abstract {
 private:
 	virtual void SetPosDest() abstract;
+protected:
+	bool isMove = false;
 public:
 	virtual void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc) abstract;
 	virtual void Move(HWND hWnd, int timerID) abstract;
 	virtual void Stop(Dir dir) abstract;
-	virtual bool IsMove() const abstract;
+
+	inline bool IsMove() const
+	{
+		return isMove;
+	}
 };
 
 class IMovable abstract {
 private:
 	virtual void SetPosDest() abstract;
+protected:
+	bool isMove = false;
 public:
 	virtual void Move() abstract;
 	virtual void Stop() abstract;
-	virtual bool IsMove() const abstract;
+
+	inline bool IsMove() const
+	{
+		return isMove;
+	}
 };
