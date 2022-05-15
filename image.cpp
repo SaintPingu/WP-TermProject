@@ -23,7 +23,7 @@ void ObjectImage::Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint
 	this->bodySize = bodySize;
 }
 
-void ObjectImage::Paint(HDC hdc, const RECT* rectBody, const RECT* rectImage) const
+void ObjectImage::Paint(HDC hdc, const RECT& rectBody, const RECT* rectImage) const
 {
 	if (rectImage == nullptr)
 	{
@@ -38,8 +38,8 @@ void ObjectImage::Paint(HDC hdc, const RECT* rectBody, const RECT* rectImage) co
 	SelectObject(memDC, hBitmap);
 
 	RECT rectDraw = { 0, };
-	rectDraw.left = rectBody->left - bodyDrawPoint.x;
-	rectDraw.top = rectBody->top - bodyDrawPoint.y;
+	rectDraw.left = rectBody.left - bodyDrawPoint.x;
+	rectDraw.top = rectBody.top - bodyDrawPoint.y;
 	rectDraw.right = rectDraw.left + drawSize.x;
 	rectDraw.bottom = rectDraw.top + drawSize.y;
 
@@ -60,10 +60,10 @@ void ObjectImage::ScaleImage(double scaleX, double scaleY)
 }
 
 
-RECT ISprite::GetRectImage(const ObjectImage* image, int frame) const
+RECT ISprite::GetRectImage(const ObjectImage& image, int frame) const
 {
-	POINT drawSize = image->GetDrawSize();
-	RECT rectImage = image->GetRectImage();
+	POINT drawSize = image.GetDrawSize();
+	RECT rectImage = image.GetRectImage();
 	int width = (rectImage.right - rectImage.left) - 1;
 	rectImage.left += (width * frame);
 	rectImage.right += (width * frame);

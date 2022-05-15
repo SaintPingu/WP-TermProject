@@ -6,6 +6,8 @@
 #undef WINVER
 #define WINVER 0x6000
 
+enum class Action { Idle, Attack, Hurt, Death };
+
 class ObjectImage {
 private:
 	HBITMAP hBitmap{};
@@ -18,7 +20,7 @@ private:
 
 public:
 	void Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint, POINT bodySize);
-	void Paint(HDC hdc, const RECT* rectBody, const RECT* rectImage = nullptr) const;
+	void Paint(HDC hdc, const RECT& rectBody, const RECT* rectImage = nullptr) const;
 	void ScaleImage(double scaleX, double scaleY);
 
 	inline RECT GetRectImage() const
@@ -41,12 +43,21 @@ public:
 
 class ISprite abstract {
 protected:
-	RECT GetRectImage(const ObjectImage* image, int frame) const;
+	RECT GetRectImage(const ObjectImage& image, int frame) const;
 };
 
 class IAnimatable abstract : public ISprite {
+private:
+	Action action = Action::Idle;
 protected:
+	RECT rectImage = { 0, };
 	int frame = 0;
+	bool isRevFrame = false;
+
+	inline Action GetAction() const
+	{
+		return action;
+	}
 public:
-	virtual void Animate(HWND hWnd) abstract;
+	virtual void Animate() abstract;
 };

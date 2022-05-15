@@ -69,7 +69,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	return Message.wParam;
 }
 
-FlyPokemon* flyPokemon;
+Player* player;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
@@ -79,6 +79,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	static RECT rectWindow;
 	static ObjectImage moltres;
 	static ObjectImage bullet;
+	static ObjectImage beedrill;
 	static GameData gameData;
 
 	switch (uMsg)
@@ -88,7 +89,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		GetClientRect(hWnd, &rectWindow);
 		moltres.Load(L"sprite_moltres.png", { 85, 77 }, { 35, 25 }, { 15,35 });
 		bullet.Load(L"sprite_bullet.png", { 20, 20 }, { 5, 2 }, { 10, 16 });
-		flyPokemon = new FlyPokemon(hWnd, &rectWindow, moltres, 1.5f, 1.5f, { 450, 800 });
+		beedrill.Load(L"sprite_beedrill.png", { 35,35 }, { 7,6 }, { 21,22 });
+		player = new Player(hWnd, rectWindow, moltres, 1.5f, 1.5f, { 450, 800 });
 
 		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
 		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
@@ -101,15 +103,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 	{
 		InitPaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
-		flyPokemon->Paint(memDC);
+		player->Paint(memDC);
 		ReleasePaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
 	}
 	break;
 	case WM_KEYDOWN:
-		CheckKeyDown(hWnd, wParam, &gameData, flyPokemon);
+		CheckKeyDown(hWnd, wParam, gameData, *player);
 		break;
 	case WM_KEYUP:
-		CheckKeyUp(hWnd, wParam, &gameData, flyPokemon);
+		CheckKeyUp(hWnd, wParam, gameData, *player);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);

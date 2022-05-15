@@ -22,15 +22,24 @@ void GameObject::SetPos(POINT pos)
 
 void GameObject::Paint(HDC hdc, const RECT* rectImage)
 {
-	image.Paint(hdc, &rectBody, rectImage);
+	image.Paint(hdc, rectBody, rectImage);
 	if (isShowHitbox == true)
 	{
 		FrameRect(hdc, &rectBody, (HBRUSH)GetStockObject(BLACK_BRUSH));
 	}
 }
 
-bool GameObject::IsCollide(const RECT* rectSrc) const
+bool GameObject::IsCollide(const RECT& rectSrc) const
 {
 	RECT notuse;
-	return (bool)IntersectRect(&notuse, &rectBody, rectSrc);
+	return (bool)IntersectRect(&notuse, &rectBody, &rectSrc);
+}
+
+
+POINT Lerp(POINT src, POINT dst, double alpha)
+{
+	POINT transform;
+	transform.x = (LONG)((src.x * (1 - alpha)) + (dst.x * alpha));
+	transform.y = (LONG)((src.y * (1 - alpha)) + (dst.y * alpha));
+	return transform;
 }

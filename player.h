@@ -4,12 +4,8 @@
 #include "timer.h"
 #include "bullet.h"
 
-class FlyPokemon : public GameObject, public IMovable, public IAnimatable {
+class Player : public GameObject, public IControllable, public IAnimatable {
 private:
-	Action action = Action::Idle;
-
-	RECT rectImage;
-
 	POINT posDst = { 0, };
 	POINT vector = { 0, };
 	double alpha = 0;
@@ -20,17 +16,16 @@ private:
 	BulletController* bulletController = nullptr;
 
 	virtual void SetPosDest();
-	POINT Lerp(POINT src, POINT dst, double alpha);
 public:
-	FlyPokemon(HWND hWnd, const RECT* rectWindow, ObjectImage image, double scaleX, double scaleY, POINT pos = { 0, 0 });
+	Player(HWND hWnd, const RECT& rectWindow, ObjectImage image, double scaleX, double scaleY, POINT pos = { 0, 0 });
 	void Paint(HDC hdc);
 
 	void SetDirection(Dir dir);
 	void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc);
 	void Move(HWND hWnd, int timerID);
-	void Stop(HWND hWnd, Dir dir);
+	void Stop(Dir dir);
 
-	void Animate(HWND hWnd);
+	void Animate();
 	void Shot();
 	void MoveBullets();
 

@@ -2,7 +2,6 @@
 #include <Windows.h>
 #include "image.h"
 
-enum class Action { Idle, Attack, Hury, Death };
 enum class Dir { Empty = 0, Left, Right, Up, Down, LD, LU, RD, RU };
 
 // Direction 연산자 오버로딩
@@ -150,7 +149,7 @@ protected:
 public:
 	void Paint(HDC hdc, const RECT* rectImage = nullptr);
 	
-	bool IsCollide(const RECT* rectSrc) const;
+	bool IsCollide(const RECT& rectSrc) const;
 
 	inline POINT GetPosCenter() const
 	{
@@ -163,12 +162,23 @@ public:
 	}
 };
 
-class IMovable abstract {
+POINT Lerp(POINT src, POINT dst, double alpha);
+
+class IControllable abstract {
 private:
 	virtual void SetPosDest() abstract;
 public:
 	virtual void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc) abstract;
 	virtual void Move(HWND hWnd, int timerID) abstract;
-	virtual void Stop(HWND hWnd, Dir dir) abstract;
+	virtual void Stop(Dir dir) abstract;
+	virtual bool IsMove() const abstract;
+};
+
+class IMovable abstract {
+private:
+	virtual void SetPosDest() abstract;
+public:
+	virtual void Move() abstract;
+	virtual void Stop() abstract;
 	virtual bool IsMove() const abstract;
 };

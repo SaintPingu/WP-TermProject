@@ -29,7 +29,7 @@ void BulletController::Bullet::Create(POINT center, POINT bulletSize, Dir dir)
 		break;
 	}
 }
-bool BulletController::Bullet::Move(const RECT* rectWindow)
+bool BulletController::Bullet::Move(const RECT& rectWindow)
 {
 	constexpr int moveAmount = 10;
 	int moveX = 0;
@@ -87,7 +87,7 @@ bool BulletController::Bullet::Move(const RECT* rectWindow)
 	case Dir::Right:
 	case Dir::RU:
 	case Dir::RD:
-		if (rectBullet.left > rectWindow->right)
+		if (rectBullet.left > rectWindow.right)
 		{
 			return false;
 		}
@@ -107,7 +107,7 @@ bool BulletController::Bullet::Move(const RECT* rectWindow)
 	case Dir::Down:
 	case Dir::LD:
 	case Dir::RD:
-		if (rectBullet.top > rectWindow->bottom)
+		if (rectBullet.top > rectWindow.bottom)
 		{
 			return false;
 		}
@@ -154,23 +154,19 @@ RECT BulletController::GetRectImage(Dir dir) const
 		break;
 	}
 
-	return ISprite::GetRectImage(&bulletImage, frame);
+	return ISprite::GetRectImage(bulletImage, frame);
 }
 
 
 
-BulletController::BulletController(const RECT* rectWindow, const ObjectImage* bulletImage, const int maxBullet)
+BulletController::BulletController(const RECT& rectWindow, const ObjectImage& bulletImage, const int maxBullet)
 {
-	this->rectWindow = rectWindow;
+	this->rectWindow = &rectWindow;
 
-	this->bulletImage = *bulletImage;
-	bullets = new Bullet[maxBullet];
+	this->bulletImage = bulletImage;
+	bullets.resize(maxBullet);
 
-	bulletSize = bulletImage->GetBodySize();
-}
-BulletController::~BulletController()
-{
-	delete[] bullets;
+	bulletSize = bulletImage.GetBodySize();
 }
 
 void BulletController::Paint(HDC hdc) const
@@ -181,7 +177,7 @@ void BulletController::Paint(HDC hdc) const
 	{
 		rectImage = GetRectImage(bullets[i].GetDir());
 		RECT rectBullet = bullets[i].GetRect();
-		bulletImage.Paint(hdc, &rectBullet, &rectImage);
+		bulletImage.Paint(hdc, rectBullet, &rectImage);
 	}
 }
 
@@ -199,7 +195,7 @@ void BulletController::Move()
 {
 	for (int i = 0; i < bulletCount; ++i)
 	{
-		if (bullets[i].Move(rectWindow) == false)
+		if (bullets[i].Move(*rectWindow) == false)
 		{
 			if (i < bulletCount)
 			{

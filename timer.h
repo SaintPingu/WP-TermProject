@@ -1,12 +1,12 @@
 #pragma once
 #include <Windows.h>
-#include "flypokemon.h"
+#include "player.h"
 
 #define TIMERID_INVALIDATE 0
 #define ELAPSE_INVALIDATE 10
 
 #define TIMERID_ANIMATION 1
-#define ELAPSE_ANIMATION 100
+#define ELAPSE_ANIMATION 50
 
 #define TIMERID_MOVE_PLAYER 2
 #define ELAPSE_MOVE_PLAYER 10

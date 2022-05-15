@@ -1,9 +1,9 @@
-#include "flyPokemon.h"
+#include "player.h"
 
 
-FlyPokemon::FlyPokemon(HWND hWnd, const RECT* rectWindow, ObjectImage image, double scaleX, double scaleY, POINT pos) : GameObject(image, scaleX, scaleY, pos)
+Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage image, double scaleX, double scaleY, POINT pos) : GameObject(image, scaleX, scaleY, pos)
 {
-	this->rectWindow = rectWindow;
+	this->rectWindow = &rectWindow;
 
 	direction = Dir::Empty;
 	posDst = { 0, };
@@ -16,16 +16,16 @@ FlyPokemon::FlyPokemon(HWND hWnd, const RECT* rectWindow, ObjectImage image, dou
 
 	ObjectImage bulletImage;
 	bulletImage.Load(L"sprite_bullet.png", { 20,20 }, { 6,2 }, { 10,16 });
-	bulletController = new BulletController(rectWindow, &bulletImage);
+	bulletController = new BulletController(rectWindow, bulletImage);
 }
 
-void FlyPokemon::Paint(HDC hdc)
+void Player::Paint(HDC hdc)
 {
 	GameObject::Paint(hdc, &rectImage);
 	bulletController->Paint(hdc);
 }
 
-void FlyPokemon::SetPosDest()
+void Player::SetPosDest()
 {
 	constexpr int amount = 10;
 	switch (direction)
@@ -64,15 +64,8 @@ void FlyPokemon::SetPosDest()
 	posDst.x = posCenter.x + vector.x;
 	posDst.y = posCenter.y + vector.y;
 }
-POINT FlyPokemon::Lerp(POINT src, POINT dst, double alpha)
-{
-	POINT transform;
-	transform.x = (LONG)((src.x * (1 - alpha)) + (dst.x * alpha));
-	transform.y = (LONG)((src.y * (1 - alpha)) + (dst.y * alpha));
-	return transform;
-}
 
-void FlyPokemon::SetDirection(Dir inputDir)
+void Player::SetDirection(Dir inputDir)
 {
 	if (direction == inputDir || direction == Dir::Empty)
 	{
@@ -104,7 +97,7 @@ void FlyPokemon::SetDirection(Dir inputDir)
 	isMove = false;
 }
 
-void FlyPokemon::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
+void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 {
 	if (isMove == true && alpha > 0)
 	{
@@ -123,7 +116,7 @@ void FlyPokemon::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc
 	}
 	isMove = true;
 }
-void FlyPokemon::Move(HWND hWnd, int timerID)
+void Player::Move(HWND hWnd, int timerID)
 {
 	POINT posCenter = GetPosCenter();
 	POINT posNext = Lerp(posCenter, posDst, alpha);
@@ -151,7 +144,7 @@ void FlyPokemon::Move(HWND hWnd, int timerID)
 		}
 	}
 }
-void FlyPokemon::Stop(HWND hWnd, Dir inputDir)
+void Player::Stop(Dir inputDir)
 {
 	switch (direction)
 	{
@@ -183,15 +176,29 @@ void FlyPokemon::Stop(HWND hWnd, Dir inputDir)
 	direction = direction - inputDir;
 }
 
-void FlyPokemon::Animate(HWND hWnd)
+void Player::Animate()
 {
-	++frame;
-	switch (action)
+	if (isRevFrame == true)
+	{
+		--frame;
+	}
+	else
+	{
+		++frame;
+	}
+
+	switch (GetAction())
 	{
 	case Action::Idle:
 		if (frame > 2)
 		{
-			frame = 0;
+			isRevFrame = true;
+			--frame;
+		}
+		else if (frame < 0)
+		{
+			isRevFrame = false;
+			++frame;
 		}
 		break;
 	}
@@ -200,7 +207,7 @@ void FlyPokemon::Animate(HWND hWnd)
 	rectImage = GetRectImage(image, frame);
 }
 
-void FlyPokemon::Shot()
+void Player::Shot()
 {
 	RECT rectBody = GetRectBody();
 	POINT bulletPos;
@@ -212,7 +219,7 @@ void FlyPokemon::Shot()
 	bulletController->CreateBullet(bulletPos, Dir::Up);
 }
 
-void FlyPokemon::MoveBullets()
+void Player::MoveBullets()
 {
 	bulletController->Move();
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <tchar.h>
-#include "flypokemon.h"
+#include "player.h"
 
 #define WINDOWSIZE_X 900
 #define WINDOWSIZE_Y 1200
@@ -21,7 +21,7 @@ typedef struct tagGameData {
 	Difficulty difficulty = Difficulty::Easy;
 }GameData;
 
-void GameStart(HWND hWnd, GameData* data, FlyPokemon* flyPokemon);
+void GameStart(HWND hWnd, GameData& data, Player& player);
 
-void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData* gameData, FlyPokemon* flyPokemon);
-void CheckKeyUp(HWND hWnd, const WPARAM& wParam, GameData* gameData, FlyPokemon* flyPokemon);
+void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData, Player& player);
+void CheckKeyUp(HWND hWnd, const WPARAM& wParam, GameData& gameData, Player& player);

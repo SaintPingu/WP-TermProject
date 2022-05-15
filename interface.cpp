@@ -1,19 +1,19 @@
 #include "interface.h"
 
-void GameStart(HWND hWnd, GameData* data, FlyPokemon* flyPokemon)
+void GameStart(HWND hWnd, GameData& data, Player& player)
 {
-	data->isGameStart = true;
+	data.isGameStart = true;
 
 }
-void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData* gameData, FlyPokemon* flyPokemon)
+void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData, Player& player)
 {
-	if (gameData->isGameStart == false)
+	if (gameData.isGameStart == false)
 	{
 		switch (wParam)
 		{
 		case _T('s'):
 		case _T('S'):
-			gameData->isGameStart = true;
+			gameData.isGameStart = true;
 			break;
 		}
 
@@ -24,75 +24,75 @@ void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData* gameData, FlyPokemo
 	switch (wParam)
 	{
 	case _T('H'):
-		flyPokemon->ShowHitbox();
+		player.ShowHitbox();
 		break;
 	}
 
 	if (KEYDOWN(KEY_LEFT))
 	{
-		flyPokemon->Stop(hWnd, Dir::Right);
-		flyPokemon->SetDirection(Dir::Left);
+		player.Stop(Dir::Right);
+		player.SetDirection(Dir::Left);
 	}
 	if (KEYDOWN(KEY_RIGHT))
 	{
 		if (wParam != KEY_LEFT)
 		{
-			flyPokemon->Stop(hWnd, Dir::Left);
-			flyPokemon->SetDirection(Dir::Right);
+			player.Stop(Dir::Left);
+			player.SetDirection(Dir::Right);
 		}
 	}
 	if (KEYDOWN(KEY_UP))
 	{
-		flyPokemon->Stop(hWnd, Dir::Down);
-		flyPokemon->SetDirection(Dir::Up);
+		player.Stop(Dir::Down);
+		player.SetDirection(Dir::Up);
 	}
 	if (KEYDOWN(KEY_DOWN))
 	{
 		if (wParam != KEY_UP)
 		{
-			flyPokemon->Stop(hWnd, Dir::Up);
-			flyPokemon->SetDirection(Dir::Down);
+			player.Stop(Dir::Up);
+			player.SetDirection(Dir::Down);
 		}
 	}
-	flyPokemon->SetMove(hWnd, TIMERID_MOVE_PLAYER, ELAPSE_MOVE_PLAYER, T_MovePlayer);
+	player.SetMove(hWnd, TIMERID_MOVE_PLAYER, ELAPSE_MOVE_PLAYER, T_MovePlayer);
 	InvalidateRect(hWnd, NULL, FALSE);
 }
-void CheckKeyUp(HWND hWnd, const WPARAM& wParam, GameData* gameData, FlyPokemon* flyPokemon)
+void CheckKeyUp(HWND hWnd, const WPARAM& wParam, GameData& gameData, Player& player)
 {
-	if (gameData->isGameStart == false)
+	if (gameData.isGameStart == false)
 	{
 		return;
 	}
-	else if (flyPokemon->IsMove() == true)
+	else if (player.IsMove() == true)
 	{
 		switch (wParam)
 		{
 		case KEY_LEFT:
-			flyPokemon->Stop(hWnd, Dir::Left);
+			player.Stop(Dir::Left);
 			if (KEYDOWN(KEY_RIGHT))
 			{
-				flyPokemon->SetDirection(Dir::Right);
+				player.SetDirection(Dir::Right);
 			}
 			break;
 		case KEY_RIGHT:
-			flyPokemon->Stop(hWnd, Dir::Right);
+			player.Stop(Dir::Right);
 			if (KEYDOWN(KEY_LEFT))
 			{
-				flyPokemon->SetDirection(Dir::Left);
+				player.SetDirection(Dir::Left);
 			}
 			break;
 		case KEY_UP:
-			flyPokemon->Stop(hWnd, Dir::Up);
+			player.Stop(Dir::Up);
 			if (KEYDOWN(KEY_DOWN))
 			{
-				flyPokemon->SetDirection(Dir::Down);
+				player.SetDirection(Dir::Down);
 			}
 			break;
 		case KEY_DOWN:
-			flyPokemon->Stop(hWnd, Dir::Down);
+			player.Stop(Dir::Down);
 			if (KEYDOWN(KEY_UP))
 			{
-				flyPokemon->SetDirection(Dir::Up);
+				player.SetDirection(Dir::Up);
 			}
 			break;
 		}
