@@ -6,18 +6,25 @@ private:
 	class Bullet {
 	private:
 		Dir dir = Dir::Empty;
-		RECT rectBullet = { 0, };
+		RECT rectBody = { 0, };
+		RECT rectImage;
+		POINT posCenter = { 0, };
 	public:
-		Bullet(POINT center, POINT bulletSize, Dir dir);
-		Bullet() {};
+		Bullet(POINT center, POINT bulletSize, Dir dir, RECT rectImage);
+		void Paint(HDC hdc, const ObjectImage& bulletImage) const;
 		bool Move(const RECT& rectWindow);
+
 		inline Dir GetDir() const
 		{
 			return dir;
 		}
 		inline RECT GetRect() const
 		{
-			return rectBullet;
+			return rectBody;
+		}
+		inline POINT GetPos() const
+		{
+			return posCenter;
 		}
 	};
 
@@ -29,6 +36,7 @@ private:
 	const RECT* rectWindow = nullptr;
 
 	RECT GetRectImage(Dir dir) const;
+	void SetRectImage(int frame);
 public:
 	BulletController(const RECT& rectWindow, const ObjectImage& bulletImage);
 

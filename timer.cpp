@@ -2,6 +2,7 @@
 #include "timer.h"
 #include "player.h"
 #include "enemy.h"
+#include "effect.h"
 
 void CALLBACK T_Invalidate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
@@ -10,7 +11,6 @@ void CALLBACK T_Invalidate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 
 extern Player* player;
 extern EnemyController* enemies;
-
 void CALLBACK T_Animate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	player->Animate();
@@ -35,4 +35,10 @@ void CALLBACK T_MoveObject(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 void CALLBACK T_CreateEnemy(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	enemies->CreateMelee();
+}
+
+extern EffectManager* effects;
+void CALLBACK T_Effect(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+{
+	effects->Animate();
 }

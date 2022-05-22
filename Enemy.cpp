@@ -4,17 +4,16 @@
 #include "timer.h"
 #include "interface.h"
 
+#define FRAME_MAX_IDLE 3
 #define FRAME_NUM_IDLE 0
 #define FRAME_NUM_ATTACK 3
 
 extern GameData gameData;
 extern Player* player;
-Enemy::Enemy(ObjectImage& image, float scaleX, float scaleY, Vector2 pos, int hp, float speed, int attackDelay) : GameObject(image, scaleX, scaleY, pos)
+Enemy::Enemy(ObjectImage& image, float scaleX, float scaleY, Vector2 pos, EnemyData data) : GameObject(image, scaleX, scaleY, pos)
 {
 	isMove = true;
-	this->hp = hp;
-	this->attackDelay = attackDelay;
-	this->speed = speed;
+	this->data = data;
 }
 
 Dir Enemy::GetDir() const
@@ -82,20 +81,21 @@ void Enemy::SetPosDest()
 
 	unitVector = vectorToPlayer / radius;
 
-	posDest = posCenter - (unitVector * speed);
+	posDest = posCenter - (unitVector * data.speed);
 }
 
 void Enemy::ResetAttackDelay()
 {
-	crntDelay = attackDelay;
+	data.crntDelay = data.attackDelay;
 }
 bool Enemy::IsDelayOver()
 {
-	return (crntDelay <= 0);
+	return (data.crntDelay <= 0);
 }
 
 void Enemy::Paint(HDC hdc)
 {
+	RECT rectImage = GetRectImage(GetImage(), frame, GetSpriteRow());
 	GameObject::Paint(hdc, &rectImage);
 }
 
@@ -103,7 +103,7 @@ void Enemy::Move()
 {
 	if (IsMove() == false)
 	{
-		crntDelay -= ELAPSE_MOVE_OBJECT;
+		data.crntDelay -= ELAPSE_MOVE_OBJECT;
 		if (IsDelayOver() == true)
 		{
 			isMove = true;
@@ -112,6 +112,7 @@ void Enemy::Move()
 	}
 	else if (CheckCollidePlayer() == true)
 	{
+		player->GetDamage(data.damage);
 		return;
 	}
 
@@ -121,7 +122,7 @@ void Enemy::Move()
 
 }
 
-void Enemy::SetRectImage(int frame)
+int Enemy::GetSpriteRow()
 {
 	int spriteRow = 0;
 	switch (GetDir())
@@ -155,7 +156,7 @@ void Enemy::SetRectImage(int frame)
 		break;
 	}
 
-	rectImage = GetRectImage(GetImage(), frame, spriteRow);
+	return spriteRow;
 }
 
 void Enemy::Animate()
@@ -172,7 +173,7 @@ void Enemy::Animate()
 	switch (GetAction())
 	{
 	case Action::Idle:
-		if (frame > 2)
+		if (frame >= FRAME_MAX_IDLE)
 		{
 			isRevFrame = true;
 			--frame;
@@ -196,8 +197,6 @@ void Enemy::Animate()
 		}
 		break;
 	}
-
-	SetRectImage(frame);
 }
 
 bool Enemy::CheckCollidePlayer()
@@ -216,7 +215,7 @@ bool Enemy::CheckCollidePlayer()
 }
 bool Enemy::GetDamage(int damage)
 {
-	if ((hp -= damage) <= 0)
+	if ((data.hp -= damage) <= 0)
 	{
 		return true;
 	}
@@ -233,20 +232,26 @@ bool Enemy::GetDamage(int damage)
 
 EnemyController::EnemyController()
 {
-	Image_beedrill.Load(L"sprite_beedrill.png", { 35,35 }, { 7,6 }, { 21,22 });
+	Image_beedrill.Load(L"sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
 }
 
 void EnemyController::CreateMelee()
 {
 	int createCount = 5;
+	EnemyData data;
+
 	for (int i = 0; i < createCount; ++i)
 	{
-		float xPos = rand() % WINDOWSIZE_X;
+		float xPos = (rand() % (WINDOWSIZE_X - 50)) + 50;
 		float yPos = -(rand() % 100);
 		switch (gameData.stage)
 		{
 		case Stage::Electric:
-			Enemy* enemy = new Enemy(Image_beedrill, 1.5f, 1.5f, { xPos, yPos }, 5, 3, 1000);
+			data.hp = 3;
+			data.speed = 3;
+			data.attackDelay = 1000;
+			data.damage = 1;
+			Enemy* enemy = new Enemy(Image_beedrill, 1.5f, 1.5f, { xPos, yPos }, data);
 			enemies.emplace_back(*enemy);
 			delete enemy;
 			break;

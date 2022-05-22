@@ -1,10 +1,13 @@
 #include "stdafx.h"
 #include "bullet.h"
 #include "enemy.h"
+#include "effect.h"
 
-BulletController::Bullet::Bullet(POINT center, POINT bulletSize, Dir dir)
+BulletController::Bullet::Bullet(POINT center, POINT bulletSize, Dir dir, RECT rectImage)
 {
 	this->dir = dir;
+	this->rectImage = rectImage;
+	this->posCenter = center;
 
 	switch (dir)
 	{
@@ -14,22 +17,26 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, Dir dir)
 	case Dir::LU:
 	case Dir::RU:
 	case Dir::RD:
-		rectBullet.left = center.x - (bulletSize.x / 2);
-		rectBullet.right = rectBullet.left + bulletSize.x;
-		rectBullet.top = center.y - (bulletSize.y / 2);
-		rectBullet.bottom = rectBullet.top + bulletSize.y;
+		rectBody.left = center.x - (bulletSize.x / 2);
+		rectBody.right = rectBody.left + bulletSize.x;
+		rectBody.top = center.y - (bulletSize.y / 2);
+		rectBody.bottom = rectBody.top + bulletSize.y;
 		break;
 	case Dir::Left:
 	case Dir::Right:
-		rectBullet.left = center.x - (bulletSize.y / 2);
-		rectBullet.right = rectBullet.left + bulletSize.y;
-		rectBullet.top = center.y - (bulletSize.x / 2);
-		rectBullet.bottom = rectBullet.top + bulletSize.x;
+		rectBody.left = center.x - (bulletSize.y / 2);
+		rectBody.right = rectBody.left + bulletSize.y;
+		rectBody.top = center.y - (bulletSize.x / 2);
+		rectBody.bottom = rectBody.top + bulletSize.x;
 		break;
 	default:
 		assert(0);
 		break;
 	}
+}
+void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage) const
+{
+	bulletImage.Paint(hdc, rectBody, &rectImage);
 }
 bool BulletController::Bullet::Move(const RECT& rectWindow)
 {
@@ -71,17 +78,19 @@ bool BulletController::Bullet::Move(const RECT& rectWindow)
 		break;
 	}
 
-	rectBullet.left += moveX;
-	rectBullet.right += moveX;
-	rectBullet.top += moveY;
-	rectBullet.bottom += moveY;
+	rectBody.left += moveX;
+	rectBody.right += moveX;
+	rectBody.top += moveY;
+	rectBody.bottom += moveY;
+	posCenter.x += moveX;
+	posCenter.y += moveY;
 
 	switch (dir)
 	{
 	case Dir::Left:
 	case Dir::LU:
 	case Dir::LD:
-		if (rectBullet.right < 0)
+		if (rectBody.right < 0)
 		{
 			return false;
 		}
@@ -89,7 +98,7 @@ bool BulletController::Bullet::Move(const RECT& rectWindow)
 	case Dir::Right:
 	case Dir::RU:
 	case Dir::RD:
-		if (rectBullet.left > rectWindow.right)
+		if (rectBody.left > rectWindow.right)
 		{
 			return false;
 		}
@@ -101,7 +110,7 @@ bool BulletController::Bullet::Move(const RECT& rectWindow)
 	case Dir::Up:
 	case Dir::LU:
 	case Dir::RU:
-		if (rectBullet.bottom < 0)
+		if (rectBody.bottom < 0)
 		{
 			return false;
 		}
@@ -109,7 +118,7 @@ bool BulletController::Bullet::Move(const RECT& rectWindow)
 	case Dir::Down:
 	case Dir::LD:
 	case Dir::RD:
-		if (rectBullet.top > rectWindow.bottom)
+		if (rectBody.top > rectWindow.bottom)
 		{
 			return false;
 		}
@@ -158,8 +167,7 @@ RECT BulletController::GetRectImage(Dir dir) const
 
 	return ISprite::GetRectImage(bulletImage, frame);
 }
-
-
+void BulletController::SetRectImage(int frame) {};
 
 BulletController::BulletController(const RECT& rectWindow, const ObjectImage& bulletImage)
 {
@@ -174,29 +182,32 @@ BulletController::BulletController(const RECT& rectWindow, const ObjectImage& bu
 
 void BulletController::Paint(HDC hdc) const
 {
-
-	RECT rectImage = { 0, };
-	for (size_t i = 0; i < bullets.size(); ++i)
+	for (const Bullet& bullet : bullets)
 	{
-		rectImage = GetRectImage(bullets[i].GetDir());
-		RECT rectBullet = bullets[i].GetRect();
-		bulletImage.Paint(hdc, rectBullet, &rectImage);
+		bullet.Paint(hdc, bulletImage);
 	}
 }
 
 void BulletController::CreateBullet(POINT center, Dir dir)
 {
-	Bullet* bullet = new Bullet(center, bulletSize, dir);
+	RECT rectImage = GetRectImage(dir);
+	Bullet* bullet = new Bullet(center, bulletSize, dir, rectImage);
 	bullets.emplace_back(*bullet);
 }
 
 extern EnemyController* enemies;
+extern EffectManager* effects;
 void BulletController::Move()
 {
 	for (size_t i = 0; i < bullets.size(); ++i)
 	{
-		if (enemies->CheckHit(bullets[i].GetRect(), damage) == true ||
-			bullets[i].Move(*rectWindow) == false)
+		if (enemies->CheckHit(bullets.at(i).GetRect(), damage) == true)
+		{
+			effects->CreateEffect(EXPLODE_FIRE, bullets[i].GetPos());
+			bullets[i--] = bullets.back();
+			bullets.pop_back();
+		}
+		else if(bullets.at(i).Move(*rectWindow) == false)
 		{
 			bullets[i--] = bullets.back();
 			bullets.pop_back();

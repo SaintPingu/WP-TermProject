@@ -3,11 +3,18 @@
 
 class BulletController;
 
+typedef struct PlayerData {
+	int hp = 0;
+	int speed = 0;
+}PlayerData;
+
 class Player : public GameObject, public IControllable, public IAnimatable {
 private:
 	Vector2 posDest = { 0, };
 	Vector2 vectorMove = { 0, };
 	float alpha = 0;
+
+	PlayerData data;
 
 	const RECT* rectWindow = nullptr;
 
@@ -15,7 +22,7 @@ private:
 
 	void SetPosDest() override;
 public:
-	Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos);
+	Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data);
 	void Paint(HDC hdc);
 
 	void SetDirection(Dir dir);
@@ -25,7 +32,7 @@ public:
 	Vector2 CheckCollideWindow(Vector2 pos) const;
 
 	void Animate() override;
-	void SetRectImage(int frame);
 	void Shot();
 	void MoveBullets();
+	void GetDamage(int damage);
 };

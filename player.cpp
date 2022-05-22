@@ -4,9 +4,10 @@
 #include "timer.h"
 
 
-Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos) : GameObject(image, scaleX, scaleY, pos)
+Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data) : GameObject(image, scaleX, scaleY, pos)
 {
 	this->rectWindow = &rectWindow;
+	this->data = data;
 
 	direction = Dir::Empty;
 	posDest = { 0, };
@@ -15,8 +16,6 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 	alpha = 0;
 	isMove = false;
 
-	rectImage = image.GetRectImage();
-
 	ObjectImage bulletImage;
 	bulletImage.Load(_T("sprite_bullet.png"), { 20,20 }, { 6,2 }, { 10,16 });
 	bulletController = new BulletController(rectWindow, bulletImage);
@@ -24,13 +23,14 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 
 void Player::Paint(HDC hdc)
 {
+	RECT rectImage = GetRectImage(GetImage(), frame);
 	GameObject::Paint(hdc, &rectImage);
 	bulletController->Paint(hdc);
 }
 
 void Player::SetPosDest()
 {
-	constexpr int amount = 10;
+	const int amount = data.speed * 2;
 	switch (direction)
 	{
 	case Dir::Left:
@@ -111,7 +111,6 @@ void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 	if (isMove == false && alpha == 0)
 	{
 		frame = 0;
-		SetRectImage(frame);
 		SetTimer(hWnd, timerID, elpase, timerProc);
 	}
 	else if (alpha > 0.5f)
@@ -233,12 +232,6 @@ void Player::Animate()
 		}
 		break;
 	}
-
-	SetRectImage(frame);
-}
-void Player::SetRectImage(int frame)
-{
-	rectImage = GetRectImage(GetImage(), frame);
 }
 void Player::Shot()
 {
@@ -255,4 +248,12 @@ void Player::Shot()
 void Player::MoveBullets()
 {
 	bulletController->Move();
+}
+
+void Player::GetDamage(int damage)
+{
+	if ((data.hp -= damage) <= 0)
+	{
+		data.speed = 0;
+	}
 }

@@ -20,7 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bullet.cpp" />
-    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="effect.cpp" />
+    <ClCompile Include="enemy.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="image.cpp" />
     <ClCompile Include="interface.cpp" />
@@ -36,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bullet.h" />
+    <ClInclude Include="effect.h" />
     <ClInclude Include="enemy.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="image.h" />
