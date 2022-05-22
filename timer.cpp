@@ -1,4 +1,7 @@
+#include "stdafx.h"
 #include "timer.h"
+#include "player.h"
+#include "enemy.h"
 
 void CALLBACK T_Invalidate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
@@ -6,12 +9,12 @@ void CALLBACK T_Invalidate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 }
 
 extern Player* player;
-extern Enemy* enemy;
+extern EnemyController* enemies;
 
 void CALLBACK T_Animate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	player->Animate();
-	enemy->Animate();
+	enemies->Animate();
 }
 
 void CALLBACK T_MovePlayer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
@@ -24,12 +27,12 @@ void CALLBACK T_ShotBullet(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 	player->Shot();
 }
 
-void CALLBACK T_MoveBullet(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+void CALLBACK T_MoveObject(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	player->MoveBullets();
+	enemies->Move();
 }
-
-void CALLBACK T_MoveEnemy(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+void CALLBACK T_CreateEnemy(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
-	enemy->Move();
+	enemies->CreateMelee();
 }

@@ -1,12 +1,13 @@
-#pragma warning(disable:28251)
+#include "stdafx.h"
 #include <Windows.h>
 #include <gdiplus.h>
 #include <time.h>
 #include <atlImage.h>
 #include <cassert>
 #include "interface.h"
-
-#define DEBUG_MODE false
+#include "enemy.h"
+#include "player.h"
+#include "timer.h"
 
 void InitPaint(HWND hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBitmap, RECT& rectWindow);
 void ReleasePaint(HWND hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBitmap, RECT& rectWindow);
@@ -69,8 +70,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	return Message.wParam;
 }
 
+GameData gameData;
 Player* player;
-Enemy* enemy;
+EnemyController* enemies;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
@@ -80,25 +82,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	static RECT rectWindow;
 	static ObjectImage moltres;
 	static ObjectImage bullet;
-	static ObjectImage beedrill;
-	static GameData gameData;
 
 	switch (uMsg)
 	{
 	case WM_CREATE:
 	{
 		GetClientRect(hWnd, &rectWindow);
-		moltres.Load(L"sprite_moltres.png", { 85, 77 }, { 35, 25 }, { 15,35 });
-		bullet.Load(L"sprite_bullet.png", { 20, 20 }, { 5, 2 }, { 10, 16 });
-		beedrill.Load(L"sprite_beedrill.png", { 35,35 }, { 7,6 }, { 21,22 });
+		moltres.Load(_T("sprite_moltres.png"), { 85, 77 }, { 35, 25 }, { 15,35 });
+		bullet.Load(_T("sprite_bullet.png"), { 20, 20 }, { 5, 2 }, { 10, 16 });
+		enemies = new EnemyController();
 		player = new Player(hWnd, rectWindow, moltres, 1.5f, 1.5f, { 450, 800 });
-		enemy = new Enemy(*player, beedrill, 1.5f, 1.5f, { 800, 100 });
+
+		gameData.stage = Stage::Electric;
 
 		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
 		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
 		SetTimer(hWnd, TIMERID_SHOOT_BULLET, ELAPSE_SHOOT_BULLET, T_ShotBullet);
-		SetTimer(hWnd, TIMERID_MOVE_BULLET, ELAPSE_MOVE_BULLET, T_MoveBullet);
-		SetTimer(hWnd, TIMERID_MOVE_ENEMY, ELAPSE_MOVE_ENEMY, T_MoveEnemy);
+		SetTimer(hWnd, TIMERID_MOVE_OBJECT, ELAPSE_MOVE_OBJECT, T_MoveObject);
+		SetTimer(hWnd, TIMERID_CREATE_ENEMY, ELAPSE_CREATE_ENEMY, T_CreateEnemy);
 	}
 	break;
 	case WM_ERASEBKGND:
@@ -107,7 +108,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		InitPaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
 		player->Paint(memDC);
-		enemy->Paint(memDC);
+		enemies->Paint(memDC);
 		ReleasePaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
 	}
 	break;

@@ -1,4 +1,7 @@
+#include "stdafx.h"
 #include "interface.h"
+#include "player.h"
+#include "timer.h"
 
 void GameStart(HWND hWnd, GameData& data, Player& player)
 {

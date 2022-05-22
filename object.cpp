@@ -1,10 +1,11 @@
+#include "stdafx.h"
 #include "object.h"
 
-GameObject::GameObject(ObjectImage image, double scaleX, double scaleY, Vector2 pos)
+GameObject::GameObject(ObjectImage& image, float scaleX, float scaleY, Vector2 pos)
 {
-	this->image = image;
-	this->image.ScaleImage(scaleX, scaleY);
-	bodySize = this->image.GetBodySize();
+	this->image = &image;
+	this->image->ScaleImage(scaleX, scaleY);
+	bodySize = this->image->GetBodySize();
 
 	SetPos(pos);
 }
@@ -22,7 +23,7 @@ void GameObject::SetPos(Vector2 pos)
 
 void GameObject::Paint(HDC hdc, const RECT* rectImage)
 {
-	image.Paint(hdc, rectBody, rectImage);
+	image->Paint(hdc, rectBody, rectImage);
 	if (isShowHitbox == true)
 	{
 		FrameRect(hdc, &rectBody, (HBRUSH)GetStockObject(BLACK_BRUSH));
@@ -46,7 +47,7 @@ bool GameObject::IsCollide(const RECT& rectSrc) const
 }
 
 
-Vector2 Lerp(Vector2 src, Vector2 dst, double alpha)
+Vector2 Lerp(Vector2 src, Vector2 dst, float alpha)
 {
 	Vector2 transform;
 	transform.x = (src.x * (1 - alpha)) + (dst.x * alpha);

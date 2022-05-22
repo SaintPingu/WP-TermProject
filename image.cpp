@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "image.h"
 
 void ObjectImage::Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint, POINT bodySize)
@@ -49,14 +50,20 @@ void ObjectImage::Paint(HDC hdc, const RECT& rectBody, const RECT* rectImage) co
 	DeleteDC(memDC);
 }
 
-void ObjectImage::ScaleImage(double scaleX, double scaleY)
+void ObjectImage::ScaleImage(float scaleX, float scaleY)
 {
-	drawSize.x = (LONG)((double)drawSize.x * scaleX);
-	drawSize.y = (LONG)((double)drawSize.y * scaleY);
-	bodyDrawPoint.x = (LONG)((double)bodyDrawPoint.x * scaleX);
-	bodyDrawPoint.y = (LONG)((double)bodyDrawPoint.y * scaleY);
-	bodySize.x = (LONG)((double)bodySize.x * scaleX);
-	bodySize.y = (LONG)((double)bodySize.y * scaleY);
+	if (isScaled == true)
+	{
+		return;
+	}
+	isScaled = true;
+
+	drawSize.x = (LONG)((float)drawSize.x * scaleX);
+	drawSize.y = (LONG)((float)drawSize.y * scaleY);
+	bodyDrawPoint.x = (LONG)((float)bodyDrawPoint.x * scaleX);
+	bodyDrawPoint.y = (LONG)((float)bodyDrawPoint.y * scaleY);
+	bodySize.x = (LONG)((float)bodySize.x * scaleX);
+	bodySize.y = (LONG)((float)bodySize.y * scaleY);
 }
 
 

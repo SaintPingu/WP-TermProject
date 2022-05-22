@@ -1,14 +1,13 @@
 #pragma once
-#include <Windows.h>
 #include "object.h"
-#include "timer.h"
-#include "bullet.h"
+
+class BulletController;
 
 class Player : public GameObject, public IControllable, public IAnimatable {
 private:
 	Vector2 posDest = { 0, };
 	Vector2 vectorMove = { 0, };
-	double alpha = 0;
+	float alpha = 0;
 
 	const RECT* rectWindow = nullptr;
 
@@ -16,7 +15,7 @@ private:
 
 	void SetPosDest() override;
 public:
-	Player(HWND hWnd, const RECT& rectWindow, ObjectImage image, double scaleX, double scaleY, Vector2 pos = { 0, 0 });
+	Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos);
 	void Paint(HDC hdc);
 
 	void SetDirection(Dir dir);
@@ -26,6 +25,7 @@ public:
 	Vector2 CheckCollideWindow(Vector2 pos) const;
 
 	void Animate() override;
+	void SetRectImage(int frame);
 	void Shot();
 	void MoveBullets();
 };

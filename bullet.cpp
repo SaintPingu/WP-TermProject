@@ -1,6 +1,8 @@
+#include "stdafx.h"
 #include "bullet.h"
+#include "enemy.h"
 
-void BulletController::Bullet::Create(POINT center, POINT bulletSize, Dir dir)
+BulletController::Bullet::Bullet(POINT center, POINT bulletSize, Dir dir)
 {
 	this->dir = dir;
 
@@ -159,21 +161,22 @@ RECT BulletController::GetRectImage(Dir dir) const
 
 
 
-BulletController::BulletController(const RECT& rectWindow, const ObjectImage& bulletImage, const int maxBullet)
+BulletController::BulletController(const RECT& rectWindow, const ObjectImage& bulletImage)
 {
 	this->rectWindow = &rectWindow;
 
 	this->bulletImage = bulletImage;
-	bullets.resize(maxBullet);
 
 	bulletSize = bulletImage.GetBodySize();
+
+	this->damage = 1;
 }
 
 void BulletController::Paint(HDC hdc) const
 {
 
 	RECT rectImage = { 0, };
-	for (int i = 0; i < bulletCount; ++i)
+	for (size_t i = 0; i < bullets.size(); ++i)
 	{
 		rectImage = GetRectImage(bullets[i].GetDir());
 		RECT rectBullet = bullets[i].GetRect();
@@ -183,25 +186,20 @@ void BulletController::Paint(HDC hdc) const
 
 void BulletController::CreateBullet(POINT center, Dir dir)
 {
-	if (bulletCount >= MAX_BULLET - 1)
-	{
-		return;
-	}
-
-	bullets[bulletCount++].Create(center, bulletSize, dir);
+	Bullet* bullet = new Bullet(center, bulletSize, dir);
+	bullets.emplace_back(*bullet);
 }
 
+extern EnemyController* enemies;
 void BulletController::Move()
 {
-	for (int i = 0; i < bulletCount; ++i)
+	for (size_t i = 0; i < bullets.size(); ++i)
 	{
-		if (bullets[i].Move(*rectWindow) == false)
+		if (enemies->CheckHit(bullets[i].GetRect(), damage) == true ||
+			bullets[i].Move(*rectWindow) == false)
 		{
-			if (i < bulletCount)
-			{
-				bullets[i--] = bullets[bulletCount - 1];
-			}
-			--bulletCount;
+			bullets[i--] = bullets.back();
+			bullets.pop_back();
 		}
 	}
 }

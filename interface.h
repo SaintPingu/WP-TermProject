@@ -1,8 +1,5 @@
 #pragma once
-#include <Windows.h>
-#include <tchar.h>
-#include "player.h"
-#include "enemy.h"
+class Player;
 
 #define WINDOWSIZE_X 900
 #define WINDOWSIZE_Y 1200
@@ -15,11 +12,11 @@
 #define KEY_DOWN 'S'
 #define KEY_RIGHT 'D'
 
-enum class Difficulty { Easy = 0, Normal, Hard };
-
 typedef struct tagGameData {
 	bool isGameStart = false;
 	Difficulty difficulty = Difficulty::Easy;
+	Scene scene = Scene::Stage;
+	Stage stage = Stage::Empty;
 }GameData;
 
 void GameStart(HWND hWnd, GameData& data, Player& player);

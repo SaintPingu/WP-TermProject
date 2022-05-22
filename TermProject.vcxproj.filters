@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="PCH">
+      <UniqueIdentifier>{322c394c-ec9e-47cc-abba-7c7788460d9b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="player.cpp">
@@ -39,6 +42,9 @@
     <ClCompile Include="Enemy.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>PCH</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="player.h">
@@ -61,6 +67,9 @@
     </ClInclude>
     <ClInclude Include="enemy.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>PCH</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

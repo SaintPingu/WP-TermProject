@@ -1,7 +1,10 @@
+#include "stdafx.h"
 #include "player.h"
+#include "bullet.h"
+#include "timer.h"
 
 
-Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage image, double scaleX, double scaleY, Vector2 pos) : GameObject(image, scaleX, scaleY, pos)
+Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos) : GameObject(image, scaleX, scaleY, pos)
 {
 	this->rectWindow = &rectWindow;
 
@@ -15,7 +18,7 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage image, double scal
 	rectImage = image.GetRectImage();
 
 	ObjectImage bulletImage;
-	bulletImage.Load(L"sprite_bullet.png", { 20,20 }, { 6,2 }, { 10,16 });
+	bulletImage.Load(_T("sprite_bullet.png"), { 20,20 }, { 6,2 }, { 10,16 });
 	bulletController = new BulletController(rectWindow, bulletImage);
 }
 
@@ -107,6 +110,8 @@ void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 
 	if (isMove == false && alpha == 0)
 	{
+		frame = 0;
+		SetRectImage(frame);
 		SetTimer(hWnd, timerID, elpase, timerProc);
 	}
 	else if (alpha > 0.5f)
@@ -181,7 +186,7 @@ Vector2 Player::CheckCollideWindow(Vector2 pos) const
 {
 	RECT rectBody = GetRectBody(pos);
 
-	Vector2 corrValue = { 0, };
+	POINT corrValue = { 0, };
 	if (rectBody.left < 0)
 	{
 		corrValue.x = -rectBody.left;
@@ -229,10 +234,12 @@ void Player::Animate()
 		break;
 	}
 
-	const ObjectImage& image = GetImage();
-	rectImage = GetRectImage(image, frame);
+	SetRectImage(frame);
 }
-
+void Player::SetRectImage(int frame)
+{
+	rectImage = GetRectImage(GetImage(), frame);
+}
 void Player::Shot()
 {
 	RECT rectBody = GetRectBody();

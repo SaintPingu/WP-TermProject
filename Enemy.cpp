@@ -1,17 +1,29 @@
+#include "stdafx.h"
 #include "enemy.h"
+#include "player.h"
+#include "timer.h"
+#include "interface.h"
 
-Enemy::Enemy(const Player& player, ObjectImage image, double scaleX, double scaleY, Vector2 pos) : GameObject(image, scaleX, scaleY, pos)
+#define FRAME_NUM_IDLE 0
+#define FRAME_NUM_ATTACK 3
+
+extern GameData gameData;
+extern Player* player;
+Enemy::Enemy(ObjectImage& image, float scaleX, float scaleY, Vector2 pos, int hp, float speed, int attackDelay) : GameObject(image, scaleX, scaleY, pos)
 {
-	this->player = &player;
+	isMove = true;
+	this->hp = hp;
+	this->attackDelay = attackDelay;
+	this->speed = speed;
 }
 
 Dir Enemy::GetDir() const
 {
-	double theta = atan2(unitVector.y, unitVector.x);
-	double crntDegree = RADIAN_TO_DEGREE(theta);
+	float theta = atan2(unitVector.y, unitVector.x);
+	float crntDegree = RADIAN_TO_DEGREE(theta);
 
 	constexpr int unitDegree = 45;
-	double degree = (double)unitDegree / 2;
+	float degree = (float)unitDegree / 2;
 	if (crntDegree > 0)
 	{
 		if (crntDegree < degree)
@@ -37,7 +49,7 @@ Dir Enemy::GetDir() const
 	}
 	else
 	{
-		degree = -((double)unitDegree / 2);
+		degree = -((float)unitDegree / 2);
 		if (crntDegree > degree)
 		{
 			return Dir::Left;
@@ -66,13 +78,20 @@ void Enemy::SetPosDest()
 	Vector2 posCenter = GetPosCenter();
 	Vector2 vectorToPlayer = posCenter - player->GetPosCenter();
 
-	double radius = GetRadius(vectorToPlayer.x, vectorToPlayer.y);
+	float radius = GetRadius(vectorToPlayer.x, vectorToPlayer.y);
 
 	unitVector = vectorToPlayer / radius;
 
-	constexpr int moveScale = 3;
+	posDest = posCenter - (unitVector * speed);
+}
 
-	posDest = posCenter - (unitVector * moveScale);
+void Enemy::ResetAttackDelay()
+{
+	crntDelay = attackDelay;
+}
+bool Enemy::IsDelayOver()
+{
+	return (crntDelay <= 0);
 }
 
 void Enemy::Paint(HDC hdc)
@@ -82,43 +101,28 @@ void Enemy::Paint(HDC hdc)
 
 void Enemy::Move()
 {
+	if (IsMove() == false)
+	{
+		crntDelay -= ELAPSE_MOVE_OBJECT;
+		if (IsDelayOver() == true)
+		{
+			isMove = true;
+		}
+		return;
+	}
+	else if (CheckCollidePlayer() == true)
+	{
+		return;
+	}
+
 	SetPosDest();
 
 	SetPos(posDest);
+
 }
 
-void Enemy::Stop()
+void Enemy::SetRectImage(int frame)
 {
-	
-}
-
-void Enemy::Animate()
-{
-	if (isRevFrame == true)
-	{
-		--frame;
-	}
-	else
-	{
-		++frame;
-	}
-
-	switch (GetAction())
-	{
-	case Action::Idle:
-		if (frame > 2)
-		{
-			isRevFrame = true;
-			--frame;
-		}
-		else if (frame < 0)
-		{
-			isRevFrame = false;
-			++frame;
-		}
-		break;
-	}
-
 	int spriteRow = 0;
 	switch (GetDir())
 	{
@@ -151,6 +155,140 @@ void Enemy::Animate()
 		break;
 	}
 
-	const ObjectImage& image = GetImage();
-	rectImage = GetRectImage(image, frame, spriteRow);
+	rectImage = GetRectImage(GetImage(), frame, spriteRow);
+}
+
+void Enemy::Animate()
+{
+	if (isRevFrame == true)
+	{
+		--frame;
+	}
+	else
+	{
+		++frame;
+	}
+
+	switch (GetAction())
+	{
+	case Action::Idle:
+		if (frame > 2)
+		{
+			isRevFrame = true;
+			--frame;
+		}
+		else if (frame < FRAME_NUM_IDLE)
+		{
+			isRevFrame = false;
+			++frame;
+		}
+		break;
+	case Action::Attack:
+		if (frame > FRAME_NUM_ATTACK + 1)
+		{
+			isRevFrame = true;
+			--frame;
+		}
+		else if (frame < FRAME_NUM_ATTACK)
+		{
+			isRevFrame = false;
+			SetAction(Action::Idle, FRAME_NUM_IDLE);
+		}
+		break;
+	}
+
+	SetRectImage(frame);
+}
+
+bool Enemy::CheckCollidePlayer()
+{
+	RECT rectBody = GetRectBody();
+	if (player->IsCollide(rectBody) == true)
+	{
+		StopMove();
+		SetAction(Action::Attack, FRAME_NUM_ATTACK);
+		ResetAttackDelay();
+
+		return true;
+	}
+
+	return false;
+}
+bool Enemy::GetDamage(int damage)
+{
+	if ((hp -= damage) <= 0)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+
+
+
+
+
+
+
+EnemyController::EnemyController()
+{
+	Image_beedrill.Load(L"sprite_beedrill.png", { 35,35 }, { 7,6 }, { 21,22 });
+}
+
+void EnemyController::CreateMelee()
+{
+	int createCount = 5;
+	for (int i = 0; i < createCount; ++i)
+	{
+		float xPos = rand() % WINDOWSIZE_X;
+		float yPos = -(rand() % 100);
+		switch (gameData.stage)
+		{
+		case Stage::Electric:
+			Enemy* enemy = new Enemy(Image_beedrill, 1.5f, 1.5f, { xPos, yPos }, 5, 3, 1000);
+			enemies.emplace_back(*enemy);
+			delete enemy;
+			break;
+		}
+	}
+}
+
+void EnemyController::Paint(HDC hdc)
+{
+	for (Enemy& enemy : enemies)
+	{
+		enemy.Paint(hdc);
+	}
+}
+void EnemyController::Move()
+{
+	for (Enemy& enemy : enemies)
+	{
+		enemy.Move();
+	}
+}
+void EnemyController::Animate()
+{
+	for (Enemy& enemy : enemies)
+	{
+		enemy.Animate();
+	}
+}
+bool EnemyController::CheckHit(const RECT& rectSrc, int damage)
+{
+	for (size_t i = 0;i<enemies.size();++i)
+	{
+		if (enemies.at(i).IsCollide(rectSrc) == true)
+		{
+			if (enemies.at(i).GetDamage(damage) == true)
+			{
+				enemies[i--] = enemies.back();
+				enemies.pop_back();
+			}
+			return true;
+		}
+	}
+
+	return false;
 }

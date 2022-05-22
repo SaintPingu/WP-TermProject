@@ -1,10 +1,5 @@
 #pragma once
-#include <Windows.h>
-#include <vector>
-#include "object.h"
-#include "bullet.h"
-
-#define MAX_BULLET 50
+#include "image.h"
 
 class BulletController : public ISprite {
 private:
@@ -13,7 +8,8 @@ private:
 		Dir dir = Dir::Empty;
 		RECT rectBullet = { 0, };
 	public:
-		void Create(POINT center, POINT bulletSize, Dir dir);
+		Bullet(POINT center, POINT bulletSize, Dir dir);
+		Bullet() {};
 		bool Move(const RECT& rectWindow);
 		inline Dir GetDir() const
 		{
@@ -26,15 +22,15 @@ private:
 	};
 
 	std::vector<Bullet> bullets;
-	int bulletCount = 0;
 	ObjectImage bulletImage;
 	POINT bulletSize = { 0, };
+	int damage = 0;
 
 	const RECT* rectWindow = nullptr;
 
 	RECT GetRectImage(Dir dir) const;
 public:
-	BulletController(const RECT& rectWindow, const ObjectImage& bulletImage, int maxBullet = MAX_BULLET);
+	BulletController(const RECT& rectWindow, const ObjectImage& bulletImage);
 
 	void Paint(HDC hdc) const;
 

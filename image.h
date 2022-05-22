@@ -1,12 +1,4 @@
 #pragma once
-#include <Windows.h>
-#include <gdiplus.h>
-#include <cassert>
-#define	WIN32_LEAN_AND_MEAN
-#undef WINVER
-#define WINVER 0x6000
-
-enum class Action { Idle, Attack, Hurt, Death };
 
 class ObjectImage {
 private:
@@ -17,11 +9,12 @@ private:
 	POINT bodyDrawPoint = { 0, };
 	POINT drawSize = { 0, };
 	POINT bodySize = { 0, };
+	bool isScaled = false;
 
 public:
 	void Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint, POINT bodySize);
 	void Paint(HDC hdc, const RECT& rectBody, const RECT* rectImage = nullptr) const;
-	void ScaleImage(double scaleX, double scaleY);
+	void ScaleImage(float scaleX, float scaleY);
 
 	inline RECT GetRectImage() const
 	{
@@ -54,9 +47,17 @@ protected:
 	int frame = 0;
 	bool isRevFrame = false;
 
+	virtual void SetRectImage(int frame) abstract;
 	inline Action GetAction() const
 	{
 		return action;
+	}
+	inline void SetAction(Action action, int frame)
+	{
+		this->frame = frame;
+		this->action = action;
+		this->isRevFrame = false;
+		SetRectImage(frame);
 	}
 public:
 	virtual void Animate() abstract;
