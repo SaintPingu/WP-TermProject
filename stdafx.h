@@ -11,8 +11,8 @@
 #include <cassert>
 
 
-#define WINDOWSIZE_X 900
-#define WINDOWSIZE_Y 1200
+#define WINDOWSIZE_X 500
+#define WINDOWSIZE_Y 750
 
 #define	WIN32_LEAN_AND_MEAN
 #undef WINVER
@@ -22,6 +22,8 @@ enum class Difficulty { Easy = 0, Normal, Hard };
 enum class Scene { Start = 0, Loading, Lobby, Stage, Battle };
 enum class Stage { Empty = 0, Fire, Water, Electric, Dark };
 enum class Action { Idle = 0, Attack, Hurt, Death };
+
+enum class Type { Empty = 0, Fire, Elec, Water };
 
 #define PI 3.141592
 #define DEGREE_TO_RADIAN(degree) ((PI/180) * (degree))
@@ -230,3 +232,4 @@ struct Vector2 {
 Vector2 Rotate(Vector2 vector, float degree);
 bool OutOfRange(const RECT& rect, const RECT& rectRange);
 void GetRotationPos(const RECT& rect, const Vector2& unitVector, Vector2 vPoints[3]);
+RECT GetRotatedBody(Vector2 vPoints[3]);

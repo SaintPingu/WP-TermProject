@@ -1,10 +1,12 @@
 #pragma once
 #include "object.h"
 
+struct BulletData;
 class Player;
 class EnemyBullet;
 
 typedef struct EnemyData {
+	Type type = Type::Empty;
 	int frameNum_Idle = 0;
 	int frameNum_IdleMax = 0;
 	int frameNum_Atk = 0;
@@ -15,8 +17,8 @@ typedef struct EnemyData {
 	int crnt_atkDelay = 0;
 
 	int hp = 0;
-	int speed = 0;
-	int damage = 0;
+	float speed = 0;
+	float damage = 0;
 
 	int maxYPos = 0;
 }EnemyData;
@@ -41,6 +43,11 @@ public:
 	int GetSpriteRow();
 	void Animate() override;
 	bool GetDamage(int damage);
+
+	inline Type GetType() const
+	{
+		return data.type;
+	}
 };
 
 class Melee : public Enemy {
@@ -90,7 +97,7 @@ public:
 	void Animate();
 	bool CheckHit(const RECT& rectSrc, int damage);
 	void CheckAtkDelay();
-	void CreateBullet(POINT center, int damage, int speed, Vector2 unitVector, bool isRotate = false);
-	void CreateBullet(POINT center, int damage, int speed, Dir dir);
+	void CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotate = false);
+	void CreateBullet(POINT center, const BulletData& data, Dir dir);
 	void MoveBullets();
 };

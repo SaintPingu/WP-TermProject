@@ -15,19 +15,47 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 	alpha = 0;
 	StopMove();
 
-	subPokemon = SubPokemon::Pikachu;
+	subPokemon = SubPokemon::Squirtle;
 	img_subPokemon[static_cast<int>(SubPokemon::Pikachu)].Load(L"sub_pikachu.png", { 23,25 });
 	img_subPokemon[static_cast<int>(SubPokemon::Squirtle)].Load(L"sub_squirtle.png", { 17,24 });
 	img_subPokemon[static_cast<int>(SubPokemon::Charmander)].Load(L"sub_charmander.png", { 18,23 });
 
 	pokemon = Pokemon::Moltres;
 	ObjectImage bulletImage;
-	bulletImage.Load(_T("sprite_bullet.png"), { 20,20 }, { 6,2 }, { 10,16 });
-	bullets = new PlayerBullet(rectWindow, bulletImage, BulletType::Fire);
+	bulletImage.Load(_T("bullet_fire.png"), { 11,16 });
+	bulletImage.ScaleImage(0.9f, 0.9f);
+	bullets = new PlayerBullet(rectWindow, bulletImage);
+
+	switch (pokemon)
+	{
+	case Pokemon::Moltres:
+		bulletType = Type::Fire;
+		break;
+	}
 
 	ObjectImage subBulletImage;
-	subBulletImage.Load(_T("bullet_elec.png"), { 11,30 });
-	subBullets = new PlayerBullet(rectWindow, subBulletImage, BulletType::Elec);
+	switch (subPokemon)
+	{
+	case SubPokemon::Pikachu:
+		subBulletImage.Load(_T("bullet_elec.png"), { 11,30 });
+		subBulletImage.ScaleImage(0.7f, 0.7f);
+		subBullets = new PlayerBullet(rectWindow, subBulletImage);
+		bulletSubType = Type::Elec;
+		break;
+	case SubPokemon::Charmander:
+		subBulletImage.Load(_T("bullet_flame.png"), { 8,16 });
+		subBulletImage.ScaleImage(0.7f, 0.7f);
+		subBullets = new PlayerBullet(rectWindow, subBulletImage);
+		bulletSubType = Type::Fire;
+		break;
+	case SubPokemon::Squirtle:
+		subBulletImage.Load(_T("bullet_ice.png"), { 7,15 });
+		subBulletImage.ScaleImage(0.7f, 0.7f);
+		subBullets = new PlayerBullet(rectWindow, subBulletImage);
+		bulletSubType = Type::Water;
+		break;
+	}
+	
 }
 
 void Player::Paint(HDC hdc)
@@ -260,19 +288,34 @@ void Player::Animate()
 		break;
 	}
 }
-void Player::Shot()
+void Player::Fire()
 {
 	RECT rectBody = GetRectBody();
+	BulletData bulletData;
+	bulletData.bulletType = bulletType;
+	bulletData.damage = 1;
+	bulletData.speed = 7;
+
 	POINT bulletPos = { 0, };
 	bulletPos.y = rectBody.top;
-
 	bulletPos.x = rectBody.left - 10;
-	bullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
+	bullets->CreateBullet(bulletPos, bulletData, Dir::Up);
 	bulletPos.x = rectBody.right + 10;
-	bullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
+	bullets->CreateBullet(bulletPos, bulletData, Dir::Up);
 
+	bulletData.bulletType = bulletSubType;
 	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
-	subBullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
+	subBullets->CreateBullet(bulletPos, bulletData, Dir::Up);
+
+	switch (crntSkill)
+	{
+	case Skill::Sector:
+		FireBySector();
+		break;
+	case Skill::Circle:
+		FireByCircle();
+		break;
+	}
 }
 
 void Player::MoveBullets()
@@ -289,27 +332,70 @@ void Player::GetDamage(int damage)
 	}
 }
 
-void Player::ShotBySector()
+void Player::FireBySector()
 {
 	RECT rectBody = GetRectBody();
+	BulletData bulletData;
+	bulletData.bulletType = bulletSubType;
+	bulletData.damage = 1;
+	bulletData.speed = 10;
+
 	POINT bulletPos = { 0, };
 	bulletPos.y = rectBody.top;
-	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
+	bulletPos.y = rectBody.top;
+	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);	
 
 	Vector2 unitVector = Vector2::Forward();
-	unitVector = Rotate(unitVector, -45);
+	unitVector = Rotate(unitVector, -50);
 	for (int i = 0; i < 11; ++i)
 	{
-		subBullets->CreateBullet(bulletPos, 1, 10, unitVector, true);
-		unitVector = Rotate(unitVector, 9);
+		subBullets->CreateBullet(bulletPos, bulletData, unitVector, true);
+		unitVector = Rotate(unitVector, 10);
+	}
+
+	if (--skillCount <= 0)
+	{
+		skillCount = 0;
+		crntSkill = Skill::Empty;
 	}
 }
+void Player::FireByCircle()
+{
+	POINT bulletPos = GetPosCenter();
+	BulletData bulletData;
+	bulletData.bulletType = bulletSubType;
+	bulletData.damage = 1;
+	bulletData.speed = 10;
+
+	Vector2 unitVector = Vector2::Forward();
+	for (int i = 0; i < 18; ++i)
+	{
+		subBullets->CreateBullet(bulletPos, bulletData, unitVector, true);
+		unitVector = Rotate(unitVector, 20);
+	}
+
+	if (--skillCount <= 0)
+	{
+		skillCount = 0;
+		crntSkill = Skill::Empty;
+	}
+}
+
 void Player::UseSkill(Skill skill)
 {
+	if (crntSkill != Skill::Empty)
+	{
+		return;
+	}
+
+	crntSkill = skill;
 	switch (skill)
 	{
 	case Skill::Sector:
-		ShotBySector();
+		skillCount = 5;
+		break;
+	case Skill::Circle:
+		skillCount = 5;
 		break;
 	}
 }

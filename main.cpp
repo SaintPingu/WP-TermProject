@@ -44,8 +44,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	hWnd = CreateWindow(lpszClass,
 		lpszWindowName,
 		WS_OVERLAPPED | WS_SYSMENU,
-		0,
-		0,
+		300,
+		300,
 		WINDOWSIZE_X,
 		WINDOWSIZE_Y,
 		NULL,
@@ -88,20 +88,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		bkground.Load(L"background.png");
 		GetClientRect(hWnd, &rectWindow);
 		moltres.Load(_T("sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,35 });
-		moltres.ScaleImage(2, 2);
-		bullet.Load(_T("sprite_bullet.png"), { 18, 18 }, { 5, 2 }, { 10, 16 });
 		enemies = new EnemyController(rectWindow);
 		effects = new EffectManager();
 		PlayerData playerData;
 		playerData.hp = 10;
 		playerData.speed = 5;
-		player = new Player(hWnd, rectWindow, moltres, 1.5f, 1.5f, { 450, 800 }, playerData);
+		player = new Player(hWnd, rectWindow, moltres, 1, 1, { 200, 500 }, playerData);
 
 		gameData.stage = Stage::Electric;
 
 		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
 		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
-		SetTimer(hWnd, TIMERID_SHOOT_BULLET, ELAPSE_SHOOT_BULLET, T_ShotBullet);
+		SetTimer(hWnd, TIMERID_SHOOT_BULLET, ELAPSE_SHOOT_BULLET, T_FireBullet);
 		SetTimer(hWnd, TIMERID_MOVE_OBJECT, ELAPSE_MOVE_OBJECT, T_MoveObject);
 		SetTimer(hWnd, TIMERID_EFFECT, ELAPSE_EFFECT, T_Effect);
 	}

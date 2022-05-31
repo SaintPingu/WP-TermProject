@@ -1,9 +1,6 @@
 #pragma once
 #include "image.h"
 
-#define EXPLODE_FIRE 0
-#define EXPLODE_ELEC 1
-
 class EffectManager {
 private:
 	class Effect : public ISprite {
@@ -18,11 +15,12 @@ private:
 
 	EffectImage explode_fire;
 	EffectImage explode_elec;
+	EffectImage explode_water;
 
 	std::vector<Effect> effects;
 public:
 	EffectManager();
 	void Paint(HDC hdc) const;
-	void CreateEffect(int id, POINT pos);
+	void CreateEffect(POINT pos, Type type);
 	void Animate();
 };

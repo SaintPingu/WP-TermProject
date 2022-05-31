@@ -19,16 +19,22 @@ private:
 	PlayerData data;
 	PlayerBullet* bullets = nullptr;
 	PlayerBullet* subBullets = nullptr;
+	Type bulletType = Type::Empty;
+	Type bulletSubType = Type::Empty;
 	Vector2 posDest = { 0, };
 	Vector2 vectorMove = { 0, };
 	float alpha = 0;
+
+	Skill crntSkill = Skill::Empty;
+	int skillCount = 0;
 
 	Pokemon pokemon;
 	SubPokemon subPokemon;
 	ObjectImage img_subPokemon[3];
 
 	void SetPosDest() override;
-	void ShotBySector();
+	void FireBySector();
+	void FireByCircle();
 public:
 	Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data);
 	void Paint(HDC hdc);
@@ -40,7 +46,7 @@ public:
 	Vector2 CheckCollideWindow(Vector2 pos) const;
 
 	void Animate() override;
-	void Shot();
+	void Fire();
 	void MoveBullets();
 	void GetDamage(int damage);
 

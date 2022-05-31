@@ -41,34 +41,9 @@ void Image::PaintRotation(HDC hdc, Vector2 vPoints[3]) const
 	SelectObject(memDCObject, hBitmap);
 
 	POINT points[3] = { vPoints[0], vPoints[1], vPoints[2] };
-
-	RECT rectDraw = { 0, };
-	rectDraw.left = points[0].x;
-	rectDraw.right = points[0].x;
-	rectDraw.top = points[0].y;
-	rectDraw.bottom = points[0].y;
-
-	for (int i = 1; i < 3; ++i)
-	{
-		if (rectDraw.left > points[i].x)
-		{
-			rectDraw.left = points[i].x;
-		}
-		else if (rectDraw.right < points[i].x)
-		{
-			rectDraw.right = points[i].x;
-		}
-		if (rectDraw.top > points[i].y)
-		{
-			rectDraw.top = points[i].y;
-		}
-		else if (rectDraw.bottom < points[i].y)
-		{
-			rectDraw.bottom = points[i].y;
-		}
-	}
-	int wDest = (rectDraw.right - rectDraw.left) * 2;
-	int hDest = (rectDraw.bottom - rectDraw.top) * 2;
+	RECT rectDraw = GetRotatedBody(vPoints);
+	int wDest = rectDraw.right - rectDraw.left;
+	int hDest = rectDraw.bottom - rectDraw.top;
 
 	RECT rectFill = { 0,0,rectImage.right + rectImage.bottom, rectImage.right  + rectImage.bottom};
 	FillRect(memDCBack, &rectFill, transBrush);

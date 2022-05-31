@@ -298,12 +298,17 @@ void Range::Fire()
 	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
 	bulletPos.y = rectBody.bottom;
 
+	BulletData bulletData;
+	bulletData.bulletType = GetType();
+	bulletData.damage = 1;
+	bulletData.speed = 4;
+
 	Vector2 unitVector = { 0, 1 };
-	enemies->CreateBullet(bulletPos, 1, 6, unitVector);
+	enemies->CreateBullet(bulletPos, bulletData, unitVector);
 	unitVector = Rotate(unitVector, 20);
-	enemies->CreateBullet(bulletPos, 1, 6, unitVector);
+	enemies->CreateBullet(bulletPos, bulletData, unitVector);
 	unitVector = Rotate(unitVector, -40);
-	enemies->CreateBullet(bulletPos, 1, 6, unitVector);
+	enemies->CreateBullet(bulletPos, bulletData, unitVector);
 }
 
 
@@ -317,6 +322,7 @@ EnemyController::EnemyController(const RECT& rectWindow)
 	image_beedrill.Load(L"sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
 	image_zapdos.Load(L"sprite_zapdos.png", { 58,58 }, { 12,12 }, { 36,46 });
 	image_zapdos_bullet.Load(L"bullet_zapdos.png", { 14,14 });
+	image_zapdos_bullet.ScaleImage(0.8f, 0.8f);
 	
 	bullets = new EnemyBullet(rectWindow, image_zapdos_bullet);
 }
@@ -336,8 +342,9 @@ void EnemyController::CreateMelee()
 	switch (gameData.stage)
 	{
 	case Stage::Electric:
+		data.type = Type::Elec;
 		data.hp = 4;
-		data.speed = 3;
+		data.speed = 1.5f;
 		data.atkDelay = 1000;
 		data.damage = 2;
 		data.frameNum_Idle = 0;
@@ -355,7 +362,7 @@ void EnemyController::CreateMelee()
 		switch (gameData.stage)
 		{
 		case Stage::Electric:
-			Melee* enemy = new Melee(image_beedrill, 1.5f, 1.5f, { xPos, yPos }, data);
+			Melee* enemy = new Melee(image_beedrill, 1, 1, { xPos, yPos }, data);
 			enemies.emplace_back(enemy);
 			break;
 		}
@@ -376,7 +383,8 @@ void EnemyController::CreateRange()
 	switch (gameData.stage)
 	{
 	case Stage::Electric:
-		data.hp = 2;
+		data.type = Type::Elec;
+		data.hp = 6;
 		data.speed = 1;
 		data.atkDelay = 2000;
 		data.damage = 1;
@@ -390,7 +398,7 @@ void EnemyController::CreateRange()
 
 	for (int i = 0; i < createCount; ++i)
 	{
-		data.maxYPos = (rand() % 200) + 100;
+		data.maxYPos = (rand() % 100) + 50;
 		float xPos = (rand() % (WINDOWSIZE_X - 100)) + 50;
 		float yPos = -(rand() % 100);
 		switch (gameData.stage)
@@ -450,13 +458,13 @@ void EnemyController::CheckAtkDelay()
 		enemy->CheckAtkDelay();
 	}
 }
-void EnemyController::CreateBullet(POINT center, int damage, int speed, Vector2 unitVector, bool isRotateImg)
+void EnemyController::CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg)
 {
-	bullets->CreateBullet(center, damage, speed, unitVector, isRotateImg);
+	bullets->CreateBullet(center, data, unitVector, isRotateImg);
 }
-void EnemyController::CreateBullet(POINT center, int damage, int speed, Dir dir)
+void EnemyController::CreateBullet(POINT center, const BulletData& data, Dir dir)
 {
-	bullets->CreateBullet(center, damage, speed, dir);
+	bullets->CreateBullet(center, data, dir);
 }
 void EnemyController::MoveBullets()
 {

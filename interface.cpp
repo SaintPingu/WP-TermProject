@@ -34,6 +34,9 @@ void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData)
 	case _T('W'):
 		player->UseSkill(Skill::Sector);
 		break;
+	case _T('E'):
+		player->UseSkill(Skill::Circle);
+		break;
 	}
 
 	if (KEYDOWN(KEY_LEFT))

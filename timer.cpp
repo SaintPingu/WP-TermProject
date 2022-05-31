@@ -25,9 +25,9 @@ void CALLBACK T_MovePlayer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 	player->Move(hWnd, TIMERID_MOVE_PLAYER);
 }
 
-void CALLBACK T_ShotBullet(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+void CALLBACK T_FireBullet(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
-	player->Shot();
+	player->Fire();
 }
 
 void CALLBACK T_MoveObject(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
