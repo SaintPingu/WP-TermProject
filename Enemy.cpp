@@ -1,18 +1,15 @@
 #include "stdafx.h"
 #include "enemy.h"
 #include "player.h"
+#include "bullet.h"
 #include "timer.h"
 #include "interface.h"
-
-#define FRAME_MAX_IDLE 3
-#define FRAME_NUM_IDLE 0
-#define FRAME_NUM_ATTACK 3
 
 extern GameData gameData;
 extern Player* player;
 Enemy::Enemy(ObjectImage& image, float scaleX, float scaleY, Vector2 pos, EnemyData data) : GameObject(image, scaleX, scaleY, pos)
 {
-	isMove = true;
+	StartMove();
 	this->data = data;
 }
 
@@ -72,8 +69,13 @@ Dir Enemy::GetDir() const
 	}
 }
 
-void Enemy::SetPosDest()
+void Melee::SetPosDest()
 {
+	if (IsMove() == false)
+	{
+		return;
+	}
+
 	Vector2 posCenter = GetPosCenter();
 	Vector2 vectorToPlayer = posCenter - player->GetPosCenter();
 
@@ -83,31 +85,62 @@ void Enemy::SetPosDest()
 
 	posDest = posCenter - (unitVector * data.speed);
 }
+void Range::SetPosDest()
+{
+	if (IsMove() == false)
+	{
+		return;
+	}
 
-void Enemy::ResetAttackDelay()
-{
-	data.crntDelay = data.attackDelay;
-}
-bool Enemy::IsDelayOver()
-{
-	return (data.crntDelay <= 0);
+	Vector2 posCenter = GetPosCenter();
+
+	unitVector = { 0, -1 };
+	posDest = posCenter - (unitVector * data.speed);
+	if (posDest.y > data.maxYPos)
+	{
+		StopMove();
+	}
 }
 
-void Enemy::Paint(HDC hdc)
+void Enemy::ResetAtkDelay()
 {
-	RECT rectImage = GetRectImage(GetImage(), frame, GetSpriteRow());
+	data.crnt_atkDelay = data.atkDelay;
+}
+bool Enemy::IsAtkDelayClear()
+{
+	return (data.crnt_atkDelay <= 0);
+}
+
+void Enemy::Paint(HDC hdc, int spriteRow)
+{
+	RECT rectImage = GetRectImage(GetImage(), frame, spriteRow);
 	GameObject::Paint(hdc, &rectImage);
+}
+void Melee::Paint(HDC hdc)
+{
+	int spriteRow = GetSpriteRow();
+	Enemy::Paint(hdc, spriteRow);
+}
+void Range::Paint(HDC hdc)
+{
+	int spriteRow = 0;
+	Enemy::Paint(hdc, spriteRow);
 }
 
 void Enemy::Move()
 {
 	if (IsMove() == false)
 	{
-		data.crntDelay -= ELAPSE_MOVE_OBJECT;
-		if (IsDelayOver() == true)
-		{
-			isMove = true;
-		}
+		return;
+	}
+
+	SetPosDest();
+	SetPos(posDest);
+}
+void Melee::Move()
+{
+	if (IsMove() == false)
+	{
 		return;
 	}
 	else if (CheckCollidePlayer() == true)
@@ -117,9 +150,17 @@ void Enemy::Move()
 	}
 
 	SetPosDest();
-
 	SetPos(posDest);
+}
+void Range::Move()
+{
+	if (IsMove() == false)
+	{
+		return;
+	}
 
+	SetPosDest();
+	SetPos(posDest);
 }
 
 int Enemy::GetSpriteRow()
@@ -173,40 +214,40 @@ void Enemy::Animate()
 	switch (GetAction())
 	{
 	case Action::Idle:
-		if (frame >= FRAME_MAX_IDLE)
+		if (frame > data.frameNum_IdleMax)
 		{
 			isRevFrame = true;
 			--frame;
 		}
-		else if (frame < FRAME_NUM_IDLE)
+		else if (frame < data.frameNum_Idle)
 		{
 			isRevFrame = false;
 			++frame;
 		}
 		break;
 	case Action::Attack:
-		if (frame > FRAME_NUM_ATTACK + 1)
+		if (frame > data.frameNum_AtkMax)
 		{
 			isRevFrame = true;
 			--frame;
 		}
-		else if (frame < FRAME_NUM_ATTACK)
+		else if (frame < data.frameNum_AtkRev)
 		{
 			isRevFrame = false;
-			SetAction(Action::Idle, FRAME_NUM_IDLE);
+			SetAction(Action::Idle, data.frameNum_Idle);
 		}
 		break;
 	}
 }
 
-bool Enemy::CheckCollidePlayer()
+bool Melee::CheckCollidePlayer()
 {
 	RECT rectBody = GetRectBody();
 	if (player->IsCollide(rectBody) == true)
 	{
 		StopMove();
-		SetAction(Action::Attack, FRAME_NUM_ATTACK);
-		ResetAttackDelay();
+		SetAction(Action::Attack, data.frameNum_Atk);
+		ResetAtkDelay();
 
 		return true;
 	}
@@ -223,37 +264,138 @@ bool Enemy::GetDamage(int damage)
 	return false;
 }
 
-
-
-
-
-
-
-
-EnemyController::EnemyController()
+void Melee::CheckAtkDelay()
 {
-	Image_beedrill.Load(L"sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
+	if (IsMove() == false)
+	{
+		data.crnt_atkDelay -= ELAPSE_MOVE_OBJECT;
+		if (data.crnt_atkDelay <= 0)
+		{
+			StartMove();
+		}
+	}
+}
+void Range::CheckAtkDelay()
+{
+	if (IsMove() == false)
+	{
+		data.crnt_atkDelay -= ELAPSE_MOVE_OBJECT;
+		if (IsAtkDelayClear() == true)
+		{
+			Fire();
+			ResetAtkDelay();
+		}
+	}
+}
+
+extern EnemyController* enemies;
+void Range::Fire()
+{
+	SetAction(Action::Attack, data.frameNum_Atk);
+
+	RECT rectBody = GetRectBody();
+	POINT bulletPos = { 0, };
+	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
+	bulletPos.y = rectBody.bottom;
+
+	enemies->CreateBullet(bulletPos, Dir::LD, 1);
+	enemies->CreateBullet(bulletPos, Dir::RD, 1);
+	enemies->CreateBullet(bulletPos, Dir::Down, 1);
+}
+
+
+
+
+
+
+
+
+EnemyController::EnemyController(const RECT& rectWindow)
+{
+	image_beedrill.Load(L"sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
+	image_zapdos.Load(L"sprite_zapdos.png", { 58,58 }, { 12,12 }, { 36,46 });
+	image_zapdos_bullet.Load(L"bullet_zapdos.png", { 14,14 }, { 0, 0 }, { 12, 12 });
+	
+	bullets = new EnemyBullet(rectWindow, image_zapdos_bullet);
 }
 
 void EnemyController::CreateMelee()
 {
+	delay_Melee += ELAPSE_INVALIDATE;
+	if (delay_Melee < createDelay_Melee)
+	{
+		return;
+	}
+	delay_Melee = 0;
+
 	int createCount = 5;
 	EnemyData data;
 
+	switch (gameData.stage)
+	{
+	case Stage::Electric:
+		data.hp = 4;
+		data.speed = 3;
+		data.atkDelay = 1000;
+		data.damage = 2;
+		data.frameNum_Idle = 0;
+		data.frameNum_IdleMax = 2;
+		data.frameNum_Atk = 3;
+		data.frameNum_AtkMax = 4;
+		data.frameNum_AtkRev = 3;
+		break;
+	}
+
 	for (int i = 0; i < createCount; ++i)
 	{
-		float xPos = (rand() % (WINDOWSIZE_X - 50)) + 50;
+		float xPos = rand() % WINDOWSIZE_X;
 		float yPos = -(rand() % 100);
 		switch (gameData.stage)
 		{
 		case Stage::Electric:
-			data.hp = 3;
-			data.speed = 3;
-			data.attackDelay = 1000;
-			data.damage = 1;
-			Enemy* enemy = new Enemy(Image_beedrill, 1.5f, 1.5f, { xPos, yPos }, data);
-			enemies.emplace_back(*enemy);
-			delete enemy;
+			Melee* enemy = new Melee(image_beedrill, 1.5f, 1.5f, { xPos, yPos }, data);
+			enemies.emplace_back(enemy);
+			break;
+		}
+	}
+}
+void EnemyController::CreateRange()
+{
+	delay_Range += ELAPSE_INVALIDATE;
+	if (delay_Range < createDelay_Range)
+	{
+		return;
+	}
+	delay_Range = 0;
+
+	int createCount = 3;
+	EnemyData data;
+
+	switch (gameData.stage)
+	{
+	case Stage::Electric:
+		data.hp = 2;
+		data.speed = 1;
+		data.atkDelay = 2000;
+		data.damage = 1;
+		data.frameNum_Idle = 0;
+		data.frameNum_IdleMax = 2;
+		data.frameNum_Atk = 3;
+		data.frameNum_AtkMax = 4;
+		data.frameNum_AtkRev = 4;
+		break;
+	}
+
+	for (int i = 0; i < createCount; ++i)
+	{
+		data.maxYPos = (rand() % 200) + 100;
+		float xPos = (rand() % (WINDOWSIZE_X - 100)) + 50;
+		float yPos = -(rand() % 100);
+		switch (gameData.stage)
+		{
+		case Stage::Electric:
+			Range* enemy = new Range(image_zapdos, 1, 1, { xPos, yPos }, data, image_zapdos_bullet);
+			enemies.emplace_back(enemy);
 			break;
 		}
 	}
@@ -261,32 +403,33 @@ void EnemyController::CreateMelee()
 
 void EnemyController::Paint(HDC hdc)
 {
-	for (Enemy& enemy : enemies)
+	for (Enemy* enemy : enemies)
 	{
-		enemy.Paint(hdc);
+		enemy->Paint(hdc);
 	}
+	bullets->Paint(hdc);
 }
 void EnemyController::Move()
 {
-	for (Enemy& enemy : enemies)
+	for (Enemy* enemy : enemies)
 	{
-		enemy.Move();
+		enemy->Move();
 	}
 }
 void EnemyController::Animate()
 {
-	for (Enemy& enemy : enemies)
+	for (Enemy* enemy : enemies)
 	{
-		enemy.Animate();
+		enemy->Animate();
 	}
 }
 bool EnemyController::CheckHit(const RECT& rectSrc, int damage)
 {
 	for (size_t i = 0;i<enemies.size();++i)
 	{
-		if (enemies.at(i).IsCollide(rectSrc) == true)
+		if (enemies.at(i)->IsCollide(rectSrc) == true)
 		{
-			if (enemies.at(i).GetDamage(damage) == true)
+			if (enemies.at(i)->GetDamage(damage) == true)
 			{
 				enemies[i--] = enemies.back();
 				enemies.pop_back();
@@ -296,4 +439,20 @@ bool EnemyController::CheckHit(const RECT& rectSrc, int damage)
 	}
 
 	return false;
+}
+
+void EnemyController::CheckAtkDelay()
+{
+	for (Enemy* enemy : enemies)
+	{
+		enemy->CheckAtkDelay();
+	}
+}
+void EnemyController::CreateBullet(POINT center, Dir dir, int damage)
+{
+	bullets->CreateBullet(center, dir, damage, 6, false);
+}
+void EnemyController::MoveBullets()
+{
+	bullets->Move();
 }

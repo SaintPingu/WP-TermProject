@@ -1,7 +1,7 @@
 #pragma once
 #include "object.h"
 
-class BulletController;
+class PlayerBullet;
 
 typedef struct PlayerData {
 	int hp = 0;
@@ -18,7 +18,7 @@ private:
 
 	const RECT* rectWindow = nullptr;
 
-	BulletController* bulletController = nullptr;
+	PlayerBullet* bullets = nullptr;
 
 	void SetPosDest() override;
 public:

@@ -4,13 +4,16 @@
 #include "enemy.h"
 #include "effect.h"
 
+extern EnemyController* enemies;
 void CALLBACK T_Invalidate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	InvalidateRect(hWnd, NULL, FALSE);
+	enemies->CreateMelee();
+	enemies->CreateRange();
+	enemies->CheckAtkDelay();
 }
 
 extern Player* player;
-extern EnemyController* enemies;
 void CALLBACK T_Animate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	player->Animate();
@@ -30,11 +33,8 @@ void CALLBACK T_ShotBullet(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 void CALLBACK T_MoveObject(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	player->MoveBullets();
+	enemies->MoveBullets();
 	enemies->Move();
-}
-void CALLBACK T_CreateEnemy(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
-{
-	enemies->CreateMelee();
 }
 
 extern EffectManager* effects;

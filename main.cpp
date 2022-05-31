@@ -92,7 +92,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		GetClientRect(hWnd, &rectWindow);
 		moltres.Load(_T("sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,35 });
 		bullet.Load(_T("sprite_bullet.png"), { 18, 18 }, { 5, 2 }, { 10, 16 });
-		enemies = new EnemyController();
+		enemies = new EnemyController(rectWindow);
 		effects = new EffectManager();
 		PlayerData playerData;
 		playerData.hp = 10;
@@ -105,7 +105,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
 		SetTimer(hWnd, TIMERID_SHOOT_BULLET, ELAPSE_SHOOT_BULLET, T_ShotBullet);
 		SetTimer(hWnd, TIMERID_MOVE_OBJECT, ELAPSE_MOVE_OBJECT, T_MoveObject);
-		SetTimer(hWnd, TIMERID_CREATE_ENEMY, ELAPSE_CREATE_ENEMY, T_CreateEnemy);
 		SetTimer(hWnd, TIMERID_EFFECT, ELAPSE_EFFECT, T_Effect);
 	}
 	break;
@@ -140,7 +139,7 @@ void InitPaint(HWND hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBitma
 	memDC = CreateCompatibleDC(hdc);
 	hBitmap = CreateCompatibleBitmap(hdc, rectWindow.right, rectWindow.bottom);
 	SelectObject(memDC, hBitmap);
-	SelectObject(memDC, GetStockObject(WHITE_BRUSH));
+	SelectObject(memDC, GetStockObject(BLACK_BRUSH));
 	Rectangle(memDC, 0, 0, rectWindow.right, rectWindow.bottom);
 	SetStretchBltMode(hdc, COLORONCOLOR);
 	SetStretchBltMode(memDC, COLORONCOLOR);

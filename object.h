@@ -53,13 +53,19 @@ inline float GetRadius(float x, float y)
 class IControllable abstract {
 private:
 	virtual void SetPosDest() abstract;
-protected:
 	bool isMove = false;
 public:
 	virtual void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc) abstract;
 	virtual void Move(HWND hWnd, int timerID) abstract;
 	virtual void Stop(Dir dir) abstract;
-
+	inline void StartMove()
+	{
+		isMove = true;
+	}
+	inline void StopMove()
+	{
+		isMove = false;
+	}
 	inline bool IsMove() const
 	{
 		return isMove;
@@ -69,14 +75,20 @@ public:
 class IMovable abstract {
 private:
 	virtual void SetPosDest() abstract;
-protected:
 	bool isMove = false;
 public:
 	virtual void Move() abstract;
-	virtual void StopMove() abstract;
-
+	inline void StartMove()
+	{
+		isMove = true;
+	}
+	inline void StopMove()
+	{
+		isMove = false;
+	}
 	inline bool IsMove() const
 	{
 		return isMove;
 	}
+	
 };

@@ -14,18 +14,18 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 	vectorMove = { 0, };
 
 	alpha = 0;
-	isMove = false;
+	StopMove();
 
 	ObjectImage bulletImage;
 	bulletImage.Load(_T("sprite_bullet.png"), { 20,20 }, { 6,2 }, { 10,16 });
-	bulletController = new BulletController(rectWindow, bulletImage);
+	bullets = new PlayerBullet(rectWindow, bulletImage);
 }
 
 void Player::Paint(HDC hdc)
 {
 	RECT rectImage = GetRectImage(GetImage(), frame);
 	GameObject::Paint(hdc, &rectImage);
-	bulletController->Paint(hdc);
+	bullets->Paint(hdc);
 }
 
 void Player::SetPosDest()
@@ -96,19 +96,19 @@ void Player::SetDirection(Dir inputDir)
 	default:
 		return;
 	}
-	isMove = false;
+	StopMove();
 }
 
 void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 {
-	if (isMove == true && alpha > 0)
+	if (IsMove() == true && alpha > 0)
 	{
 		return;
 	}
 
 	SetPosDest();
 
-	if (isMove == false && alpha == 0)
+	if (IsMove() == false && alpha == 0)
 	{
 		frame = 0;
 		SetTimer(hWnd, timerID, elpase, timerProc);
@@ -117,7 +117,7 @@ void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 	{
 		alpha = 0.5f;
 	}
-	isMove = true;
+	StartMove();
 }
 
 void Player::Move(HWND hWnd, int timerID)
@@ -142,7 +142,7 @@ void Player::Move(HWND hWnd, int timerID)
 		else if (alpha > 1)
 		{
 			vectorMove = { 0, };
-			isMove = false;
+			StopMove();
 			alpha = 0;
 			KillTimer(hWnd, timerID);
 		}
@@ -236,18 +236,18 @@ void Player::Animate()
 void Player::Shot()
 {
 	RECT rectBody = GetRectBody();
-	POINT bulletPos;
+	POINT bulletPos = { 0, };
 	bulletPos.y = rectBody.top;
 
 	bulletPos.x = rectBody.left - 10;
-	bulletController->CreateBullet(bulletPos, Dir::Up);
+	bullets->CreateBullet(bulletPos, Dir::Up, 1, 10);
 	bulletPos.x = rectBody.right + 10;
-	bulletController->CreateBullet(bulletPos, Dir::Up);
+	bullets->CreateBullet(bulletPos, Dir::Up, 1, 10);
 }
 
 void Player::MoveBullets()
 {
-	bulletController->Move();
+	bullets->Move();
 }
 
 void Player::GetDamage(int damage)

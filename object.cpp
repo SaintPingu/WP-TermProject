@@ -26,7 +26,7 @@ void GameObject::Paint(HDC hdc, const RECT* rectImage)
 	image->Paint(hdc, rectBody, rectImage);
 	if (isShowHitbox == true)
 	{
-		FrameRect(hdc, &rectBody, (HBRUSH)GetStockObject(BLACK_BRUSH));
+		FrameRect(hdc, &rectBody, (HBRUSH)GetStockObject(WHITE_BRUSH));
 	}
 }
 
