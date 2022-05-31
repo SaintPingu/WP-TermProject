@@ -90,6 +90,7 @@ public:
 	void Animate();
 	bool CheckHit(const RECT& rectSrc, int damage);
 	void CheckAtkDelay();
-	void CreateBullet(POINT center, int damage, int speed, Vector2 unitVector);
+	void CreateBullet(POINT center, int damage, int speed, Vector2 unitVector, bool isRotate = false);
+	void CreateBullet(POINT center, int damage, int speed, Dir dir);
 	void MoveBullets();
 };

@@ -5,6 +5,8 @@ class BulletController abstract : public ISprite {
 protected:
 	class Bullet {
 	private:
+		bool isRotateImg = false;
+
 		int damage = 0;
 		int speed = 0;
 
@@ -17,9 +19,10 @@ protected:
 		Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed);
 	public:
 		Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed, Dir dir);
-		Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed, Vector2 unitVector);
+		Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed, Vector2 unitVector, bool isRotateImg);
+		~Bullet() {};
 
-		void Paint(HDC hdc, const ObjectImage& bulletImage) const;
+		void Paint(HDC hdc, const ObjectImage& bulletImage, const RECT& rectWindow) const;
 		bool Move(const RECT& rectWindow);
 
 		inline int GetDamage() const
@@ -55,7 +58,7 @@ public:
 	void Paint(HDC hdc) const;
 
 	void CreateBullet(POINT center, int damage, int speed, Dir dir);
-	void CreateBullet(POINT center, int damage, int speed, Vector2 unitVector);
+	void CreateBullet(POINT center, int damage, int speed, Vector2 unitVector, bool isRotateImg);
 
 	virtual void Move() abstract;
 };

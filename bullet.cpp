@@ -39,10 +39,11 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage,
 		break;
 	}
 }
-BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed, Vector2 unitVector) : Bullet(center, bulletSize, rectImage, damage, speed)
+BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed, Vector2 unitVector, bool isRotateImg) : Bullet(center, bulletSize, rectImage, damage, speed)
 {
 	this->dir = Dir::Empty;
 	this->unitVector = unitVector;
+	this->isRotateImg = isRotateImg;
 
 	rectBody.left = center.x - (bulletSize.x / 2);
 	rectBody.right = rectBody.left + bulletSize.x;
@@ -51,9 +52,18 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage,
 }
 
 
-void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage) const
+void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage, const RECT& rectWindow) const
 {
-	bulletImage.Paint(hdc, rectBody, &rectImage);
+	if (isRotateImg == false || dir != Dir::Empty)
+	{
+		bulletImage.Paint(hdc, rectBody, &rectImage);
+	}
+	else
+	{
+		Vector2 vPoints[3];
+		GetRotationPos(rectBody, unitVector, vPoints);
+		bulletImage.PaintRotation(hdc, vPoints);
+	}
 	//FrameRect(hdc, &rectBody, (HBRUSH)GetStockObject(WHITE_BRUSH));
 }
 bool BulletController::Bullet::Move(const RECT& rectWindow)
@@ -210,7 +220,7 @@ void BulletController::Paint(HDC hdc) const
 {
 	for (const Bullet* bullet : bullets)
 	{
-		bullet->Paint(hdc, bulletImage);
+		bullet->Paint(hdc, bulletImage, *rectWindow);
 	}
 }
 
@@ -220,10 +230,10 @@ void BulletController::CreateBullet(POINT center, int damage, int speed, Dir dir
 	Bullet* bullet = new Bullet(center, bulletSize, rectImage, damage, speed, dir);
 	bullets.emplace_back(bullet);
 }
-void BulletController::CreateBullet(POINT center, int damage, int speed, Vector2 unitVector)
+void BulletController::CreateBullet(POINT center, int damage, int speed, Vector2 unitVector, bool isRotateImg)
 {
 	RECT rectImage = GetRectImage(Dir::Up);
-	Bullet* bullet = new Bullet(center, bulletSize, rectImage, damage, speed, unitVector);
+	Bullet* bullet = new Bullet(center, bulletSize, rectImage, damage, speed, unitVector, isRotateImg);
 	bullets.emplace_back(bullet);
 }
 

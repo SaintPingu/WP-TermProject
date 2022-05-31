@@ -1,4 +1,10 @@
 #pragma once
+// Rotate Rectangle -> Get 3 Point
+// Draw at memDC (Transparent)
+// PlgBlt at hdc (Rotation)
+
+static const COLORREF transRGB = RGB(145, 91, 145);
+const HBRUSH transBrush = CreateSolidBrush(transRGB);
 
 class Image abstract {
 private:
@@ -14,6 +20,7 @@ protected:
 	float scaleY = 0;
 
 public:
+	void PaintRotation(HDC hdc, Vector2 vPoints[3]) const;
 	virtual void ScaleImage(float scaleX, float scaleY) abstract;
 
 	inline RECT GetRectImage() const

@@ -271,8 +271,10 @@ void Player::Shot()
 	bulletPos.x = rectBody.right + 10;
 	bullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
 
-	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
-	subBullets->CreateBullet(bulletPos, 1, 10, { 0, -1 });
+	{
+		bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
+		subBullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
+	}
 }
 
 void Player::MoveBullets()

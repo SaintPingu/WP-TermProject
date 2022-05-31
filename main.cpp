@@ -1,9 +1,4 @@
 #include "stdafx.h"
-#include <Windows.h>
-#include <gdiplus.h>
-#include <time.h>
-#include <atlImage.h>
-#include <cassert>
 #include "interface.h"
 #include "enemy.h"
 #include "player.h"
@@ -84,11 +79,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	static RECT rectWindow;
 	static ObjectImage moltres;
 	static ObjectImage bullet;
+	static CImage bkground;
 
 	switch (uMsg)
 	{
 	case WM_CREATE:
 	{
+		bkground.Load(L"background.png");
 		GetClientRect(hWnd, &rectWindow);
 		moltres.Load(_T("sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,35 });
 		moltres.ScaleImage(2, 2);
@@ -114,6 +111,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 	{
 		InitPaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
+		bkground.Draw(memDC, rectWindow);
 		player->Paint(memDC);
 		enemies->Paint(memDC);
 		effects->Paint(memDC);
@@ -140,7 +138,7 @@ void InitPaint(HWND hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBitma
 	memDC = CreateCompatibleDC(hdc);
 	hBitmap = CreateCompatibleBitmap(hdc, rectWindow.right, rectWindow.bottom);
 	SelectObject(memDC, hBitmap);
-	SelectObject(memDC, GetStockObject(BLACK_BRUSH));
+	SelectObject(memDC, GetStockObject(WHITE_BRUSH));
 	Rectangle(memDC, 0, 0, rectWindow.right, rectWindow.bottom);
 	SetStretchBltMode(hdc, COLORONCOLOR);
 	SetStretchBltMode(memDC, COLORONCOLOR);

@@ -312,7 +312,6 @@ void Range::Fire()
 
 
 
-
 EnemyController::EnemyController(const RECT& rectWindow)
 {
 	image_beedrill.Load(L"sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
@@ -451,9 +450,13 @@ void EnemyController::CheckAtkDelay()
 		enemy->CheckAtkDelay();
 	}
 }
-void EnemyController::CreateBullet(POINT center, int damage, int speed, Vector2 unitVector)
+void EnemyController::CreateBullet(POINT center, int damage, int speed, Vector2 unitVector, bool isRotateImg)
 {
-	bullets->CreateBullet(center, damage, speed, unitVector);
+	bullets->CreateBullet(center, damage, speed, unitVector, isRotateImg);
+}
+void EnemyController::CreateBullet(POINT center, int damage, int speed, Dir dir)
+{
+	bullets->CreateBullet(center, damage, speed, dir);
 }
 void EnemyController::MoveBullets()
 {

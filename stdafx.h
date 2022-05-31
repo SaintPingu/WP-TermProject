@@ -3,11 +3,16 @@
 #pragma warning(disable:4244)
 #include <Windows.h>
 #include <math.h>
-#include <gdiplus.h>
+#include <time.h>
 #include <tchar.h>
+#include <gdiplus.h>
+#include <atlImage.h>
 #include <vector>
 #include <cassert>
 
+
+#define WINDOWSIZE_X 900
+#define WINDOWSIZE_Y 1200
 
 #define	WIN32_LEAN_AND_MEAN
 #undef WINVER
@@ -181,7 +186,47 @@ struct Vector2 {
 	{
 		return { static_cast<float>(rhs.x), static_cast<float>(rhs.y) };
 	}
+
+	inline Vector2 Normalized()
+	{
+		return *this / GetNorm(*this);
+	}
+	inline float Norm()
+	{
+		return sqrtf(x * x + y * y);
+	}
+	static inline float GetNorm(Vector2 v)
+	{
+		return sqrtf(v.x * v.x + v.y * v.y);
+	}
+	static inline constexpr float Dot(const Vector2 lhs, const Vector2 rhs)
+	{
+		return (lhs.x * rhs.x) + (lhs.y * rhs.y);
+	}
+	static inline float GetTheta(const Vector2 lhs, const Vector2 rhs)
+	{
+		float dot = Vector2::Dot(lhs, rhs);
+		return acos(dot / (Vector2::GetNorm(lhs) * Vector2::GetNorm(rhs)));
+	}
+
+	static inline constexpr Vector2 Forward()
+	{
+		return { 0, -1 };
+	}
+	static inline constexpr Vector2 Back()
+	{
+		return { 0, 1 };
+	}
+	static inline constexpr Vector2 Left()
+	{
+		return { -1, 0 };
+	}
+	static inline constexpr Vector2 Right()
+	{
+		return { 1, 0 };
+	}
 };
 
 Vector2 Rotate(Vector2 vector, float degree);
 bool OutOfRange(const RECT& rect, const RECT& rectRange);
+void GetRotationPos(const RECT& rect, const Vector2& unitVector, Vector2 vPoints[3]);
