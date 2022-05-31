@@ -4,14 +4,16 @@
 #include "player.h"
 #include "effect.h"
 
-BulletController::Bullet::Bullet(POINT center, POINT bulletSize, Dir dir, RECT rectImage, int damage, int speed)
+BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed)
 {
-	this->dir = dir;
 	this->rectImage = rectImage;
 	this->posCenter = center;
 	this->damage = damage;
 	this->speed = speed;
-
+}
+BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed, Dir dir) : Bullet(center, bulletSize, rectImage, damage, speed)
+{
+	this->dir = dir;
 	switch (dir)
 	{
 	case Dir::Up:
@@ -37,6 +39,18 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, Dir dir, RECT r
 		break;
 	}
 }
+BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed, Vector2 unitVector) : Bullet(center, bulletSize, rectImage, damage, speed)
+{
+	this->dir = Dir::Empty;
+	this->unitVector = unitVector;
+
+	rectBody.left = center.x - (bulletSize.x / 2);
+	rectBody.right = rectBody.left + bulletSize.x;
+	rectBody.top = center.y - (bulletSize.y / 2);
+	rectBody.bottom = rectBody.top + bulletSize.y;
+}
+
+
 void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage) const
 {
 	bulletImage.Paint(hdc, rectBody, &rectImage);
@@ -47,6 +61,10 @@ bool BulletController::Bullet::Move(const RECT& rectWindow)
 	int moveY = 0;
 	switch (dir)
 	{
+	case Dir::Empty:
+		moveX = unitVector.x * speed;
+		moveY = unitVector.y * speed;
+		break;
 	case Dir::Left:
 		moveX = -speed;
 		break;
@@ -89,6 +107,12 @@ bool BulletController::Bullet::Move(const RECT& rectWindow)
 
 	switch (dir)
 	{
+	case Dir::Empty:
+		if (OutOfRange(rectBody, rectWindow) == true)
+		{
+			return false;
+		}
+		break;
 	case Dir::Left:
 	case Dir::LU:
 	case Dir::LD:
@@ -138,6 +162,7 @@ RECT BulletController::GetRectImage(Dir dir) const
 	int frame = 0;
 	switch (dir)
 	{
+	case Dir::Empty:
 	case Dir::Up:
 		frame = 0;
 		break;
@@ -188,18 +213,16 @@ void BulletController::Paint(HDC hdc) const
 	}
 }
 
-void BulletController::CreateBullet(POINT center, Dir dir, int damage, int speed, bool hasFrame)
+void BulletController::CreateBullet(POINT center, int damage, int speed, Dir dir)
 {
-	RECT rectImage;
-	if (hasFrame == true)
-	{
-		rectImage = GetRectImage(dir);
-	}
-	else
-	{
-		rectImage = GetRectImage(Dir::Up);
-	}
-	Bullet* bullet = new Bullet(center, bulletSize, dir, rectImage, damage, speed);
+	RECT rectImage = GetRectImage(dir);
+	Bullet* bullet = new Bullet(center, bulletSize, rectImage, damage, speed, dir);
+	bullets.emplace_back(bullet);
+}
+void BulletController::CreateBullet(POINT center, int damage, int speed, Vector2 unitVector)
+{
+	RECT rectImage = GetRectImage(Dir::Up);
+	Bullet* bullet = new Bullet(center, bulletSize, rectImage, damage, speed, unitVector);
 	bullets.emplace_back(bullet);
 }
 
@@ -230,7 +253,7 @@ void EnemyBullet::Move()
 		if (player->IsCollide(bullets.at(i)->GetRect()) == true)
 		{
 			player->GetDamage(bullets.at(i)->GetDamage());
-			effects->CreateEffect(EXPLODE_FIRE, bullets[i]->GetPos());
+			effects->CreateEffect(EXPLODE_ELEC, bullets[i]->GetPos());
 			bullets[i--] = bullets.back();
 			bullets.pop_back();
 		}

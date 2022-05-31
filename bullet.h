@@ -7,12 +7,18 @@ protected:
 	private:
 		int damage = 0;
 		int speed = 0;
+
 		Dir dir = Dir::Empty;
+		Vector2 unitVector;
+
 		RECT rectBody = { 0, };
 		RECT rectImage;
 		POINT posCenter = { 0, };
+		Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed);
 	public:
-		Bullet(POINT center, POINT bulletSize, Dir dir, RECT rectImage, int damage, int speed);
+		Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed, Dir dir);
+		Bullet(POINT center, POINT bulletSize, RECT rectImage, int damage, int speed, Vector2 unitVector);
+
 		void Paint(HDC hdc, const ObjectImage& bulletImage) const;
 		bool Move(const RECT& rectWindow);
 
@@ -48,7 +54,8 @@ public:
 
 	void Paint(HDC hdc) const;
 
-	void CreateBullet(POINT center, Dir dir, int damage, int speed, bool hasFrame = true);
+	void CreateBullet(POINT center, int damage, int speed, Dir dir);
+	void CreateBullet(POINT center, int damage, int speed, Vector2 unitVector);
 
 	virtual void Move() abstract;
 };

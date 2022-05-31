@@ -298,9 +298,12 @@ void Range::Fire()
 	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
 	bulletPos.y = rectBody.bottom;
 
-	enemies->CreateBullet(bulletPos, Dir::LD, 1);
-	enemies->CreateBullet(bulletPos, Dir::RD, 1);
-	enemies->CreateBullet(bulletPos, Dir::Down, 1);
+	Vector2 unitVector = { 0, 1 };
+	enemies->CreateBullet(bulletPos, 1, 6, unitVector);
+	unitVector = Rotate(unitVector, 20);
+	enemies->CreateBullet(bulletPos, 1, 6, unitVector);
+	unitVector = Rotate(unitVector, -40);
+	enemies->CreateBullet(bulletPos, 1, 6, unitVector);
 }
 
 
@@ -448,9 +451,9 @@ void EnemyController::CheckAtkDelay()
 		enemy->CheckAtkDelay();
 	}
 }
-void EnemyController::CreateBullet(POINT center, Dir dir, int damage)
+void EnemyController::CreateBullet(POINT center, int damage, int speed, Vector2 unitVector)
 {
-	bullets->CreateBullet(center, dir, damage, 6, false);
+	bullets->CreateBullet(center, damage, speed, unitVector);
 }
 void EnemyController::MoveBullets()
 {

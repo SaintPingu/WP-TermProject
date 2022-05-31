@@ -2,6 +2,7 @@
 #include "image.h"
 
 #define EXPLODE_FIRE 0
+#define EXPLODE_ELEC 1
 
 class EffectManager {
 private:
@@ -16,6 +17,7 @@ private:
 	};
 
 	EffectImage explode_fire;
+	EffectImage explode_elec;
 
 	std::vector<Effect> effects;
 public:

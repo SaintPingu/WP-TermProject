@@ -240,9 +240,9 @@ void Player::Shot()
 	bulletPos.y = rectBody.top;
 
 	bulletPos.x = rectBody.left - 10;
-	bullets->CreateBullet(bulletPos, Dir::Up, 1, 10);
+	bullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
 	bulletPos.x = rectBody.right + 10;
-	bullets->CreateBullet(bulletPos, Dir::Up, 1, 10);
+	bullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
 }
 
 void Player::MoveBullets()

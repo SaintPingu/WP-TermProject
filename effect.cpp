@@ -5,6 +5,8 @@ EffectManager::EffectManager()
 {
 	explode_fire.Load(_T("explode_fire.png"), { 56, 56 }, 8);
 	explode_fire.ScaleImage(0.7f, 0.7f);
+	explode_elec.Load(_T("explode_elec.png"), { 81, 73 }, 8);
+	explode_elec.ScaleImage(0.5f, 0.5f);
 }
 EffectManager::Effect::Effect(const EffectImage& effectImage, POINT pos)
 {
@@ -26,6 +28,9 @@ void EffectManager::CreateEffect(int id, POINT pos)
 	{
 	case EXPLODE_FIRE:
 		effects.emplace_back(explode_fire, pos);
+		break;
+	case EXPLODE_ELEC:
+		effects.emplace_back(explode_elec, pos);
 		break;
 	}
 }

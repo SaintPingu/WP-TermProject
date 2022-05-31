@@ -19,6 +19,7 @@ enum class Stage { Empty = 0, Fire, Water, Electric, Dark };
 enum class Action { Idle = 0, Attack, Hurt, Death };
 
 #define PI 3.141592
+#define DEGREE_TO_RADIAN(degree) ((PI/180) * (degree))
 #define RADIAN_TO_DEGREE(radian) ((180/PI) * (radian))
 
 enum class Dir { Empty = 0, Left, Right, Up, Down, LD, LU, RD, RU };
@@ -181,3 +182,6 @@ struct Vector2 {
 		return { static_cast<float>(rhs.x), static_cast<float>(rhs.y) };
 	}
 };
+
+Vector2 Rotate(Vector2 vector, float degree);
+bool OutOfRange(const RECT& rect, const RECT& rectRange);
