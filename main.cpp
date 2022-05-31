@@ -78,6 +78,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	static RECT rectWindow;
 	static ObjectImage moltres;
+	static ObjectImage articuno;
+	static ObjectImage thunder;
 	static ObjectImage bullet;
 	static CImage bkground;
 
@@ -88,12 +90,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		bkground.Load(L"background.png");
 		GetClientRect(hWnd, &rectWindow);
 		moltres.Load(_T("sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,35 });
+		articuno.Load(_T("sprite_articuno.png"), { 69, 69 }, { 29, 28 }, { 13,29 });
+		thunder.Load(_T("sprite_thunder.png"), { 53, 48 }, { 19, 10 }, { 17,24 });
 		enemies = new EnemyController(rectWindow);
 		effects = new EffectManager();
 		PlayerData playerData;
 		playerData.hp = 10;
 		playerData.speed = 5;
-		player = new Player(hWnd, rectWindow, moltres, 1, 1, { 200, 500 }, playerData);
+		player = new Player(hWnd, rectWindow, thunder, 1, 1, { 200, 500 }, playerData);
 
 		gameData.stage = Stage::Electric;
 

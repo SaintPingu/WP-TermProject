@@ -20,18 +20,27 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 	img_subPokemon[static_cast<int>(SubPokemon::Squirtle)].Load(L"sub_squirtle.png", { 17,24 });
 	img_subPokemon[static_cast<int>(SubPokemon::Charmander)].Load(L"sub_charmander.png", { 18,23 });
 
-	pokemon = Pokemon::Moltres;
+	pokemon = Pokemon::Thunder;
 	ObjectImage bulletImage;
-	bulletImage.Load(_T("bullet_fire.png"), { 11,16 });
-	bulletImage.ScaleImage(0.9f, 0.9f);
-	bullets = new PlayerBullet(rectWindow, bulletImage);
 
 	switch (pokemon)
 	{
 	case Pokemon::Moltres:
-		bulletType = Type::Fire;
+		type = Type::Fire;
+		bulletImage.Load(_T("bullet_fire.png"), { 11,16 });
+		bulletImage.ScaleImage(0.9f, 0.9f);
+		break;
+	case Pokemon::Articuno:
+		type = Type::Water;
+		bulletImage.Load(_T("bullet_ice.png"), { 7,15 });
+		bulletImage.ScaleImage(0.9f, 0.9f);
+		break;
+	case Pokemon::Thunder:
+		type = Type::Elec;
+		bulletImage.Load(_T("bullet_elec_main.png"), { 5,16 });
 		break;
 	}
+	bullets = new PlayerBullet(rectWindow, bulletImage);
 
 	ObjectImage subBulletImage;
 	switch (subPokemon)
@@ -40,19 +49,19 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 		subBulletImage.Load(_T("bullet_elec.png"), { 11,30 });
 		subBulletImage.ScaleImage(0.7f, 0.7f);
 		subBullets = new PlayerBullet(rectWindow, subBulletImage);
-		bulletSubType = Type::Elec;
+		subType = Type::Elec;
 		break;
 	case SubPokemon::Charmander:
 		subBulletImage.Load(_T("bullet_flame.png"), { 8,16 });
 		subBulletImage.ScaleImage(0.7f, 0.7f);
 		subBullets = new PlayerBullet(rectWindow, subBulletImage);
-		bulletSubType = Type::Fire;
+		subType = Type::Fire;
 		break;
 	case SubPokemon::Squirtle:
-		subBulletImage.Load(_T("bullet_ice.png"), { 7,15 });
-		subBulletImage.ScaleImage(0.7f, 0.7f);
+		subBulletImage.Load(_T("bullet_water.png"), { 8,24 });
+		subBulletImage.ScaleImage(0.8f, 0.7f);
 		subBullets = new PlayerBullet(rectWindow, subBulletImage);
-		bulletSubType = Type::Water;
+		subType = Type::Water;
 		break;
 	}
 	
@@ -292,7 +301,7 @@ void Player::Fire()
 {
 	RECT rectBody = GetRectBody();
 	BulletData bulletData;
-	bulletData.bulletType = bulletType;
+	bulletData.bulletType = type;
 	bulletData.damage = 1;
 	bulletData.speed = 7;
 
@@ -303,7 +312,7 @@ void Player::Fire()
 	bulletPos.x = rectBody.right + 10;
 	bullets->CreateBullet(bulletPos, bulletData, Dir::Up);
 
-	bulletData.bulletType = bulletSubType;
+	bulletData.bulletType = subType;
 	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
 	subBullets->CreateBullet(bulletPos, bulletData, Dir::Up);
 
@@ -336,7 +345,7 @@ void Player::FireBySector()
 {
 	RECT rectBody = GetRectBody();
 	BulletData bulletData;
-	bulletData.bulletType = bulletSubType;
+	bulletData.bulletType = subType;
 	bulletData.damage = 1;
 	bulletData.speed = 10;
 
@@ -346,12 +355,21 @@ void Player::FireBySector()
 	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);	
 
 	Vector2 unitVector = Vector2::Forward();
-	unitVector = Rotate(unitVector, -50);
+	int startDegree = -10 - (skillCount * 10);
+	int rotationDegree = -(startDegree * 2) / 10;
+	unitVector = Rotate(unitVector, startDegree);
 	for (int i = 0; i < 11; ++i)
 	{
 		subBullets->CreateBullet(bulletPos, bulletData, unitVector, true);
-		unitVector = Rotate(unitVector, 10);
+		unitVector = Rotate(unitVector, rotationDegree);
 	}
+	/*unitVector = Rotate(unitVector, -50);
+	for (int i = 0; i < 11; ++i)
+	{
+		int randDegree = 8 + rand() % 4;
+		subBullets->CreateBullet(bulletPos, bulletData, unitVector, true);
+		unitVector = Rotate(unitVector, randDegree);
+	}*/
 
 	if (--skillCount <= 0)
 	{
@@ -363,11 +381,12 @@ void Player::FireByCircle()
 {
 	POINT bulletPos = GetPosCenter();
 	BulletData bulletData;
-	bulletData.bulletType = bulletSubType;
+	bulletData.bulletType = subType;
 	bulletData.damage = 1;
 	bulletData.speed = 10;
 
 	Vector2 unitVector = Vector2::Forward();
+	unitVector = Rotate(unitVector, skillCount * 6);
 	for (int i = 0; i < 18; ++i)
 	{
 		subBullets->CreateBullet(bulletPos, bulletData, unitVector, true);

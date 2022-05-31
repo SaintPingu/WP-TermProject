@@ -4,7 +4,7 @@
 class PlayerBullet;
 
 enum class Skill : int { Empty = 0, Identity, Sector, Circle, Ultimate };
-enum class Pokemon : int { Moltres = 0};
+enum class Pokemon : int { Moltres = 0, Articuno, Thunder};
 enum class SubPokemon : int { Pikachu = 0, Squirtle, Charmander };
 
 typedef struct PlayerData {
@@ -19,8 +19,8 @@ private:
 	PlayerData data;
 	PlayerBullet* bullets = nullptr;
 	PlayerBullet* subBullets = nullptr;
-	Type bulletType = Type::Empty;
-	Type bulletSubType = Type::Empty;
+	Type type = Type::Empty;
+	Type subType = Type::Empty;
 	Vector2 posDest = { 0, };
 	Vector2 vectorMove = { 0, };
 	float alpha = 0;
