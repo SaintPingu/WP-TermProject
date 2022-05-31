@@ -6,7 +6,7 @@ EffectManager::EffectManager()
 	explode_fire.Load(_T("explode_fire.png"), { 56, 56 }, 8);
 	explode_fire.ScaleImage(0.7f, 0.7f);
 	explode_elec.Load(_T("explode_elec.png"), { 81, 73 }, 8);
-	explode_elec.ScaleImage(0.5f, 0.5f);
+	explode_elec.ScaleImage(0.8f, 0.8f);
 }
 EffectManager::Effect::Effect(const EffectImage& effectImage, POINT pos)
 {

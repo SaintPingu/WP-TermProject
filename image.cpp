@@ -23,8 +23,6 @@ void Image::Paint(HDC hdc, const RECT& rectDraw, const RECT& rectImage) const
 {
 	HDC memDC = CreateCompatibleDC(hdc);
 
-	BITMAP bitmap;
-	GetObject(hBitmap, sizeof(bitmap), &bitmap);
 	SelectObject(memDC, hBitmap);
 
 	AlphaBlend(hdc, rectDraw.left, rectDraw.top, (rectDraw.right - rectDraw.left), (rectDraw.bottom - rectDraw.top),
@@ -33,25 +31,14 @@ void Image::Paint(HDC hdc, const RECT& rectDraw, const RECT& rectImage) const
 	
 	DeleteDC(memDC);
 }
-// memDC¿¡ Draw
-// plgblt
-// transparent
 void Image::PaintRotation(HDC hdc, Vector2 vPoints[3]) const
 {
-	static HDC memDCBack = CreateCompatibleDC(hdc);
-	static HDC memDCObject = CreateCompatibleDC(hdc);
-
-	BITMAP bitmap;
-	GetObject(hBitmap, sizeof(bitmap), &bitmap);
+	HDC memDCBack = CreateCompatibleDC(hdc);
+	HDC memDCObject = CreateCompatibleDC(hdc);
 
 	static HBITMAP hBitmapBack = CreateCompatibleBitmap(hdc, WINDOWSIZE_X, WINDOWSIZE_Y);
 	SelectObject(memDCBack, hBitmapBack);
-	RECT rectFill = { 0,0,WINDOWSIZE_X, WINDOWSIZE_Y };
-	FillRect(memDCBack, &rectFill, transBrush);
-
 	SelectObject(memDCObject, hBitmap);
-	AlphaBlend(memDCBack, 0, 0, bitmap.bmWidth, bitmap.bmHeight,
-		memDCObject, rectImage.left, rectImage.top, bitmap.bmWidth, bitmap.bmHeight, bFunction);
 
 	POINT points[3] = { vPoints[0], vPoints[1], vPoints[2] };
 
@@ -80,45 +67,27 @@ void Image::PaintRotation(HDC hdc, Vector2 vPoints[3]) const
 			rectDraw.bottom = points[i].y;
 		}
 	}
-	
-	PlgBlt(memDCBack, points, memDCBack, 0, 0, bitmap.bmWidth, bitmap.bmHeight, NULL, 0, 0);
+	int wDest = (rectDraw.right - rectDraw.left) * 2;
+	int hDest = (rectDraw.bottom - rectDraw.top) * 2;
 
-	int wDest = rectDraw.right - rectDraw.left;
-	int hDest = rectDraw.bottom - rectDraw.top;
-	FrameRect(hdc, &rectDraw, (HBRUSH)GetStockObject(BLACK_BRUSH));
+	RECT rectFill = { 0,0,rectImage.right + rectImage.bottom, rectImage.right  + rectImage.bottom};
+	FillRect(memDCBack, &rectFill, transBrush);
+	rectFill = rectDraw;
+	rectFill.right += wDest;
+	rectFill.bottom += hDest;
+	FillRect(memDCBack, &rectFill, transBrush);
+
+	AlphaBlend(memDCBack, 0, 0, rectImage.right, rectImage.bottom,
+		memDCObject, rectImage.left, rectImage.top, rectImage.right, rectImage.bottom, bFunction);
+
+	PlgBlt(memDCBack, points, memDCBack, 0, 0, rectImage.right, rectImage.bottom, NULL, 0, 0);
+
 	TransparentBlt(hdc, rectDraw.left, rectDraw.top, wDest, hDest, memDCBack, rectDraw.left, rectDraw.top, wDest, hDest, transRGB);
+	//FrameRect(hdc, &rectDraw, (HBRUSH)GetStockObject(BLACK_BRUSH));
 
+	DeleteDC(memDCBack);
+	DeleteDC(memDCObject);
 }
-//void Image::PaintRotation(HDC hdc, const RECT& rectWindow, Vector2 vPoints[3]) const
-//{
-//	HDC memDCObject = CreateCompatibleDC(hdc);
-//	HDC memDC = CreateCompatibleDC(hdc);
-//
-//	int width = (rectImage.right - rectImage.left);
-//	int height = (rectImage.bottom - rectImage.top);
-//	HBITMAP hBitmapDC = CreateCompatibleBitmap(hdc, width + height, width + height);
-//
-//	BITMAP bitmap;
-//	GetObject(hBitmap, sizeof(bitmap), &bitmap);
-//
-//	SelectObject(memDCObject, hBitmap);
-//	SelectObject(memDC, hBitmapDC);
-//
-//	FillRect(memDC, &rectWindow, transBrush);
-//
-//	AlphaBlend(memDC, 0, 0, width, height,
-//		memDCObject, rectImage.left, rectImage.top, width, height, bFunction);
-//
-//
-//	POINT points[3] = { vPoints[0], vPoints[1], vPoints[2] };
-//	PlgBlt(memDC, points, memDC, 0, 0, width, height, NULL, 0, 0);
-//
-//	TransparentBlt(hdc, 0, 0, rectWindow.right, rectWindow.bottom, memDC, 0, 0, rectWindow.right, rectWindow.bottom, transRGB);
-//
-//	DeleteDC(memDC);
-//	DeleteDC(memDCObject);
-//	DeleteObject(hBitmapDC);
-//}
 
 void ObjectImage::Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint, POINT bodySize)
 {

@@ -18,5 +18,5 @@ typedef struct tagGameData {
 
 void GameStart(HWND hWnd, GameData& data, Player& player);
 
-void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData, Player& player);
-void CheckKeyUp(HWND hWnd, const WPARAM& wParam, GameData& gameData, Player& player);
+void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData);
+void CheckKeyUp(HWND hWnd, const WPARAM& wParam, GameData& gameData);

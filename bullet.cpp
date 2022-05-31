@@ -54,7 +54,7 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage,
 
 void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage, const RECT& rectWindow) const
 {
-	if (isRotateImg == false || dir != Dir::Empty)
+	if (isRotateImg == false)
 	{
 		bulletImage.Paint(hdc, rectBody, &rectImage);
 	}

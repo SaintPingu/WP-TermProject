@@ -3,6 +3,7 @@
 
 class PlayerBullet;
 
+enum class Skill : int { Empty = 0, Identity, Sector, Circle, Ultimate };
 enum class Pokemon : int { Moltres = 0};
 enum class SubPokemon : int { Pikachu = 0, Squirtle, Charmander };
 
@@ -27,6 +28,7 @@ private:
 	ObjectImage img_subPokemon[3];
 
 	void SetPosDest() override;
+	void ShotBySector();
 public:
 	Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data);
 	void Paint(HDC hdc);
@@ -41,4 +43,6 @@ public:
 	void Shot();
 	void MoveBullets();
 	void GetDamage(int damage);
+
+	void UseSkill(Skill skill);
 };

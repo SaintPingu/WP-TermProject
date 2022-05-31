@@ -271,10 +271,8 @@ void Player::Shot()
 	bulletPos.x = rectBody.right + 10;
 	bullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
 
-	{
-		bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
-		subBullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
-	}
+	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
+	subBullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
 }
 
 void Player::MoveBullets()
@@ -288,5 +286,30 @@ void Player::GetDamage(int damage)
 	if ((data.hp -= damage) <= 0)
 	{
 		data.speed = 0;
+	}
+}
+
+void Player::ShotBySector()
+{
+	RECT rectBody = GetRectBody();
+	POINT bulletPos = { 0, };
+	bulletPos.y = rectBody.top;
+	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
+
+	Vector2 unitVector = Vector2::Forward();
+	unitVector = Rotate(unitVector, -45);
+	for (int i = 0; i < 11; ++i)
+	{
+		subBullets->CreateBullet(bulletPos, 1, 10, unitVector, true);
+		unitVector = Rotate(unitVector, 9);
+	}
+}
+void Player::UseSkill(Skill skill)
+{
+	switch (skill)
+	{
+	case Skill::Sector:
+		ShotBySector();
+		break;
 	}
 }

@@ -119,10 +119,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	case WM_KEYDOWN:
-		CheckKeyDown(hWnd, wParam, gameData, *player);
+		CheckKeyDown(hWnd, wParam, gameData);
 		break;
 	case WM_KEYUP:
-		CheckKeyUp(hWnd, wParam, gameData, *player);
+		CheckKeyUp(hWnd, wParam, gameData);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
