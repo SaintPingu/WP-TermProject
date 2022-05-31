@@ -91,6 +91,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		GetClientRect(hWnd, &rectWindow);
 		moltres.Load(_T("sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,35 });
+		moltres.ScaleImage(2, 2);
 		bullet.Load(_T("sprite_bullet.png"), { 18, 18 }, { 5, 2 }, { 10, 16 });
 		enemies = new EnemyController(rectWindow);
 		effects = new EffectManager();

@@ -9,8 +9,9 @@ protected:
 	RECT rectImage = { 0, };
 	POINT drawSize = { 0, };
 	void Load(const WCHAR* fileName, POINT imgSize);
-	BITMAP SelectHBitmap(HDC hdc) const;
-	void Paint(HDC hdc, HDC memDC, const RECT& rectDraw, const RECT& rectImage) const;
+	void Paint(HDC hdc, const RECT& rectDraw, const RECT& rectImage) const;
+	float scaleX = 0;
+	float scaleY = 0;
 
 public:
 	virtual void ScaleImage(float scaleX, float scaleY) abstract;
@@ -23,6 +24,11 @@ public:
 	{
 		return drawSize;
 	}
+	inline void GetScale(float& scaleX, float& scaleY) const
+	{
+		scaleX = this->scaleX;
+		scaleY = this->scaleY;
+	}
 };
 
 class ObjectImage : public Image{
@@ -32,8 +38,9 @@ private:
 	bool isScaled = false;
 
 public:
-	void Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint, POINT bodySize);
+	void Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint = { 0, 0 }, POINT bodySize = { 0, 0 });
 	void Paint(HDC hdc, const RECT& rectBody, const RECT* rectImage = nullptr) const;
+	void Paint(const RECT& rectDest, HDC hdc) const;
 	void ScaleImage(float scaleX, float scaleY);
 	
 	inline POINT GetBodyDrawPoint() const

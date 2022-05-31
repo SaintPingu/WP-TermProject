@@ -3,6 +3,9 @@
 
 class PlayerBullet;
 
+enum class Pokemon : int { Moltres = 0};
+enum class SubPokemon : int { Pikachu = 0, Squirtle, Charmander };
+
 typedef struct PlayerData {
 	int hp = 0;
 	int speed = 0;
@@ -10,15 +13,18 @@ typedef struct PlayerData {
 
 class Player : public GameObject, public IControllable, public IAnimatable {
 private:
+	const RECT* rectWindow = nullptr;
+
+	PlayerData data;
+	PlayerBullet* bullets = nullptr;
+	PlayerBullet* subBullets = nullptr;
 	Vector2 posDest = { 0, };
 	Vector2 vectorMove = { 0, };
 	float alpha = 0;
 
-	PlayerData data;
-
-	const RECT* rectWindow = nullptr;
-
-	PlayerBullet* bullets = nullptr;
+	Pokemon pokemon;
+	SubPokemon subPokemon;
+	ObjectImage img_subPokemon[3];
 
 	void SetPosDest() override;
 public:

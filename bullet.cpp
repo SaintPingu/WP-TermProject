@@ -54,6 +54,7 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage,
 void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage) const
 {
 	bulletImage.Paint(hdc, rectBody, &rectImage);
+	//FrameRect(hdc, &rectBody, (HBRUSH)GetStockObject(WHITE_BRUSH));
 }
 bool BulletController::Bullet::Move(const RECT& rectWindow)
 {
@@ -235,7 +236,17 @@ void PlayerBullet::Move()
 	{
 		if (enemies->CheckHit(bullets.at(i)->GetRect(), bullets.at(i)->GetDamage()) == true)
 		{
-			effects->CreateEffect(EXPLODE_FIRE, bullets[i]->GetPos());
+			int explode = -1;
+			switch (bulletType)
+			{
+			case BulletType::Fire:
+				explode = EXPLODE_FIRE;
+				break;
+			case BulletType::Elec:
+				explode = EXPLODE_ELEC;
+				break;
+			}
+			effects->CreateEffect(explode, bullets[i]->GetPos());
 			bullets[i--] = bullets.back();
 			bullets.pop_back();
 		}

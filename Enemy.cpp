@@ -317,7 +317,7 @@ EnemyController::EnemyController(const RECT& rectWindow)
 {
 	image_beedrill.Load(L"sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
 	image_zapdos.Load(L"sprite_zapdos.png", { 58,58 }, { 12,12 }, { 36,46 });
-	image_zapdos_bullet.Load(L"bullet_zapdos.png", { 14,14 }, { 0, 0 }, { 12, 12 });
+	image_zapdos_bullet.Load(L"bullet_zapdos.png", { 14,14 });
 	
 	bullets = new EnemyBullet(rectWindow, image_zapdos_bullet);
 }

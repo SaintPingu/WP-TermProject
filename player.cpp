@@ -12,20 +12,47 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 	direction = Dir::Empty;
 	posDest = { 0, };
 	vectorMove = { 0, };
-
 	alpha = 0;
 	StopMove();
 
+	subPokemon = SubPokemon::Pikachu;
+	img_subPokemon[static_cast<int>(SubPokemon::Pikachu)].Load(L"sub_pikachu.png", { 23,25 });
+	img_subPokemon[static_cast<int>(SubPokemon::Squirtle)].Load(L"sub_squirtle.png", { 17,24 });
+	img_subPokemon[static_cast<int>(SubPokemon::Charmander)].Load(L"sub_charmander.png", { 18,23 });
+
+	pokemon = Pokemon::Moltres;
 	ObjectImage bulletImage;
 	bulletImage.Load(_T("sprite_bullet.png"), { 20,20 }, { 6,2 }, { 10,16 });
-	bullets = new PlayerBullet(rectWindow, bulletImage);
+	bullets = new PlayerBullet(rectWindow, bulletImage, BulletType::Fire);
+
+	ObjectImage subBulletImage;
+	subBulletImage.Load(_T("bullet_elec.png"), { 11,30 });
+	subBullets = new PlayerBullet(rectWindow, subBulletImage, BulletType::Elec);
 }
 
 void Player::Paint(HDC hdc)
 {
 	RECT rectImage = GetRectImage(GetImage(), frame);
 	GameObject::Paint(hdc, &rectImage);
+
+	const ObjectImage& image = GetImage();
+	float scaleX, scaleY;
+	image.GetScale(scaleX, scaleY);
+
+	RECT rectDest = GetRectBody();
+	switch (pokemon)
+	{
+	case Pokemon::Moltres:
+		rectDest.left += 2;
+		rectDest.right -= 2;
+		rectDest.top += 8 * scaleY;
+		rectDest.bottom = rectDest.top + (18 * scaleY);
+		break;
+	}
+	img_subPokemon[static_cast<int>(subPokemon)].Paint(rectDest, hdc);
+
 	bullets->Paint(hdc);
+	subBullets->Paint(hdc);
 }
 
 void Player::SetPosDest()
@@ -243,11 +270,15 @@ void Player::Shot()
 	bullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
 	bulletPos.x = rectBody.right + 10;
 	bullets->CreateBullet(bulletPos, 1, 10, Dir::Up);
+
+	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
+	subBullets->CreateBullet(bulletPos, 1, 10, { 0, -1 });
 }
 
 void Player::MoveBullets()
 {
 	bullets->Move();
+	subBullets->Move();
 }
 
 void Player::GetDamage(int damage)

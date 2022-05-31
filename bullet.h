@@ -60,9 +60,11 @@ public:
 	virtual void Move() abstract;
 };
 
+enum class BulletType { Empty = 0, Fire, Elec, Water };
 class PlayerBullet : public BulletController {
+	BulletType bulletType = BulletType::Empty;
 public:
-	PlayerBullet(const RECT& rectWindow, const ObjectImage& bulletImage) : BulletController(rectWindow, bulletImage) {};
+	PlayerBullet(const RECT& rectWindow, const ObjectImage& bulletImage, BulletType bulletType) : BulletController(rectWindow, bulletImage) { this->bulletType = bulletType; };
 	void Move() override;
 };
 class EnemyBullet : public BulletController {
