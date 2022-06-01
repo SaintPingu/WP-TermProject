@@ -21,10 +21,6 @@ protected:
 	{
 		return *image;
 	}
-	inline RECT GetRectBody() const
-	{
-		return rectBody;
-	}
 
 public:
 	void Paint(HDC hdc, const RECT* rectImage = nullptr);
@@ -32,6 +28,10 @@ public:
 
 	bool IsCollide(const RECT& rectSrc) const;
 
+	inline RECT GetRectBody() const
+	{
+		return rectBody;
+	}
 	inline Vector2 GetPosCenter() const
 	{
 		return posCenter;
@@ -92,3 +92,5 @@ public:
 	}
 	
 };
+
+void CalculateDamage(float& damage, Type destType, Type srcType);

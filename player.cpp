@@ -2,7 +2,7 @@
 #include "player.h"
 #include "bullet.h"
 #include "timer.h"
-
+#include "skill.h"
 
 Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data) : GameObject(image, scaleX, scaleY, pos)
 {
@@ -15,29 +15,32 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 	alpha = 0;
 	StopMove();
 
-	subPokemon = SubPokemon::Squirtle;
-	img_subPokemon[static_cast<int>(SubPokemon::Pikachu)].Load(L"sub_pikachu.png", { 23,25 });
-	img_subPokemon[static_cast<int>(SubPokemon::Squirtle)].Load(L"sub_squirtle.png", { 17,24 });
-	img_subPokemon[static_cast<int>(SubPokemon::Charmander)].Load(L"sub_charmander.png", { 18,23 });
+	subPokemon = SubPokemon::Pikachu;
+	img_subPokemon[static_cast<int>(SubPokemon::Pikachu)].Load(L"images\\sub_pikachu.png", { 23,25 });
+	img_subPokemon[static_cast<int>(SubPokemon::Squirtle)].Load(L"images\\sub_squirtle.png", { 17,24 });
+	img_subPokemon[static_cast<int>(SubPokemon::Charmander)].Load(L"images\\sub_charmander.png", { 18,23 });
 
-	pokemon = Pokemon::Thunder;
+	pokemon = Pokemon::Articuno;
 	ObjectImage bulletImage;
 
 	switch (pokemon)
 	{
 	case Pokemon::Moltres:
 		type = Type::Fire;
-		bulletImage.Load(_T("bullet_fire.png"), { 11,16 });
+		bulletImage.Load(_T("images\\bullet_fire.png"), { 11,16 });
 		bulletImage.ScaleImage(0.9f, 0.9f);
 		break;
 	case Pokemon::Articuno:
 		type = Type::Water;
-		bulletImage.Load(_T("bullet_ice.png"), { 7,15 });
+		bulletImage.Load(_T("images\\bullet_ice.png"), { 7,15 });
 		bulletImage.ScaleImage(0.9f, 0.9f);
 		break;
 	case Pokemon::Thunder:
 		type = Type::Elec;
-		bulletImage.Load(_T("bullet_elec_main.png"), { 5,16 });
+		bulletImage.Load(_T("images\\bullet_elec_main.png"), { 5,16 });
+		break;
+	default:
+		assert(0);
 		break;
 	}
 	bullets = new PlayerBullet(rectWindow, bulletImage);
@@ -46,25 +49,29 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 	switch (subPokemon)
 	{
 	case SubPokemon::Pikachu:
-		subBulletImage.Load(_T("bullet_elec.png"), { 11,30 });
+		subBulletImage.Load(_T("images\\bullet_elec.png"), { 11,30 });
 		subBulletImage.ScaleImage(0.7f, 0.7f);
 		subBullets = new PlayerBullet(rectWindow, subBulletImage);
 		subType = Type::Elec;
 		break;
 	case SubPokemon::Charmander:
-		subBulletImage.Load(_T("bullet_flame.png"), { 8,16 });
+		subBulletImage.Load(_T("images\\bullet_flame.png"), { 8,16 });
 		subBulletImage.ScaleImage(0.7f, 0.7f);
 		subBullets = new PlayerBullet(rectWindow, subBulletImage);
 		subType = Type::Fire;
 		break;
 	case SubPokemon::Squirtle:
-		subBulletImage.Load(_T("bullet_water.png"), { 8,24 });
+		subBulletImage.Load(_T("images\\bullet_water.png"), { 8,24 });
 		subBulletImage.ScaleImage(0.8f, 0.7f);
 		subBullets = new PlayerBullet(rectWindow, subBulletImage);
 		subType = Type::Water;
 		break;
+	default:
+		assert(0);
+		break;
 	}
-	
+
+	skillManager = new SkillManager(this, subType);
 }
 
 void Player::Paint(HDC hdc)
@@ -85,11 +92,29 @@ void Player::Paint(HDC hdc)
 		rectDest.top += 8 * scaleY;
 		rectDest.bottom = rectDest.top + (18 * scaleY);
 		break;
+	case Pokemon::Articuno:
+		rectDest.right += 2;
+		rectDest.top += 3 * scaleY;
+		rectDest.bottom = rectDest.top + (22 * scaleY);
+		break;
+	case Pokemon::Thunder:
+		rectDest.left += 2;
+		rectDest.right -= 2;
+		rectDest.top += 5 * scaleY;
+		rectDest.bottom = rectDest.top + (20 * scaleY);
+		break;
+	default:
+		assert(0);
+		break;
 	}
 	img_subPokemon[static_cast<int>(subPokemon)].Paint(rectDest, hdc);
 
 	bullets->Paint(hdc);
 	subBullets->Paint(hdc);
+}
+void Player::PaintSkill(HDC hdc)
+{
+	skillManager->Paint(hdc);
 }
 
 void Player::SetPosDest()
@@ -124,6 +149,8 @@ void Player::SetPosDest()
 	case Dir::RU:
 		vectorMove.x = amount;
 		vectorMove.y = -amount;
+		break;
+	default:
 		break;
 	}
 
@@ -241,6 +268,8 @@ void Player::Stop(Dir inputDir)
 	case Dir::RD:
 		if (inputDir != Dir::Right && inputDir != Dir::Down) return;
 		break;
+	default:
+		break;
 	}
 	direction = direction - inputDir;
 }
@@ -295,14 +324,19 @@ void Player::Animate()
 			++frame;
 		}
 		break;
+	default:
+		assert(0);
+		break;
 	}
+
+	skillManager->Animate();
 }
 void Player::Fire()
 {
 	RECT rectBody = GetRectBody();
 	BulletData bulletData;
 	bulletData.bulletType = type;
-	bulletData.damage = 1;
+	bulletData.damage = data.damage;
 	bulletData.speed = 7;
 
 	POINT bulletPos = { 0, };
@@ -324,6 +358,8 @@ void Player::Fire()
 	case Skill::Circle:
 		FireByCircle();
 		break;
+	default:
+		break;
 	}
 }
 
@@ -333,8 +369,9 @@ void Player::MoveBullets()
 	subBullets->Move();
 }
 
-void Player::GetDamage(int damage)
+void Player::Hit(float damage, Type hitType)
 {
+	CalculateDamage(damage, type, hitType);
 	if ((data.hp -= damage) <= 0)
 	{
 		data.speed = 0;
@@ -346,7 +383,7 @@ void Player::FireBySector()
 	RECT rectBody = GetRectBody();
 	BulletData bulletData;
 	bulletData.bulletType = subType;
-	bulletData.damage = 1;
+	bulletData.damage = data.damage;
 	bulletData.speed = 10;
 
 	POINT bulletPos = { 0, };
@@ -363,13 +400,6 @@ void Player::FireBySector()
 		subBullets->CreateBullet(bulletPos, bulletData, unitVector, true);
 		unitVector = Rotate(unitVector, rotationDegree);
 	}
-	/*unitVector = Rotate(unitVector, -50);
-	for (int i = 0; i < 11; ++i)
-	{
-		int randDegree = 8 + rand() % 4;
-		subBullets->CreateBullet(bulletPos, bulletData, unitVector, true);
-		unitVector = Rotate(unitVector, randDegree);
-	}*/
 
 	if (--skillCount <= 0)
 	{
@@ -382,7 +412,7 @@ void Player::FireByCircle()
 	POINT bulletPos = GetPosCenter();
 	BulletData bulletData;
 	bulletData.bulletType = subType;
-	bulletData.damage = 1;
+	bulletData.damage = data.damage;
 	bulletData.speed = 10;
 
 	Vector2 unitVector = Vector2::Forward();
@@ -415,6 +445,13 @@ void Player::UseSkill(Skill skill)
 		break;
 	case Skill::Circle:
 		skillCount = 5;
+		break;
+	case Skill::Identity:
+		skillManager->UseSkill(Skill::Identity);
+		crntSkill = Skill::Empty;
+		break;
+	default:
+		assert(0);
 		break;
 	}
 }

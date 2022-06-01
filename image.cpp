@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "image.h"
 
-void Image::Load(const WCHAR* fileName, POINT imgSize)
+void Image::Load(const WCHAR* fileName, POINT imgSize, int alpha)
 {
 	Gdiplus::Bitmap* bitmap = new Gdiplus::Bitmap(fileName, false);
 	bitmap->GetHBITMAP(NULL, &hBitmap);
@@ -14,7 +14,7 @@ void Image::Load(const WCHAR* fileName, POINT imgSize)
 
 	bFunction.BlendOp = AC_SRC_OVER;
 	bFunction.BlendFlags = 0;
-	bFunction.SourceConstantAlpha = 0xff;
+	bFunction.SourceConstantAlpha = alpha;
 	bFunction.AlphaFormat = AC_SRC_ALPHA;
 
 	this->rectImage = { 0, 0, imgSize.x, imgSize.y };
@@ -119,9 +119,9 @@ void ObjectImage::ScaleImage(float scaleX, float scaleY)
 }
 
 
-void EffectImage::Load(const WCHAR* fileName, POINT imgSize, int maxFrame)
+void EffectImage::Load(const WCHAR* fileName, POINT imgSize, int maxFrame, int alpha)
 {
-	Image::Load(fileName, imgSize);
+	Image::Load(fileName, imgSize, alpha);
 	++rectImage.left;
 	++rectImage.top;
 	++rectImage.right;
@@ -143,6 +143,15 @@ void EffectImage::Paint(HDC hdc, POINT drawPoint, const RECT* rectImage) const
 	rectDraw.bottom = rectDraw.top + drawSize.y;
 
 	Image::Paint(hdc, rectDraw, *rectImage);
+}
+void EffectImage::Paint(HDC hdc, const RECT& rectDest, const RECT* rectImage) const
+{
+	if (rectImage == nullptr)
+	{
+		rectImage = &this->rectImage;
+	}
+
+	Image::Paint(hdc, rectDest, *rectImage);
 }
 void EffectImage::ScaleImage(float scaleX, float scaleY)
 {

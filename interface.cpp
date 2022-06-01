@@ -31,6 +31,9 @@ void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData)
 	case _T('H'):
 		player->ShowHitbox();
 		break;
+	case _T('Q'):
+		player->UseSkill(Skill::Identity);
+		break;
 	case _T('W'):
 		player->UseSkill(Skill::Sector);
 		break;
@@ -39,10 +42,12 @@ void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData)
 		break;
 	}
 
+	bool isMove = false;
 	if (KEYDOWN(KEY_LEFT))
 	{
 		player->Stop(Dir::Right);
 		player->SetDirection(Dir::Left);
+		isMove = true;
 	}
 	if (KEYDOWN(KEY_RIGHT))
 	{
@@ -50,12 +55,14 @@ void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData)
 		{
 			player->Stop(Dir::Left);
 			player->SetDirection(Dir::Right);
+			isMove = true;
 		}
 	}
 	if (KEYDOWN(KEY_UP))
 	{
 		player->Stop(Dir::Down);
 		player->SetDirection(Dir::Up);
+		isMove = true;
 	}
 	if (KEYDOWN(KEY_DOWN))
 	{
@@ -63,10 +70,13 @@ void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData)
 		{
 			player->Stop(Dir::Up);
 			player->SetDirection(Dir::Down);
+			isMove = true;
 		}
 	}
-	player->SetMove(hWnd, TIMERID_MOVE_PLAYER, ELAPSE_MOVE_PLAYER, T_MovePlayer);
-	InvalidateRect(hWnd, NULL, FALSE);
+	if (isMove == true)
+	{
+		player->SetMove(hWnd, TIMERID_MOVE_PLAYER, ELAPSE_MOVE_PLAYER, T_MovePlayer);
+	}
 }
 void CheckKeyUp(HWND hWnd, const WPARAM& wParam, GameData& gameData)
 {

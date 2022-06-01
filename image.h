@@ -14,7 +14,7 @@ private:
 protected:
 	RECT rectImage = { 0, };
 	POINT drawSize = { 0, };
-	void Load(const WCHAR* fileName, POINT imgSize);
+	void Load(const WCHAR* fileName, POINT imgSize, int alpha = 0xff);
 	void Paint(HDC hdc, const RECT& rectDraw, const RECT& rectImage) const;
 	float scaleX = 0;
 	float scaleY = 0;
@@ -63,10 +63,10 @@ public:
 class EffectImage : public Image {
 private:
 	int maxFrame = 0;
-	POINT imgSize = { 0, };
 public:
-	void Load(const WCHAR* fileName, POINT imgSize, int maxFrame);
+	void Load(const WCHAR* fileName, POINT imgSize, int maxFrame, int alpha = 0xff);
 	void Paint(HDC hdc, POINT drawPoint, const RECT* rectImage) const;
+	void Paint(HDC hdc, const RECT& rectDest, const RECT* rectImage) const;
 	void ScaleImage(float scaleX, float scaleY);
 
 	inline int GetMaxFrame() const
@@ -74,7 +74,6 @@ public:
 		return maxFrame;
 	}
 };
-
 
 
 

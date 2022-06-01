@@ -2,14 +2,14 @@
 #include "object.h"
 
 class PlayerBullet;
-
-enum class Skill : int { Empty = 0, Identity, Sector, Circle, Ultimate };
-enum class Pokemon : int { Moltres = 0, Articuno, Thunder};
-enum class SubPokemon : int { Pikachu = 0, Squirtle, Charmander };
+class SkillManager;
 
 typedef struct PlayerData {
-	int hp = 0;
-	int speed = 0;
+	float hp = 0;
+	float speed = 0;
+
+	float damage = 0;
+	float damage_Q = 0;
 }PlayerData;
 
 class Player : public GameObject, public IControllable, public IAnimatable {
@@ -25,6 +25,7 @@ private:
 	Vector2 vectorMove = { 0, };
 	float alpha = 0;
 
+	SkillManager* skillManager = nullptr;
 	Skill crntSkill = Skill::Empty;
 	int skillCount = 0;
 
@@ -38,6 +39,7 @@ private:
 public:
 	Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data);
 	void Paint(HDC hdc);
+	void PaintSkill(HDC hdc);
 
 	void SetDirection(Dir dir);
 	void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc) override;
@@ -48,7 +50,16 @@ public:
 	void Animate() override;
 	void Fire();
 	void MoveBullets();
-	void GetDamage(int damage);
+	void Hit(float damage, Type hitType);
+
+	float GetDamage_Q() const
+	{
+		return data.damage_Q;
+	}
+	inline Type GetType() const
+	{
+		return type;
+	}
 
 	void UseSkill(Skill skill);
 };

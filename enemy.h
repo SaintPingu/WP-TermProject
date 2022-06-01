@@ -95,7 +95,8 @@ public:
 	void Paint(HDC hdc);
 	void Move();
 	void Animate();
-	bool CheckHit(const RECT& rectSrc, int damage);
+	bool CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint);
+	void CheckHitAll(const RECT& rectSrc, float damage, Type hitType);
 	void CheckAtkDelay();
 	void CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotate = false);
 	void CreateBullet(POINT center, const BulletData& data, Dir dir);

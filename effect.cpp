@@ -3,11 +3,11 @@
 
 EffectManager::EffectManager()
 {
-	explode_fire.Load(_T("explode_fire.png"), { 56, 56 }, 8);
+	explode_fire.Load(_T("images\\explode_fire.png"), { 56, 56 }, 8);
 	explode_fire.ScaleImage(0.7f, 0.7f);
-	explode_elec.Load(_T("explode_elec.png"), { 81, 73 }, 8);
+	explode_elec.Load(_T("images\\explode_elec.png"), { 81, 73 }, 8);
 	explode_elec.ScaleImage(0.6f, 0.6f);
-	explode_water.Load(_T("explode_water.png"), { 72, 64 }, 9);
+	explode_water.Load(_T("images\\explode_water.png"), { 72, 64 }, 9);
 	explode_water.ScaleImage(0.7f, 0.7f);
 }
 EffectManager::Effect::Effect(const EffectImage& effectImage, POINT pos)
@@ -37,6 +37,9 @@ void EffectManager::CreateEffect(POINT pos, Type type)
 	case Type::Water:
 		effects.emplace_back(explode_water, pos);
 		break;
+	default:
+		assert(0);
+		break;
 	}
 }
 
@@ -55,7 +58,7 @@ void EffectManager::Animate()
 
 void EffectManager::Effect::Paint(HDC hdc) const
 {
-	RECT rectImage = GetRectImage(*effectImage, frame, 0);
+	RECT rectImage = ISprite::GetRectImage(*effectImage, frame, 0);
 	effectImage->Paint(hdc, pos, &rectImage);
 }
 

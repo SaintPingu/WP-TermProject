@@ -3,10 +3,13 @@
 #include "player.h"
 #include "bullet.h"
 #include "timer.h"
+#include "effect.h"
 #include "interface.h"
 
 extern GameData gameData;
 extern Player* player;
+extern EffectManager* effects;
+
 Enemy::Enemy(ObjectImage& image, float scaleX, float scaleY, Vector2 pos, EnemyData data) : GameObject(image, scaleX, scaleY, pos)
 {
 	StartMove();
@@ -145,7 +148,8 @@ void Melee::Move()
 	}
 	else if (CheckCollidePlayer() == true)
 	{
-		player->GetDamage(data.damage);
+		player->Hit(data.damage, GetType());
+		effects->CreateEffect(player->GetPosCenter(), GetType());
 		return;
 	}
 
@@ -237,6 +241,9 @@ void Enemy::Animate()
 			SetAction(Action::Idle, data.frameNum_Idle);
 		}
 		break;
+	default:
+		assert(0);
+		break;
 	}
 }
 
@@ -319,9 +326,9 @@ void Range::Fire()
 
 EnemyController::EnemyController(const RECT& rectWindow)
 {
-	image_beedrill.Load(L"sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
-	image_zapdos.Load(L"sprite_zapdos.png", { 58,58 }, { 12,12 }, { 36,46 });
-	image_zapdos_bullet.Load(L"bullet_zapdos.png", { 14,14 });
+	image_beedrill.Load(L"images\\sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
+	image_zapdos.Load(L"images\\sprite_zapdos.png", { 58,58 }, { 12,12 }, { 36,46 });
+	image_zapdos_bullet.Load(L"images\\bullet_zapdos.png", { 14,14 });
 	image_zapdos_bullet.ScaleImage(0.8f, 0.8f);
 	
 	bullets = new EnemyBullet(rectWindow, image_zapdos_bullet);
@@ -353,6 +360,9 @@ void EnemyController::CreateMelee()
 		data.frameNum_AtkMax = 4;
 		data.frameNum_AtkRev = 3;
 		break;
+	default:
+		assert(0);
+		break;
 	}
 
 	for (int i = 0; i < createCount; ++i)
@@ -362,8 +372,13 @@ void EnemyController::CreateMelee()
 		switch (gameData.stage)
 		{
 		case Stage::Electric:
+		{
 			Melee* enemy = new Melee(image_beedrill, 1, 1, { xPos, yPos }, data);
 			enemies.emplace_back(enemy);
+		}
+			break;
+		default:
+			assert(0);
 			break;
 		}
 	}
@@ -394,6 +409,9 @@ void EnemyController::CreateRange()
 		data.frameNum_AtkMax = 4;
 		data.frameNum_AtkRev = 4;
 		break;
+	default:
+		assert(0);
+		break;
 	}
 
 	for (int i = 0; i < createCount; ++i)
@@ -404,8 +422,13 @@ void EnemyController::CreateRange()
 		switch (gameData.stage)
 		{
 		case Stage::Electric:
+		{
 			Range* enemy = new Range(image_zapdos, 1, 1, { xPos, yPos }, data, image_zapdos_bullet);
 			enemies.emplace_back(enemy);
+		}
+			break;
+		default:
+			assert(0);
 			break;
 		}
 	}
@@ -433,12 +456,14 @@ void EnemyController::Animate()
 		enemy->Animate();
 	}
 }
-bool EnemyController::CheckHit(const RECT& rectSrc, int damage)
+bool EnemyController::CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint)
 {
 	for (size_t i = 0;i<enemies.size();++i)
 	{
 		if (enemies.at(i)->IsCollide(rectSrc) == true)
 		{
+			effects->CreateEffect(effectPoint, hitType);
+			CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
 			if (enemies.at(i)->GetDamage(damage) == true)
 			{
 				enemies[i--] = enemies.back();
@@ -449,6 +474,22 @@ bool EnemyController::CheckHit(const RECT& rectSrc, int damage)
 	}
 
 	return false;
+}
+void EnemyController::CheckHitAll(const RECT& rectSrc, float damage, Type hitType)
+{
+	for (size_t i = 0; i < enemies.size(); ++i)
+	{
+		if (enemies.at(i)->IsCollide(rectSrc) == true)
+		{
+			effects->CreateEffect(enemies.at(i)->GetPosCenter(), hitType);
+			CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
+			if (enemies.at(i)->GetDamage(damage) == true)
+			{
+				enemies[i--] = enemies.back();
+				enemies.pop_back();
+			}
+		}
+	}
 }
 
 void EnemyController::CheckAtkDelay()

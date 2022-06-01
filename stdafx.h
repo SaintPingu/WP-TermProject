@@ -23,7 +23,10 @@ enum class Scene { Start = 0, Loading, Lobby, Stage, Battle };
 enum class Stage { Empty = 0, Fire, Water, Electric, Dark };
 enum class Action { Idle = 0, Attack, Hurt, Death };
 
+enum class Pokemon : int { Moltres = 0, Articuno, Thunder };
+enum class SubPokemon : int { Pikachu = 0, Squirtle, Charmander };
 enum class Type { Empty = 0, Fire, Elec, Water };
+enum class Skill : int { Empty = 0, Identity, Sector, Circle, Ultimate };
 
 #define PI 3.141592
 #define DEGREE_TO_RADIAN(degree) ((PI/180) * (degree))

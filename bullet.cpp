@@ -190,9 +190,8 @@ void PlayerBullet::Move()
 {
 	for (size_t i = 0; i < bullets.size(); ++i)
 	{
-		if (enemies->CheckHit(bullets.at(i)->GetRect(), bullets.at(i)->GetDamage()) == true)
+		if (enemies->CheckHit(bullets.at(i)->GetRect(), bullets.at(i)->GetDamage(), bullets.at(i)->GetType(), bullets[i]->GetPos()) == true)
 		{
-			effects->CreateEffect(bullets[i]->GetPos(), bullets.at(i)->GetType());
 			bullets[i--] = bullets.back();
 			bullets.pop_back();
 		}
@@ -209,7 +208,7 @@ void EnemyBullet::Move()
 	{
 		if (player->IsCollide(bullets.at(i)->GetRect()) == true)
 		{
-			player->GetDamage(bullets.at(i)->GetDamage());
+			player->Hit(bullets.at(i)->GetDamage(), bullets.at(i)->GetType());
 			effects->CreateEffect(bullets[i]->GetPos(), bullets.at(i)->GetType());
 			bullets[i--] = bullets.back();
 			bullets.pop_back();

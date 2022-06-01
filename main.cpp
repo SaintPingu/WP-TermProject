@@ -81,23 +81,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	static ObjectImage articuno;
 	static ObjectImage thunder;
 	static ObjectImage bullet;
+	//static EffectImage waterwave;
 	static CImage bkground;
 
 	switch (uMsg)
 	{
 	case WM_CREATE:
 	{
-		bkground.Load(L"background.png");
+		bkground.Load(L"images\\background.png");
 		GetClientRect(hWnd, &rectWindow);
-		moltres.Load(_T("sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,35 });
-		articuno.Load(_T("sprite_articuno.png"), { 69, 69 }, { 29, 28 }, { 13,29 });
-		thunder.Load(_T("sprite_thunder.png"), { 53, 48 }, { 19, 10 }, { 17,24 });
+		moltres.Load(_T("images\\sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,35 });
+		articuno.Load(_T("images\\sprite_articuno.png"), { 69, 69 }, { 29, 28 }, { 13,29 });
+		articuno.ScaleImage(1.2f, 1.2f);
+		thunder.Load(_T("images\\sprite_thunder.png"), { 53, 48 }, { 19, 10 }, { 17,24 });
 		enemies = new EnemyController(rectWindow);
 		effects = new EffectManager();
 		PlayerData playerData;
-		playerData.hp = 10;
-		playerData.speed = 5;
-		player = new Player(hWnd, rectWindow, thunder, 1, 1, { 200, 500 }, playerData);
+		playerData.hp = 100;
+		playerData.speed = 3;
+		playerData.damage = 1;
+		playerData.damage_Q = 1;
+		player = new Player(hWnd, rectWindow, articuno, 1, 1, { 200, 500 }, playerData);
 
 		gameData.stage = Stage::Electric;
 
@@ -106,6 +110,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		SetTimer(hWnd, TIMERID_SHOOT_BULLET, ELAPSE_SHOOT_BULLET, T_FireBullet);
 		SetTimer(hWnd, TIMERID_MOVE_OBJECT, ELAPSE_MOVE_OBJECT, T_MoveObject);
 		SetTimer(hWnd, TIMERID_EFFECT, ELAPSE_EFFECT, T_Effect);
+
+		//waterwave.Load(_T("images\\skill_waterwave.png"), { 250,840 }, 0, 0xaf);
 	}
 	break;
 	case WM_ERASEBKGND:
@@ -116,6 +122,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		bkground.Draw(memDC, rectWindow);
 		player->Paint(memDC);
 		enemies->Paint(memDC);
+		player->PaintSkill(memDC);
 		effects->Paint(memDC);
 		ReleasePaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
 	}
