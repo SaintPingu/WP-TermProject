@@ -15,12 +15,12 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 	alpha = 0;
 	StopMove();
 
-	subPokemon = SubPokemon::Pikachu;
+	subPokemon = SubPokemon::Squirtle;
 	img_subPokemon[static_cast<int>(SubPokemon::Pikachu)].Load(L"images\\sub_pikachu.png", { 23,25 });
 	img_subPokemon[static_cast<int>(SubPokemon::Squirtle)].Load(L"images\\sub_squirtle.png", { 17,24 });
 	img_subPokemon[static_cast<int>(SubPokemon::Charmander)].Load(L"images\\sub_charmander.png", { 18,23 });
 
-	pokemon = Pokemon::Articuno;
+	pokemon = Pokemon::Moltres;
 	ObjectImage bulletImage;
 
 	switch (pokemon)
@@ -201,7 +201,6 @@ void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 
 	if (IsMove() == false && alpha == 0)
 	{
-		frame = 0;
 		SetTimer(hWnd, timerID, elpase, timerProc);
 	}
 	else if (alpha > 0.5f)

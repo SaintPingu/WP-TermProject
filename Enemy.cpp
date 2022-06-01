@@ -481,7 +481,10 @@ void EnemyController::CheckHitAll(const RECT& rectSrc, float damage, Type hitTyp
 	{
 		if (enemies.at(i)->IsCollide(rectSrc) == true)
 		{
-			effects->CreateEffect(enemies.at(i)->GetPosCenter(), hitType);
+			POINT effectPoint = enemies.at(i)->GetPosCenter();
+			effectPoint.x += (rand() % 20) - 10;
+			effectPoint.y += (rand() % 20) - 10;
+			effects->CreateEffect(effectPoint, hitType);
 			CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
 			if (enemies.at(i)->GetDamage(damage) == true)
 			{

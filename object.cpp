@@ -66,10 +66,10 @@ void CalculateDamage(float& damage, Type destType, Type srcType)
 			damage /= 0.8f;
 			break;
 		case Type::Fire:
-			damage /= 0.5f;
+			damage /= 0.6f;
 			break;
 		case Type::Water:
-			damage *= 1.5f;
+			damage *= 1.2f;
 			break;
 		default:
 			assert(0);
@@ -83,10 +83,10 @@ void CalculateDamage(float& damage, Type destType, Type srcType)
 			damage /= 0.8f;
 			break;
 		case Type::Water:
-			damage /= 0.5f;
+			damage /= 0.6f;
 			break;
 		case Type::Elec:
-			damage *= 1.5f;
+			damage *= 1.2f;
 			break;
 		default:
 			assert(0);
@@ -100,10 +100,10 @@ void CalculateDamage(float& damage, Type destType, Type srcType)
 			damage /= 0.8f;
 			break;
 		case Type::Elec:
-			damage /= 0.5f;
+			damage /= 0.6f;
 			break;
 		case Type::Fire:
-			damage *= 1.5f;
+			damage *= 1.2f;
 			break;
 		default:
 			assert(0);

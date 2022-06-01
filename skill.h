@@ -13,6 +13,11 @@ private:
 		Effect(const EffectImage& imgSkill, Type type);
 		void Paint(HDC hdc, const RECT& rectBody) const;
 		bool Animate();
+
+		inline int GetFrame() const
+		{
+			return frame;
+		}
 	};
 
 	Player* player = nullptr;
