@@ -9,6 +9,13 @@ EffectManager::EffectManager()
 	explode_elec.ScaleImage(0.6f, 0.6f);
 	explode_water.Load(_T("images\\explode_water.png"), { 72, 64 }, 9);
 	explode_water.ScaleImage(0.7f, 0.7f);
+
+	cloud_fire.Load(_T("images\\sprite_cloud_fire.png"), { 56, 64 }, 11);
+	cloud_fire.ScaleImage(0.8f, 0.8f);
+	cloud_elec.Load(_T("images\\sprite_cloud_elec.png"), { 56, 64 }, 11);
+	cloud_elec.ScaleImage(0.8f, 0.8f);
+	cloud_water.Load(_T("images\\sprite_cloud_water.png"), { 48, 56 }, 15);
+	cloud_water.ScaleImage(0.9f, 0.9f);
 }
 EffectManager::Effect::Effect(const EffectImage& effectImage, POINT pos)
 {
@@ -24,7 +31,7 @@ void EffectManager::Paint(HDC hdc) const
 	}
 }
 
-void EffectManager::CreateEffect(POINT pos, Type type)
+void EffectManager::CreateHitEffect(POINT pos, Type type)
 {
 	switch (type)
 	{
@@ -36,6 +43,24 @@ void EffectManager::CreateEffect(POINT pos, Type type)
 		break;
 	case Type::Water:
 		effects.emplace_back(explode_water, pos);
+		break;
+	default:
+		assert(0);
+		break;
+	}
+}
+void EffectManager::CreateExplodeEffect(POINT pos, Type type)
+{
+	switch (type)
+	{
+	case Type::Fire:
+		effects.emplace_back(cloud_fire, pos);
+		break;
+	case Type::Elec:
+		effects.emplace_back(cloud_elec, pos);
+		break;
+	case Type::Water:
+		effects.emplace_back(cloud_water, pos);
 		break;
 	default:
 		assert(0);

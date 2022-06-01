@@ -15,6 +15,7 @@ typedef struct EnemyData {
 	
 	int atkDelay = 0;
 	int crnt_atkDelay = 0;
+	float bulletSpeed = 0;
 
 	int hp = 0;
 	float speed = 0;
@@ -68,7 +69,7 @@ private:
 	void SetPosDest();
 	void Fire();
 public:
-	Range(ObjectImage& image, float scaleX, float scaleY, Vector2 pos, EnemyData data, const ObjectImage& bulletImage) : Enemy(image, scaleX, scaleY, pos, data) {};
+	Range(ObjectImage& image, float scaleX, float scaleY, Vector2 pos, EnemyData data) : Enemy(image, scaleX, scaleY, pos, data) {};
 	void Paint(HDC hdc) override;
 	void Move() override;
 	void CheckAtkDelay() override;
@@ -88,6 +89,14 @@ private:
 	ObjectImage image_beedrill;
 	ObjectImage image_zapdos;
 	ObjectImage image_zapdos_bullet;
+
+	ObjectImage image_wingull;
+	ObjectImage image_seadra;
+	ObjectImage image_seadra_bullet;
+
+	ObjectImage image_ledyba;
+	ObjectImage image_latias;
+	ObjectImage image_latias_bullet;
 public:
 	EnemyController(const RECT& rectWindow);
 	void CreateMelee();

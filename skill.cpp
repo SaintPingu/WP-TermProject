@@ -79,7 +79,7 @@ SkillManager::SkillManager(Player* player, Type type)
 		imgSkill_Fire_Q.Load(_T("images\\sprite_skill_fire.png"), { 80,96 }, 50);
 		break;
 	case Type::Water:
-		imgSkill_Water_Q.Load(_T("images\\skill_water.png"), { 273,843 }, 50);
+		imgSkill_Water_Q.Load(_T("images\\skill_water.png"), { 273,843 }, 50, 0xaf);
 		break;
 	}
 }

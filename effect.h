@@ -1,6 +1,8 @@
 #pragma once
 #include "image.h"
 
+enum class EffectType { Empty = 0, Explode_Fire, Explode_Water, Explode_Elec, Cloud_Fire, Cloud_Water, Cloud_Elec };
+
 class EffectManager {
 private:
 	class Effect : public ISprite {
@@ -17,10 +19,15 @@ private:
 	EffectImage explode_elec;
 	EffectImage explode_water;
 
+	EffectImage cloud_fire;
+	EffectImage cloud_elec;
+	EffectImage cloud_water;
+
 	std::vector<Effect> effects;
 public:
 	EffectManager();
 	void Paint(HDC hdc) const;
-	void CreateEffect(POINT pos, Type type);
+	void CreateHitEffect(POINT pos, Type type);
+	void CreateExplodeEffect(POINT pos, Type type);
 	void Animate();
 };

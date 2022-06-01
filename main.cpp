@@ -81,13 +81,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	static ObjectImage articuno;
 	static ObjectImage thunder;
 	static ObjectImage bullet;
-	//static EffectImage waterwave;
 	static CImage bkground;
 
 	switch (uMsg)
 	{
 	case WM_CREATE:
 	{
+		gameData.stage = Stage::Fire;
+
 		bkground.Load(L"images\\background.png");
 		GetClientRect(hWnd, &rectWindow);
 		moltres.Load(_T("images\\sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,35 });
@@ -100,18 +101,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		playerData.hp = 100;
 		playerData.speed = 3;
 		playerData.damage = 1;
-		playerData.damage_Q = 1;
-		player = new Player(hWnd, rectWindow, articuno, 1, 1, { 200, 500 }, playerData);
-
-		gameData.stage = Stage::Electric;
+		playerData.damage_Q = 0.4f;
+		player = new Player(hWnd, rectWindow, thunder, 1, 1, { 200, 500 }, playerData);
 
 		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
 		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
 		SetTimer(hWnd, TIMERID_SHOOT_BULLET, ELAPSE_SHOOT_BULLET, T_FireBullet);
 		SetTimer(hWnd, TIMERID_MOVE_OBJECT, ELAPSE_MOVE_OBJECT, T_MoveObject);
 		SetTimer(hWnd, TIMERID_EFFECT, ELAPSE_EFFECT, T_Effect);
-
-		//waterwave.Load(_T("images\\skill_waterwave.png"), { 250,840 }, 0, 0xaf);
 	}
 	break;
 	case WM_ERASEBKGND:

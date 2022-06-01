@@ -149,7 +149,7 @@ void Melee::Move()
 	else if (CheckCollidePlayer() == true)
 	{
 		player->Hit(data.damage, GetType());
-		effects->CreateEffect(player->GetPosCenter(), GetType());
+		effects->CreateHitEffect(player->GetPosCenter(), GetType());
 		return;
 	}
 
@@ -308,7 +308,7 @@ void Range::Fire()
 	BulletData bulletData;
 	bulletData.bulletType = GetType();
 	bulletData.damage = 1;
-	bulletData.speed = 4;
+	bulletData.speed = data.bulletSpeed;
 
 	Vector2 unitVector = { 0, 1 };
 	enemies->CreateBullet(bulletPos, bulletData, unitVector);
@@ -329,9 +329,32 @@ EnemyController::EnemyController(const RECT& rectWindow)
 	image_beedrill.Load(L"images\\sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
 	image_zapdos.Load(L"images\\sprite_zapdos.png", { 58,58 }, { 12,12 }, { 36,46 });
 	image_zapdos_bullet.Load(L"images\\bullet_zapdos.png", { 14,14 });
-	image_zapdos_bullet.ScaleImage(0.8f, 0.8f);
 	
-	bullets = new EnemyBullet(rectWindow, image_zapdos_bullet);
+	image_wingull.Load(L"images\\sprite_wingull.png", { 34,33 }, { 4,6 }, { 28,22 });
+	image_seadra.Load(L"images\\sprite_seadra.png", { 29,31 }, { 3,3 }, { 25,28 });
+	image_seadra_bullet.Load(L"images\\bullet_seadra.png", { 14,14 });
+	image_seadra_bullet.ScaleImage(1.2f, 1.2f);
+
+	image_ledyba.Load(L"images\\sprite_ledyba.png", { 37,37 }, { 6,6 }, { 27,27 });
+	image_latias.Load(L"images\\sprite_latias.png", { 44,34 }, { 2,4 }, { 42,29 });
+	image_latias_bullet.Load(L"images\\bullet_latias.png", { 14,14 });
+	image_latias_bullet.ScaleImage(0.8f, 0.8f);
+
+	switch (gameData.stage)
+	{
+	case Stage::Electric:
+		bullets = new EnemyBullet(rectWindow, image_zapdos_bullet);
+		break;
+	case Stage::Water:
+		bullets = new EnemyBullet(rectWindow, image_seadra_bullet);
+		break;
+	case Stage::Fire:
+		bullets = new EnemyBullet(rectWindow, image_latias_bullet);
+		break;
+	default:
+		assert(0);
+		break;
+	}
 }
 
 void EnemyController::CreateMelee()
@@ -360,6 +383,30 @@ void EnemyController::CreateMelee()
 		data.frameNum_AtkMax = 4;
 		data.frameNum_AtkRev = 3;
 		break;
+	case Stage::Water:
+		data.type = Type::Water;
+		data.hp = 3;
+		data.speed = 1.8f;
+		data.atkDelay = 700;
+		data.damage = 1.5f;
+		data.frameNum_Idle = 0;
+		data.frameNum_IdleMax = 2;
+		data.frameNum_Atk = 3;
+		data.frameNum_AtkMax = 4;
+		data.frameNum_AtkRev = 3;
+		break;
+	case Stage::Fire:
+		data.type = Type::Fire;
+		data.hp = 3.5f;
+		data.speed = 1.7f;
+		data.atkDelay = 850;
+		data.damage = 1.8f;
+		data.frameNum_Idle = 0;
+		data.frameNum_IdleMax = 1;
+		data.frameNum_Atk = 2;
+		data.frameNum_AtkMax = 5;
+		data.frameNum_AtkRev = 4;
+		break;
 	default:
 		assert(0);
 		break;
@@ -373,10 +420,22 @@ void EnemyController::CreateMelee()
 		{
 		case Stage::Electric:
 		{
-			Melee* enemy = new Melee(image_beedrill, 1, 1, { xPos, yPos }, data);
+			Melee* enemy = new Melee(image_beedrill, 1.2f, 1.2f, { xPos, yPos }, data);
 			enemies.emplace_back(enemy);
 		}
-			break;
+		break;
+		case Stage::Water:
+		{
+			Melee* enemy = new Melee(image_wingull, 1.2f, 1.2f, { xPos, yPos }, data);
+			enemies.emplace_back(enemy);
+		}
+		break;
+		case Stage::Fire:
+		{
+			Melee* enemy = new Melee(image_ledyba, 1.2f, 1.2f, { xPos, yPos }, data);
+			enemies.emplace_back(enemy);
+		}
+		break;
 		default:
 			assert(0);
 			break;
@@ -408,6 +467,33 @@ void EnemyController::CreateRange()
 		data.frameNum_Atk = 3;
 		data.frameNum_AtkMax = 4;
 		data.frameNum_AtkRev = 4;
+		data.bulletSpeed = 4;
+		break;
+	case Stage::Water:
+		data.type = Type::Water;
+		data.hp = 8;
+		data.speed = 0.7f;
+		data.atkDelay = 3000;
+		data.damage = 1.5f;
+		data.frameNum_Idle = 0;
+		data.frameNum_IdleMax = 2;
+		data.frameNum_Atk = 3;
+		data.frameNum_AtkMax = 6;
+		data.frameNum_AtkRev = 3;
+		data.bulletSpeed = 3;
+		break;
+	case Stage::Fire:
+		data.type = Type::Fire;
+		data.hp = 10;
+		data.speed = 1.3f;
+		data.atkDelay = 1800;
+		data.damage = 0.8f;
+		data.frameNum_Idle = 0;
+		data.frameNum_IdleMax = 0;
+		data.frameNum_Atk = 1;
+		data.frameNum_AtkMax = 2;
+		data.frameNum_AtkRev = 2;
+		data.bulletSpeed = 4.5f;
 		break;
 	default:
 		assert(0);
@@ -423,10 +509,22 @@ void EnemyController::CreateRange()
 		{
 		case Stage::Electric:
 		{
-			Range* enemy = new Range(image_zapdos, 1, 1, { xPos, yPos }, data, image_zapdos_bullet);
+			Range* enemy = new Range(image_zapdos, 1, 1, { xPos, yPos }, data);
 			enemies.emplace_back(enemy);
 		}
 			break;
+		case Stage::Water:
+		{
+			Range* enemy = new Range(image_seadra, 1.2f, 1.2f, { xPos, yPos }, data);
+			enemies.emplace_back(enemy);
+		}
+		break;
+		case Stage::Fire:
+		{
+			Range* enemy = new Range(image_latias, 1.3f, 1.3f, { xPos, yPos }, data);
+			enemies.emplace_back(enemy);
+		}
+		break;
 		default:
 			assert(0);
 			break;
@@ -462,10 +560,11 @@ bool EnemyController::CheckHit(const RECT& rectSrc, float damage, Type hitType, 
 	{
 		if (enemies.at(i)->IsCollide(rectSrc) == true)
 		{
-			effects->CreateEffect(effectPoint, hitType);
+			effects->CreateHitEffect(effectPoint, hitType);
 			CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
 			if (enemies.at(i)->GetDamage(damage) == true)
 			{
+				effects->CreateExplodeEffect(enemies.at(i)->GetPosCenter(), enemies.at(i)->GetType());
 				enemies[i--] = enemies.back();
 				enemies.pop_back();
 			}
@@ -484,10 +583,11 @@ void EnemyController::CheckHitAll(const RECT& rectSrc, float damage, Type hitTyp
 			POINT effectPoint = enemies.at(i)->GetPosCenter();
 			effectPoint.x += (rand() % 20) - 10;
 			effectPoint.y += (rand() % 20) - 10;
-			effects->CreateEffect(effectPoint, hitType);
+			effects->CreateHitEffect(effectPoint, hitType);
 			CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
 			if (enemies.at(i)->GetDamage(damage) == true)
 			{
+				effects->CreateExplodeEffect(enemies.at(i)->GetPosCenter(), enemies.at(i)->GetType());
 				enemies[i--] = enemies.back();
 				enemies.pop_back();
 			}

@@ -20,7 +20,7 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 	img_subPokemon[static_cast<int>(SubPokemon::Squirtle)].Load(L"images\\sub_squirtle.png", { 17,24 });
 	img_subPokemon[static_cast<int>(SubPokemon::Charmander)].Load(L"images\\sub_charmander.png", { 18,23 });
 
-	pokemon = Pokemon::Moltres;
+	pokemon = Pokemon::Thunder;
 	ObjectImage bulletImage;
 
 	switch (pokemon)

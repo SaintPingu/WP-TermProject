@@ -209,7 +209,7 @@ void EnemyBullet::Move()
 		if (player->IsCollide(bullets.at(i)->GetRect()) == true)
 		{
 			player->Hit(bullets.at(i)->GetDamage(), bullets.at(i)->GetType());
-			effects->CreateEffect(bullets[i]->GetPos(), bullets.at(i)->GetType());
+			effects->CreateHitEffect(bullets[i]->GetPos(), bullets.at(i)->GetType());
 			bullets[i--] = bullets.back();
 			bullets.pop_back();
 		}
