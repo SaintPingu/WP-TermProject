@@ -4,9 +4,9 @@
 #include "timer.h"
 #include "skill.h"
 
-Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data) : GameObject(image, scaleX, scaleY, pos)
+Player::Player(HWND hWnd, const RECT& rectDisplay, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data) : GameObject(image, scaleX, scaleY, pos)
 {
-	this->rectWindow = &rectWindow;
+	this->rectDisplay = &rectDisplay;
 	this->data = data;
 
 	direction = Dir::Empty;
@@ -20,7 +20,7 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 	img_subPokemon[static_cast<int>(SubPokemon::Squirtle)].Load(L"images\\sub_squirtle.png", { 17,24 });
 	img_subPokemon[static_cast<int>(SubPokemon::Charmander)].Load(L"images\\sub_charmander.png", { 18,23 });
 
-	pokemon = Pokemon::Thunder;
+	pokemon = Pokemon::Articuno;
 	ObjectImage bulletImage;
 
 	switch (pokemon)
@@ -43,7 +43,7 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 		assert(0);
 		break;
 	}
-	bullets = new PlayerBullet(rectWindow, bulletImage);
+	bullets = new PlayerBullet(rectDisplay, bulletImage);
 
 	ObjectImage subBulletImage;
 	switch (subPokemon)
@@ -51,19 +51,19 @@ Player::Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scal
 	case SubPokemon::Pikachu:
 		subBulletImage.Load(_T("images\\bullet_elec.png"), { 11,30 });
 		subBulletImage.ScaleImage(0.7f, 0.7f);
-		subBullets = new PlayerBullet(rectWindow, subBulletImage);
+		subBullets = new PlayerBullet(rectDisplay, subBulletImage);
 		subType = Type::Elec;
 		break;
 	case SubPokemon::Charmander:
 		subBulletImage.Load(_T("images\\bullet_flame.png"), { 8,16 });
 		subBulletImage.ScaleImage(0.7f, 0.7f);
-		subBullets = new PlayerBullet(rectWindow, subBulletImage);
+		subBullets = new PlayerBullet(rectDisplay, subBulletImage);
 		subType = Type::Fire;
 		break;
 	case SubPokemon::Squirtle:
 		subBulletImage.Load(_T("images\\bullet_water.png"), { 8,24 });
 		subBulletImage.ScaleImage(0.8f, 0.7f);
-		subBullets = new PlayerBullet(rectWindow, subBulletImage);
+		subBullets = new PlayerBullet(rectDisplay, subBulletImage);
 		subType = Type::Water;
 		break;
 	default:
@@ -98,8 +98,6 @@ void Player::Paint(HDC hdc)
 		rectDest.bottom = rectDest.top + (22 * scaleY);
 		break;
 	case Pokemon::Thunder:
-		rectDest.left += 2;
-		rectDest.right -= 2;
 		rectDest.top += 5 * scaleY;
 		rectDest.bottom = rectDest.top + (20 * scaleY);
 		break;
@@ -282,17 +280,17 @@ Vector2 Player::CheckCollideWindow(Vector2 pos) const
 	{
 		corrValue.x = -rectBody.left;
 	}
-	else if (rectBody.right > rectWindow->right)
+	else if (rectBody.right > rectDisplay->right)
 	{
-		corrValue.x = rectWindow->right - rectBody.right;
+		corrValue.x = rectDisplay->right - rectBody.right;
 	}
 	if (rectBody.top < 0)
 	{
 		corrValue.y = -rectBody.top;
 	}
-	else if (rectBody.bottom > rectWindow->bottom)
+	else if (rectBody.bottom > rectDisplay->bottom)
 	{
-		corrValue.y = rectWindow->bottom - rectBody.bottom;
+		corrValue.y = rectDisplay->bottom - rectBody.bottom;
 	}
 
 	return { pos.x + corrValue.x, pos.y + corrValue.y };

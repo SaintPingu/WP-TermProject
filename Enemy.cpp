@@ -235,7 +235,7 @@ void Enemy::Animate()
 			isRevFrame = true;
 			--frame;
 		}
-		else if (frame < data.frameNum_AtkRev)
+		else if (isRevFrame == true && frame < data.frameNum_AtkRev)
 		{
 			isRevFrame = false;
 			SetAction(Action::Idle, data.frameNum_Idle);
@@ -261,7 +261,7 @@ bool Melee::CheckCollidePlayer()
 
 	return false;
 }
-bool Enemy::GetDamage(int damage)
+bool Enemy::Hit(float damage)
 {
 	if ((data.hp -= damage) <= 0)
 	{
@@ -307,10 +307,12 @@ void Range::Fire()
 
 	BulletData bulletData;
 	bulletData.bulletType = GetType();
-	bulletData.damage = 1;
+	bulletData.damage = data.damage;
 	bulletData.speed = data.bulletSpeed;
 
 	Vector2 unitVector = { 0, 1 };
+	int randDegree = (rand() % 10) - 5;
+
 	enemies->CreateBullet(bulletPos, bulletData, unitVector);
 	unitVector = Rotate(unitVector, 20);
 	enemies->CreateBullet(bulletPos, bulletData, unitVector);
@@ -324,7 +326,7 @@ void Range::Fire()
 
 
 
-EnemyController::EnemyController(const RECT& rectWindow)
+EnemyController::EnemyController(const RECT& rectDisplay)
 {
 	image_beedrill.Load(L"images\\sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
 	image_zapdos.Load(L"images\\sprite_zapdos.png", { 58,58 }, { 12,12 }, { 36,46 });
@@ -343,13 +345,13 @@ EnemyController::EnemyController(const RECT& rectWindow)
 	switch (gameData.stage)
 	{
 	case Stage::Electric:
-		bullets = new EnemyBullet(rectWindow, image_zapdos_bullet);
+		bullets = new EnemyBullet(rectDisplay, image_zapdos_bullet);
 		break;
 	case Stage::Water:
-		bullets = new EnemyBullet(rectWindow, image_seadra_bullet);
+		bullets = new EnemyBullet(rectDisplay, image_seadra_bullet);
 		break;
 	case Stage::Fire:
-		bullets = new EnemyBullet(rectWindow, image_latias_bullet);
+		bullets = new EnemyBullet(rectDisplay, image_latias_bullet);
 		break;
 	default:
 		assert(0);
@@ -386,7 +388,7 @@ void EnemyController::CreateMelee()
 	case Stage::Water:
 		data.type = Type::Water;
 		data.hp = 3;
-		data.speed = 1.8f;
+		data.speed = 2;
 		data.atkDelay = 700;
 		data.damage = 1.5f;
 		data.frameNum_Idle = 0;
@@ -397,15 +399,15 @@ void EnemyController::CreateMelee()
 		break;
 	case Stage::Fire:
 		data.type = Type::Fire;
-		data.hp = 3.5f;
+		data.hp = 6;
 		data.speed = 1.7f;
 		data.atkDelay = 850;
-		data.damage = 1.8f;
+		data.damage = 1.5f;
 		data.frameNum_Idle = 0;
 		data.frameNum_IdleMax = 1;
 		data.frameNum_Atk = 2;
 		data.frameNum_AtkMax = 5;
-		data.frameNum_AtkRev = 4;
+		data.frameNum_AtkRev = 5;
 		break;
 	default:
 		assert(0);
@@ -562,7 +564,7 @@ bool EnemyController::CheckHit(const RECT& rectSrc, float damage, Type hitType, 
 		{
 			effects->CreateHitEffect(effectPoint, hitType);
 			CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
-			if (enemies.at(i)->GetDamage(damage) == true)
+			if (enemies.at(i)->Hit(damage) == true)
 			{
 				effects->CreateExplodeEffect(enemies.at(i)->GetPosCenter(), enemies.at(i)->GetType());
 				enemies[i--] = enemies.back();
@@ -585,7 +587,7 @@ void EnemyController::CheckHitAll(const RECT& rectSrc, float damage, Type hitTyp
 			effectPoint.y += (rand() % 20) - 10;
 			effects->CreateHitEffect(effectPoint, hitType);
 			CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
-			if (enemies.at(i)->GetDamage(damage) == true)
+			if (enemies.at(i)->Hit(damage) == true)
 			{
 				effects->CreateExplodeEffect(enemies.at(i)->GetPosCenter(), enemies.at(i)->GetType());
 				enemies[i--] = enemies.back();

@@ -70,6 +70,7 @@ GameData gameData;
 Player* player;
 EnemyController* enemies;
 EffectManager* effects;
+GUIManager* gui;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
@@ -77,6 +78,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	HBITMAP hBitmap;
 
 	static RECT rectWindow;
+	static RECT rectDisplay;
 	static ObjectImage moltres;
 	static ObjectImage articuno;
 	static ObjectImage thunder;
@@ -87,7 +89,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 	{
-		gameData.stage = Stage::Fire;
+		gameData.stage = Stage::Water;
 
 		bkground.Load(L"images\\background.png");
 		GetClientRect(hWnd, &rectWindow);
@@ -95,14 +97,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		articuno.Load(_T("images\\sprite_articuno.png"), { 69, 69 }, { 29, 28 }, { 13,29 });
 		articuno.ScaleImage(1.2f, 1.2f);
 		thunder.Load(_T("images\\sprite_thunder.png"), { 53, 48 }, { 19, 10 }, { 17,24 });
-		enemies = new EnemyController(rectWindow);
+
+		gui = new GUIManager(rectWindow);
+		rectDisplay = gui->GetRectDisplay();
+
+		enemies = new EnemyController(rectDisplay);
 		effects = new EffectManager();
 		PlayerData playerData;
+		playerData.maxhp = 100;
 		playerData.hp = 100;
+		playerData.maxmp = 100;
+		playerData.mp = 30;
 		playerData.speed = 3;
 		playerData.damage = 1;
-		playerData.damage_Q = 0.4f;
-		player = new Player(hWnd, rectWindow, thunder, 1, 1, { 200, 500 }, playerData);
+		playerData.damage_Q = 0.1f;
+		player = new Player(hWnd, rectDisplay, articuno, 1.2f, 1.2f, { 200, 500 }, playerData);
+
 
 		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
 		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
@@ -121,6 +131,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		enemies->Paint(memDC);
 		player->PaintSkill(memDC);
 		effects->Paint(memDC);
+		gui->Paint(memDC);
 		ReleasePaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
 	}
 	break;

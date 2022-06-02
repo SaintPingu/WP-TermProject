@@ -16,12 +16,11 @@ protected:
 	POINT drawSize = { 0, };
 	void Load(const WCHAR* fileName, POINT imgSize, int alpha = 0xff);
 	void Paint(HDC hdc, const RECT& rectDraw, const RECT& rectImage) const;
-	float scaleX = 0;
-	float scaleY = 0;
+	float scaleX = 1;
+	float scaleY = 1;
 
 public:
 	void PaintRotation(HDC hdc, Vector2 vPoints[3]) const;
-	virtual void ScaleImage(float scaleX, float scaleY) abstract;
 
 	inline RECT GetRectImage() const
 	{
@@ -76,7 +75,12 @@ public:
 };
 
 
-
+class GUIImage : public Image {
+public:
+	void Load(const WCHAR* fileName, POINT imgSize, int alpha = 0xff);
+	void Paint(HDC hdc, const RECT& rectDest);
+	void PaintGauge(HDC hdc, const RECT& rectDest, float current, float max);
+};
 
 
 class ISprite abstract {

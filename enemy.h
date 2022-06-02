@@ -43,7 +43,7 @@ public:
 
 	int GetSpriteRow();
 	void Animate() override;
-	bool GetDamage(int damage);
+	bool Hit(float damage);
 
 	inline Type GetType() const
 	{
@@ -98,7 +98,7 @@ private:
 	ObjectImage image_latias;
 	ObjectImage image_latias_bullet;
 public:
-	EnemyController(const RECT& rectWindow);
+	EnemyController(const RECT& rectDisplay);
 	void CreateMelee();
 	void CreateRange();
 	void Paint(HDC hdc);

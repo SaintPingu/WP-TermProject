@@ -161,6 +161,53 @@ void EffectImage::ScaleImage(float scaleX, float scaleY)
 
 
 
+
+
+
+void GUIImage::Load(const WCHAR* fileName, POINT imgSize, int alpha)
+{
+	Image::Load(fileName, imgSize, alpha);
+}
+void GUIImage::Paint(HDC hdc, const RECT& rectDest)
+{
+	Image::Paint(hdc, rectDest, rectImage);
+}
+void GUIImage::PaintGauge(HDC hdc, const RECT& rectDest, float current, float max)
+{
+	constexpr int gapY = 6;
+	const int imgWidth = rectImage.right - rectImage.left;
+	const int imgHeight = rectImage.bottom - rectImage.top;
+	const int wDest = rectDest.right - rectDest.left;
+	const int hDest = rectDest.bottom - rectDest.top;
+
+	HDC memDC = CreateCompatibleDC(hdc);
+	HBITMAP hBitmap = CreateCompatibleBitmap(hdc, imgWidth, imgHeight);
+	SelectObject(memDC, hBitmap);
+
+	FillRect(memDC, &rectImage, transBrush);
+	Image::Paint(memDC, rectImage, rectImage);
+
+	RECT rectErase = rectImage;
+	rectErase.top += gapY;
+	rectErase.bottom -= gapY;
+
+	const int eraseHeight = rectErase.bottom - rectErase.top;
+	float unitHeight = eraseHeight / max;
+
+	rectErase.bottom = rectErase.top + ((max - current) * unitHeight);
+
+	FillRect(memDC, &rectErase, transBrush);
+
+	TransparentBlt(hdc, rectDest.left, rectDest.top, wDest, hDest, memDC, rectImage.left, rectImage.top, imgWidth, imgHeight, transRGB);
+
+	DeleteDC(memDC);
+	DeleteObject(hBitmap);
+}
+
+
+
+
+
 RECT ISprite::GetRectImage(const Image& image, int frame, int spriteRow) const
 {
 	POINT drawSize = image.GetDrawSize();

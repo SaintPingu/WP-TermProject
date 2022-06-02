@@ -47,7 +47,7 @@ Vector2 Lerp(Vector2 src, Vector2 dst, float alpha);
 
 inline float GetRadius(float x, float y)
 {
-	return sqrt((x * x) + (y * y));
+	return sqrtf((x * x) + (y * y));
 }
 
 class IControllable abstract {

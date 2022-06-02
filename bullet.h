@@ -52,13 +52,13 @@ protected:
 		}
 	};
 
-	BulletController(const RECT& rectWindow, const ObjectImage& bulletImage);
+	BulletController(const RECT& rectDisplay, const ObjectImage& bulletImage);
 
 	std::vector<Bullet*> bullets;
 	ObjectImage bulletImage;
 	POINT bulletSize = { 0, };
 
-	const RECT* rectWindow = nullptr;
+	const RECT* rectDisplay = nullptr;
 
 	RECT GetRectImage(Dir dir) const;
 	void SetRectImage(int frame);
@@ -74,11 +74,11 @@ public:
 
 class PlayerBullet : public BulletController {
 public:
-	PlayerBullet(const RECT& rectWindow, const ObjectImage& bulletImage) : BulletController(rectWindow, bulletImage) {};
+	PlayerBullet(const RECT& rectDisplay, const ObjectImage& bulletImage) : BulletController(rectDisplay, bulletImage) {};
 	void Move() override;
 };
 class EnemyBullet : public BulletController {
 public:
-	EnemyBullet(const RECT& rectWindow, const ObjectImage& bulletImage) : BulletController(rectWindow, bulletImage) {};
+	EnemyBullet(const RECT& rectDisplay, const ObjectImage& bulletImage) : BulletController(rectDisplay, bulletImage) {};
 	void Move() override;
 };

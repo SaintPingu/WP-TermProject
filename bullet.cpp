@@ -46,7 +46,7 @@ void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage, co
 	}
 	//FrameRect(hdc, &rectRotBody, (HBRUSH)GetStockObject(BLACK_BRUSH));
 }
-bool BulletController::Bullet::Move(const RECT& rectWindow)
+bool BulletController::Bullet::Move(const RECT& rectDisplay)
 {
 	int moveX = 0;
 	int moveY = 0;
@@ -103,7 +103,7 @@ bool BulletController::Bullet::Move(const RECT& rectWindow)
 	switch (dir)
 	{
 	case Dir::Empty:
-		if (OutOfRange(rectRotBody, rectWindow) == true)
+		if (OutOfRange(rectRotBody, rectDisplay) == true)
 		{
 			return false;
 		}
@@ -119,7 +119,7 @@ bool BulletController::Bullet::Move(const RECT& rectWindow)
 	case Dir::Right:
 	case Dir::RU:
 	case Dir::RD:
-		if (rectRotBody.left > rectWindow.right)
+		if (rectRotBody.left > rectDisplay.right)
 		{
 			return false;
 		}
@@ -139,7 +139,7 @@ bool BulletController::Bullet::Move(const RECT& rectWindow)
 	case Dir::Down:
 	case Dir::LD:
 	case Dir::RD:
-		if (rectRotBody.top > rectWindow.bottom)
+		if (rectRotBody.top > rectDisplay.bottom)
 		{
 			return false;
 		}
@@ -157,9 +157,9 @@ RECT BulletController::GetRectImage(Dir dir) const
 }
 void BulletController::SetRectImage(int frame) {};
 
-BulletController::BulletController(const RECT& rectWindow, const ObjectImage& bulletImage)
+BulletController::BulletController(const RECT& rectDisplay, const ObjectImage& bulletImage)
 {
-	this->rectWindow = &rectWindow;
+	this->rectDisplay = &rectDisplay;
 	this->bulletImage = bulletImage;
 
 	bulletSize = bulletImage.GetBodySize();
@@ -169,7 +169,7 @@ void BulletController::Paint(HDC hdc)
 {
 	for (Bullet* bullet : bullets)
 	{
-		bullet->Paint(hdc, bulletImage, *rectWindow);
+		bullet->Paint(hdc, bulletImage, *rectDisplay);
 	}
 }
 
@@ -195,7 +195,7 @@ void PlayerBullet::Move()
 			bullets[i--] = bullets.back();
 			bullets.pop_back();
 		}
-		else if(bullets.at(i)->Move(*rectWindow) == false)
+		else if(bullets.at(i)->Move(*rectDisplay) == false)
 		{
 			bullets[i--] = bullets.back();
 			bullets.pop_back();
@@ -213,7 +213,7 @@ void EnemyBullet::Move()
 			bullets[i--] = bullets.back();
 			bullets.pop_back();
 		}
-		else if (bullets.at(i)->Move(*rectWindow) == false)
+		else if (bullets.at(i)->Move(*rectDisplay) == false)
 		{
 			bullets[i--] = bullets.back();
 			bullets.pop_back();

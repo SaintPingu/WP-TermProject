@@ -5,7 +5,10 @@ class PlayerBullet;
 class SkillManager;
 
 typedef struct PlayerData {
+	float maxhp = 0;
+	float maxmp = 0;
 	float hp = 0;
+	float mp = 0;
 	float speed = 0;
 
 	float damage = 0;
@@ -14,7 +17,7 @@ typedef struct PlayerData {
 
 class Player : public GameObject, public IControllable, public IAnimatable {
 private:
-	const RECT* rectWindow = nullptr;
+	const RECT* rectDisplay = nullptr;
 
 	PlayerData data;
 	PlayerBullet* bullets = nullptr;
@@ -37,7 +40,7 @@ private:
 	void FireBySector();
 	void FireByCircle();
 public:
-	Player(HWND hWnd, const RECT& rectWindow, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data);
+	Player(HWND hWnd, const RECT& rectDisplay, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data);
 	void Paint(HDC hdc);
 	void PaintSkill(HDC hdc);
 
@@ -52,7 +55,9 @@ public:
 	void MoveBullets();
 	void Hit(float damage, Type hitType);
 
-	float GetDamage_Q() const
+	void UseSkill(Skill skill);
+
+	inline float GetDamage_Q() const
 	{
 		return data.damage_Q;
 	}
@@ -60,6 +65,20 @@ public:
 	{
 		return type;
 	}
-
-	void UseSkill(Skill skill);
+	inline float GetHP() const
+	{
+		return data.hp;
+	}
+	inline float GetMaxHP() const
+	{
+		return data.maxhp;
+	}
+	inline float GetMP() const
+	{
+		return data.mp;
+	}
+	inline float GetMaxMP() const
+	{
+		return data.maxmp;
+	}
 };
