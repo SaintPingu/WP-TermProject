@@ -16,6 +16,7 @@ protected:
 	POINT drawSize = { 0, };
 	void Load(const WCHAR* fileName, POINT imgSize, int alpha = 0xff);
 	void Paint(HDC hdc, const RECT& rectDraw, const RECT& rectImage) const;
+	void SetAlpha(int alpha);
 	float scaleX = 1;
 	float scaleY = 1;
 
@@ -81,6 +82,7 @@ public:
 	void Paint(HDC hdc, const RECT& rectDest);
 	void PaintBlack(HDC hdc, const RECT& rectDest);
 	void PaintGauge(HDC hdc, const RECT& rectDest, float current, float max);
+	void SetAlpha(int alpha);
 };
 
 

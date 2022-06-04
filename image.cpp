@@ -63,6 +63,12 @@ void Image::PaintRotation(HDC hdc, Vector2 vPoints[3]) const
 	DeleteDC(memDCBack);
 	DeleteDC(memDCObject);
 }
+void Image::SetAlpha(int alpha)
+{
+	bFunction.SourceConstantAlpha = alpha;
+}
+
+
 
 void ObjectImage::Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint, POINT bodySize)
 {
@@ -212,6 +218,11 @@ void GUIImage::PaintGauge(HDC hdc, const RECT& rectDest, float current, float ma
 	DeleteDC(memDC);
 	DeleteObject(hBitmap);
 }
+void GUIImage::SetAlpha(int alpha)
+{
+	Image::SetAlpha(alpha);
+}
+
 
 
 

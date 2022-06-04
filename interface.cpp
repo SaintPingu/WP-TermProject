@@ -144,6 +144,10 @@ GUIManager::GUIManager(const RECT& rectWindow)
 	icon_pokemon = new GUIImage();
 	gaugeMoveBarGUI = new GUIImage();
 
+	hurtGUI_Fire.gui = new GUIImage();
+	hurtGUI_Water.gui = new GUIImage();
+	hurtGUI_Elec.gui = new GUIImage();
+
 	switch (player->GetType())
 	{
 	case Type::Elec:
@@ -240,8 +244,11 @@ GUIManager::GUIManager(const RECT& rectWindow)
 	gagueGUI_border->Load(_T("images\\gauge_border.png"), { 130, 130 });
 	gagueGUI_hp->Load(_T("images\\gauge_hp.png"), { 130, 130 });
 	gagueGUI_mp->Load(_T("images\\gauge_mp.png"), { 130, 130 });
-
 	moveBarGUI->Load(_T("images\\moveBar.png"), { 20, 223 });
+
+	hurtGUI_Fire.gui->Load(_T("images\\frame_hurt_fire.png"), { 317, 564 }, 0);
+	hurtGUI_Water.gui->Load(_T("images\\frame_hurt_water.png"), { 239, 371 }, 0);
+	hurtGUI_Elec.gui->Load(_T("images\\frame_hurt_elec.png"), { 239, 371 }, 0);
 }
 
 void GUIManager::Paint(HDC hdc)
@@ -263,10 +270,18 @@ void GUIManager::Paint(HDC hdc)
 	moveBarGUI->Paint(hdc, rectMoveBar);
 	gaugeMoveBarGUI->PaintGauge(hdc, rectGaugeMoveBar, iconMoveMinY - rectPokemonIcon.bottom, iconMoveMaxY);
 	icon_pokemon->Paint(hdc, rectPokemonIcon);
+
+	hurtGUI_Fire.gui->Paint(hdc, *rectWindow);
+	hurtGUI_Water.gui->Paint(hdc, *rectWindow);
+	hurtGUI_Elec.gui->Paint(hdc, *rectWindow);
 }
 
 void GUIManager::Update()
 {
+	hurtGUI_Fire.ReduceAlpha();
+	hurtGUI_Water.ReduceAlpha();
+	hurtGUI_Elec.ReduceAlpha();
+
 	if (isIconStop == true)
 	{
 		return;
@@ -286,4 +301,36 @@ RECT GUIManager::GetRectDisplay() const
 	RECT rectDisplay = *rectWindow;
 	rectDisplay.bottom = rectMain.top;
 	return rectDisplay;	
+}
+
+void GUIManager::DisplayHurtFrame(Type type)
+{
+	switch (type)
+	{
+	case Type::Fire:
+		hurtGUI_Fire.alpha = hurtGUI_alpha;
+		break;
+	case Type::Water:
+		hurtGUI_Water.alpha = hurtGUI_alpha;
+		break;
+	case Type::Elec:
+		hurtGUI_Elec.alpha = hurtGUI_alpha;
+		break;
+	default:
+		assert(0);
+		break;
+	}
+}
+
+
+
+
+void GUIManager::HurtGUI::ReduceAlpha()
+{
+	if (--alpha < 0)
+	{
+		alpha = 0;
+		return;
+	}
+	gui->SetAlpha(alpha);
 }

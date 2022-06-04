@@ -85,7 +85,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 	{
-		gameData.stage = Stage::Fire;
+		gameData.stage = Stage::Electric;
 
 		bkground.Load(L"images\\background.png");
 		GetClientRect(hWnd, &rectWindow);

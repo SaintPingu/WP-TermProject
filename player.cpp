@@ -3,6 +3,9 @@
 #include "bullet.h"
 #include "timer.h"
 #include "skill.h"
+#include "interface.h"
+
+extern GUIManager* gui;
 
 Player::Player( PlayerData data)
 {
@@ -117,10 +120,8 @@ void Player::Paint(HDC hdc)
 	switch (pokemon)
 	{
 	case Pokemon::Moltres:
-		rectDest.left += 2;
-		rectDest.right -= 2;
-		rectDest.top += 8 * scaleY;
-		rectDest.bottom = rectDest.top + (18 * scaleY);
+		rectDest.top += 7 * scaleY;
+		rectDest.bottom = rectDest.top + (22 * scaleY);
 		break;
 	case Pokemon::Articuno:
 		rectDest.right += 2;
@@ -394,6 +395,7 @@ void Player::MoveBullets()
 void Player::Hit(float damage, Type hitType)
 {
 	damage = CalculateDamage(damage, data.type, hitType);
+	gui->DisplayHurtFrame(hitType);
 	if ((data.hp -= damage) <= 0)
 	{
 		data.speed = 0;

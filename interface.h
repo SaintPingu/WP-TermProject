@@ -19,11 +19,20 @@ typedef struct tagGameData {
 
 class GUIManager {
 private:
+	typedef struct HurtGUI {
+		GUIImage* gui = nullptr;
+		float alpha = 0;
+
+		void ReduceAlpha();
+	}HurtGUI;
+
 	const RECT* rectWindow = nullptr;
 	float iconMoveMaxY = 0;
 	float iconMoveMinY = 0;
 	float iconMoveAmount = 0;
 	bool isIconStop = false;
+
+	const float hurtGUI_alpha = 0x90;
 
 	RECT rectMain = { 0, };
 	RECT rectSkill_Q = { 0, };
@@ -48,11 +57,16 @@ private:
 	GUIImage* moveBarGUI = nullptr;
 	GUIImage* gaugeMoveBarGUI = nullptr;
 	GUIImage* icon_pokemon = nullptr;
+
+	HurtGUI hurtGUI_Fire;
+	HurtGUI hurtGUI_Water;
+	HurtGUI hurtGUI_Elec;
 public:
 	GUIManager(const RECT& rectWindow);
 	void Paint(HDC hdc);
 	void Update();
 	RECT GetRectDisplay() const;
+	void DisplayHurtFrame(Type type);
 };
 
 void GameStart(HWND hWnd, GameData& data, Player& player);
