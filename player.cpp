@@ -4,9 +4,8 @@
 #include "timer.h"
 #include "skill.h"
 
-Player::Player(HWND hWnd, const RECT& rectDisplay, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data) : GameObject(image, scaleX, scaleY, pos)
+Player::Player( PlayerData data)
 {
-	this->rectDisplay = &rectDisplay;
 	this->data = data;
 
 	direction = Dir::Empty;
@@ -14,64 +13,95 @@ Player::Player(HWND hWnd, const RECT& rectDisplay, ObjectImage& image, float sca
 	vectorMove = { 0, };
 	alpha = 0;
 	StopMove();
+}
+void Player::Init(const RECT& rectDisplay)
+{
+	constexpr int damagePer_ms = (1000 / ELAPSE_ANIMATION);
+	this->rectDisplay = &rectDisplay;
 
-	subPokemon = SubPokemon::Squirtle;
-	img_subPokemon[static_cast<int>(SubPokemon::Pikachu)].Load(L"images\\sub_pikachu.png", { 23,25 });
-	img_subPokemon[static_cast<int>(SubPokemon::Squirtle)].Load(L"images\\sub_squirtle.png", { 17,24 });
-	img_subPokemon[static_cast<int>(SubPokemon::Charmander)].Load(L"images\\sub_charmander.png", { 18,23 });
-
-	pokemon = Pokemon::Articuno;
+	static ObjectImage img_pokemon;
 	ObjectImage bulletImage;
+	ObjectImage subBulletImage;
 
-	switch (pokemon)
+	switch (data.type)
 	{
-	case Pokemon::Moltres:
-		type = Type::Fire;
-		bulletImage.Load(_T("images\\bullet_fire.png"), { 11,16 });
-		bulletImage.ScaleImage(0.9f, 0.9f);
+	case Type::Elec:
+		pokemon = Pokemon::Thunder;
+		img_pokemon.Load(_T("images\\sprite_thunder.png"), { 53, 48 }, { 19, 10 }, { 17,24 });
+		bulletImage.Load(_T("images\\bullet_elec_main.png"), { 5,16 });
+
+		data.maxhp = 40;
+		data.maxmp = 80;
+		data.mp = 0;
+		data.speed = 4;
+		data.damage = 1.25f;
+		data.damage_Q = 10.5f / damagePer_ms;
 		break;
-	case Pokemon::Articuno:
-		type = Type::Water;
+	case Type::Water:
+		pokemon = Pokemon::Articuno;
+		img_pokemon.Load(_T("images\\sprite_articuno.png"), { 69, 69 }, { 29, 28 }, { 13,29 });
+		img_pokemon.ScaleImage(1.2f, 1.2f);
 		bulletImage.Load(_T("images\\bullet_ice.png"), { 7,15 });
 		bulletImage.ScaleImage(0.9f, 0.9f);
+
+		data.maxhp = 70;
+		data.maxmp = 120;
+		data.mp = 40;
+		data.speed = 2.5f;
+		data.damage = 1;
+		data.damage_Q = 3.85f / damagePer_ms;
 		break;
-	case Pokemon::Thunder:
-		type = Type::Elec;
-		bulletImage.Load(_T("images\\bullet_elec_main.png"), { 5,16 });
+	case Type::Fire:
+		pokemon = Pokemon::Moltres;
+		img_pokemon.Load(_T("images\\sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,35 });
+		bulletImage.Load(_T("images\\bullet_fire.png"), { 11,16 });
+		bulletImage.ScaleImage(0.9f, 0.9f);
+
+		data.maxhp = 55;
+		data.maxmp = 100;
+		data.mp = 20;
+		data.speed = 3;
+		data.damage = 1.25f;
+		data.damage_Q = 15.5f / damagePer_ms;
 		break;
 	default:
 		assert(0);
 		break;
 	}
-	bullets = new PlayerBullet(rectDisplay, bulletImage);
+	data.hp = data.maxhp;
+	//data.mp = 2000; // debug
 
-	ObjectImage subBulletImage;
-	switch (subPokemon)
+	switch (data.subType)
 	{
-	case SubPokemon::Pikachu:
+	case Type::Elec:
+		subPokemon = SubPokemon::Pikachu;
+		img_subPokemon.Load(L"images\\sub_pikachu.png", { 23,25 });
 		subBulletImage.Load(_T("images\\bullet_elec.png"), { 11,30 });
 		subBulletImage.ScaleImage(0.7f, 0.7f);
-		subBullets = new PlayerBullet(rectDisplay, subBulletImage);
-		subType = Type::Elec;
 		break;
-	case SubPokemon::Charmander:
-		subBulletImage.Load(_T("images\\bullet_flame.png"), { 8,16 });
-		subBulletImage.ScaleImage(0.7f, 0.7f);
-		subBullets = new PlayerBullet(rectDisplay, subBulletImage);
-		subType = Type::Fire;
-		break;
-	case SubPokemon::Squirtle:
+	case Type::Water:
+		subPokemon = SubPokemon::Squirtle;
+		img_subPokemon.Load(L"images\\sub_squirtle.png", { 17,24 });
 		subBulletImage.Load(_T("images\\bullet_water.png"), { 8,24 });
 		subBulletImage.ScaleImage(0.8f, 0.7f);
-		subBullets = new PlayerBullet(rectDisplay, subBulletImage);
-		subType = Type::Water;
+		break;
+	case Type::Fire:
+		subPokemon = SubPokemon::Charmander;
+		img_subPokemon.Load(L"images\\sub_charmander.png", { 18,23 });
+		subBulletImage.Load(_T("images\\bullet_flame.png"), { 8,16 });
+		subBulletImage.ScaleImage(0.7f, 0.7f);
 		break;
 	default:
 		assert(0);
 		break;
 	}
+	data.subDamage = 1;
+	data.damage_WE = 1.1f;
 
-	skillManager = new SkillManager(this, subType);
+	GameObject::Init(img_pokemon, { 250,500 });
+	bullets = new PlayerBullet(rectDisplay, bulletImage);
+	subBullets = new PlayerBullet(rectDisplay, subBulletImage);
+	skillManager = new SkillManager();
 }
 
 void Player::Paint(HDC hdc)
@@ -105,7 +135,7 @@ void Player::Paint(HDC hdc)
 		assert(0);
 		break;
 	}
-	img_subPokemon[static_cast<int>(subPokemon)].Paint(rectDest, hdc);
+	img_subPokemon.Paint(rectDest, hdc);
 
 	bullets->Paint(hdc);
 	subBullets->Paint(hdc);
@@ -332,7 +362,7 @@ void Player::Fire()
 {
 	RECT rectBody = GetRectBody();
 	BulletData bulletData;
-	bulletData.bulletType = type;
+	bulletData.bulletType = data.type;
 	bulletData.damage = data.damage;
 	bulletData.speed = 7;
 
@@ -343,21 +373,16 @@ void Player::Fire()
 	bulletPos.x = rectBody.right + 10;
 	bullets->CreateBullet(bulletPos, bulletData, Dir::Up);
 
-	bulletData.bulletType = subType;
+	bulletData.bulletType = data.subType;
+	bulletData.damage = data.subDamage;
 	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
 	subBullets->CreateBullet(bulletPos, bulletData, Dir::Up);
 
-	switch (crntSkill)
-	{
-	case Skill::Sector:
-		FireBySector();
-		break;
-	case Skill::Circle:
-		FireByCircle();
-		break;
-	default:
-		break;
-	}
+	skillManager->UseSkill();
+}
+void Player::CreateSubBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg)
+{
+	subBullets->CreateBullet(center, data, unitVector, isRotateImg);
 }
 
 void Player::MoveBullets()
@@ -368,87 +393,19 @@ void Player::MoveBullets()
 
 void Player::Hit(float damage, Type hitType)
 {
-	CalculateDamage(damage, type, hitType);
+	damage = CalculateDamage(damage, data.type, hitType);
 	if ((data.hp -= damage) <= 0)
 	{
 		data.speed = 0;
 	}
 }
 
-void Player::FireBySector()
+void Player::ActiveSkill(Skill skill)
 {
-	RECT rectBody = GetRectBody();
-	BulletData bulletData;
-	bulletData.bulletType = subType;
-	bulletData.damage = data.damage;
-	bulletData.speed = 10;
-
-	POINT bulletPos = { 0, };
-	bulletPos.y = rectBody.top;
-	bulletPos.y = rectBody.top;
-	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);	
-
-	Vector2 unitVector = Vector2::Forward();
-	int startDegree = -10 - (skillCount * 10);
-	int rotationDegree = -(startDegree * 2) / 10;
-	unitVector = Rotate(unitVector, startDegree);
-	for (int i = 0; i < 11; ++i)
-	{
-		subBullets->CreateBullet(bulletPos, bulletData, unitVector, true);
-		unitVector = Rotate(unitVector, rotationDegree);
-	}
-
-	if (--skillCount <= 0)
-	{
-		skillCount = 0;
-		crntSkill = Skill::Empty;
-	}
-}
-void Player::FireByCircle()
-{
-	POINT bulletPos = GetPosCenter();
-	BulletData bulletData;
-	bulletData.bulletType = subType;
-	bulletData.damage = data.damage;
-	bulletData.speed = 10;
-
-	Vector2 unitVector = Vector2::Forward();
-	unitVector = Rotate(unitVector, skillCount * 6);
-	for (int i = 0; i < 18; ++i)
-	{
-		subBullets->CreateBullet(bulletPos, bulletData, unitVector, true);
-		unitVector = Rotate(unitVector, 20);
-	}
-
-	if (--skillCount <= 0)
-	{
-		skillCount = 0;
-		crntSkill = Skill::Empty;
-	}
+	skillManager->ActiveSkill(skill);
 }
 
-void Player::UseSkill(Skill skill)
+bool Player::IsUsingSkill() const
 {
-	if (crntSkill != Skill::Empty)
-	{
-		return;
-	}
-
-	crntSkill = skill;
-	switch (skill)
-	{
-	case Skill::Sector:
-		skillCount = 5;
-		break;
-	case Skill::Circle:
-		skillCount = 5;
-		break;
-	case Skill::Identity:
-		skillManager->UseSkill(Skill::Identity);
-		crntSkill = Skill::Empty;
-		break;
-	default:
-		assert(0);
-		break;
-	}
+	return skillManager->IsUsingSkill();
 }

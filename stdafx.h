@@ -13,6 +13,7 @@
 
 #define WINDOWSIZE_X 500
 #define WINDOWSIZE_Y 750
+#define MSEC 1000
 
 #define	WIN32_LEAN_AND_MEAN
 #undef WINVER
@@ -23,10 +24,10 @@ enum class Scene { Start = 0, Loading, Lobby, Stage, Battle };
 enum class Stage { Empty = 0, Fire, Water, Electric, Dark };
 enum class Action { Idle = 0, Attack, Hurt, Death };
 
-enum class Pokemon : int { Moltres = 0, Articuno, Thunder };
-enum class SubPokemon : int { Pikachu = 0, Squirtle, Charmander };
+enum class Pokemon { Null = 0, Moltres, Articuno, Thunder };
+enum class SubPokemon { Null = 0, Pikachu = 0, Squirtle, Charmander };
 enum class Type { Empty = 0, Fire, Elec, Water };
-enum class Skill : int { Empty = 0, Identity, Sector, Circle, Ultimate };
+enum class Skill { Empty = 0, Identity, Sector, Circle, Ultimate };
 
 #define PI 3.141592
 #define DEGREE_TO_RADIAN(degree) ((PI/180) * (degree))
@@ -167,36 +168,36 @@ struct Vector2 {
 	float x = 0;
 	float y = 0;
 
-	inline constexpr Vector2 operator+(const Vector2& rhs)
+	inline constexpr Vector2 operator+(const Vector2& rhs) const
 	{
-		return { this->x + rhs.x, this->y + rhs.y };
+		return { x + rhs.x, y + rhs.y };
 	}
-	inline constexpr Vector2 operator-(const Vector2& rhs)
+	inline constexpr Vector2 operator-(const Vector2& rhs) const
 	{
-		return { this->x - rhs.x, this->y - rhs.y };
+		return { x - rhs.x, y - rhs.y };
 	}
-	inline constexpr Vector2 operator*(const float& rhs)
+	inline constexpr Vector2 operator*(const float& rhs) const
 	{
-		return { this->x * rhs, this->y * rhs };
+		return { x * rhs, y * rhs };
 	}
-	inline constexpr Vector2 operator/(const float& rhs)
+	inline constexpr Vector2 operator/(const float& rhs) const
 	{
-		return { this->x / rhs, this->y / rhs };
+		return { x / rhs, y / rhs };
 	}
-	inline constexpr operator POINT ()
+	inline constexpr operator POINT () const
 	{
-		return { (LONG)this->x, (LONG)this->y };
+		return { (LONG)x, (LONG)y };
 	}
-	inline constexpr Vector2 operator=(const POINT& rhs)
+	inline constexpr Vector2 operator=(const POINT& rhs) const
 	{
 		return { static_cast<float>(rhs.x), static_cast<float>(rhs.y) };
 	}
 
-	inline Vector2 Normalized()
+	inline Vector2 Normalized() const
 	{
 		return *this / GetNorm(*this);
 	}
-	inline float Norm()
+	inline float Norm() const
 	{
 		return sqrtf(x * x + y * y);
 	}
@@ -214,11 +215,11 @@ struct Vector2 {
 		return acos(dot / (Vector2::GetNorm(lhs) * Vector2::GetNorm(rhs)));
 	}
 
-	static inline constexpr Vector2 Forward()
+	static inline constexpr Vector2 Up()
 	{
 		return { 0, -1 };
 	}
-	static inline constexpr Vector2 Back()
+	static inline constexpr Vector2 Down()
 	{
 		return { 0, 1 };
 	}
@@ -231,6 +232,22 @@ struct Vector2 {
 		return { 1, 0 };
 	}
 };
+
+typedef struct FRECT {
+	float left = 0;
+	float top = 0;
+	float right = 0;
+	float bottom = 0;
+
+	inline constexpr operator RECT () const
+	{
+		return { (LONG)left, (LONG)top, (LONG)right, (LONG)bottom };
+	}
+	inline constexpr FRECT operator=(const RECT& rhs)
+	{
+		return { (float)rhs.left, (float)rhs.right, (float)rhs.top, (float)rhs.bottom };
+	}
+}FRECT;
 
 Vector2 Rotate(Vector2 vector, float degree);
 bool OutOfRange(const RECT& rect, const RECT& rectRange);

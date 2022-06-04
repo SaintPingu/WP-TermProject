@@ -172,6 +172,20 @@ void GUIImage::Paint(HDC hdc, const RECT& rectDest)
 {
 	Image::Paint(hdc, rectDest, rectImage);
 }
+void GUIImage::PaintBlack(HDC hdc, const RECT& rectDest)
+{
+	HDC memDC = CreateCompatibleDC(hdc);
+	HBITMAP hBitmap = CreateCompatibleBitmap(hdc, rectImage.right, rectImage.bottom);
+	SelectObject(memDC, hBitmap);
+
+	RECT rectMask = { 0, 0, rectImage.right, rectImage.bottom };
+	Image::Paint(memDC, rectMask, rectImage);
+	SelectObject(hdc, GetStockObject(GRAY_BRUSH));
+	StretchBlt(hdc, rectDest.left, rectDest.top, rectDest.right - rectDest.left, rectDest.bottom - rectDest.top, memDC, 0, 0, rectImage.right, rectImage.bottom, MERGECOPY);
+
+	DeleteDC(memDC);
+	DeleteObject(hBitmap);
+}
 void GUIImage::PaintGauge(HDC hdc, const RECT& rectDest, float current, float max)
 {
 	constexpr int gapY = 6;
@@ -188,12 +202,7 @@ void GUIImage::PaintGauge(HDC hdc, const RECT& rectDest, float current, float ma
 	Image::Paint(memDC, rectImage, rectImage);
 
 	RECT rectErase = rectImage;
-	rectErase.top += gapY;
-	rectErase.bottom -= gapY;
-
-	const int eraseHeight = rectErase.bottom - rectErase.top;
-	float unitHeight = eraseHeight / max;
-
+	float unitHeight = imgHeight / max;
 	rectErase.bottom = rectErase.top + ((max - current) * unitHeight);
 
 	FillRect(memDC, &rectErase, transBrush);

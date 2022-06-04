@@ -3,6 +3,7 @@
 #include "player.h"
 #include "enemy.h"
 #include "effect.h"
+#include "interface.h"
 
 extern EnemyController* enemies;
 void CALLBACK T_Invalidate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
@@ -14,6 +15,9 @@ void CALLBACK T_Invalidate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 }
 
 extern Player* player;
+extern EffectManager* effects;
+extern GUIManager* gui;
+
 void CALLBACK T_Animate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	player->Animate();
@@ -37,8 +41,11 @@ void CALLBACK T_MoveObject(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 	enemies->Move();
 }
 
-extern EffectManager* effects;
 void CALLBACK T_Effect(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	effects->Animate();
+}
+void CALLBACK T_GUI(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+{
+	gui->Update();
 }

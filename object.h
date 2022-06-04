@@ -14,7 +14,9 @@ private:
 protected:
 	Dir direction = Dir::Empty;
 
-	GameObject(ObjectImage& image, float scaleX, float scaleY, Vector2 pos);
+	GameObject() {};
+	GameObject(ObjectImage& image, Vector2 pos);
+	void Init(ObjectImage& image, Vector2 pos);
 	void SetPos(Vector2 pos);
 
 	inline const ObjectImage& GetImage()
@@ -93,4 +95,4 @@ public:
 	
 };
 
-void CalculateDamage(float& damage, Type destType, Type srcType);
+float CalculateDamage(float damage, Type destType, Type srcType);

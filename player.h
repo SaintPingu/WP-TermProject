@@ -1,10 +1,14 @@
 #pragma once
 #include "object.h"
 
+struct BulletData;
 class PlayerBullet;
 class SkillManager;
 
 typedef struct PlayerData {
+	Type type = Type::Empty;
+	Type subType = Type::Empty;
+
 	float maxhp = 0;
 	float maxmp = 0;
 	float hp = 0;
@@ -12,7 +16,9 @@ typedef struct PlayerData {
 	float speed = 0;
 
 	float damage = 0;
-	float damage_Q = 0;
+	float subDamage = 0;
+	float damage_Q = 0; // per sec
+	float damage_WE = 0;
 }PlayerData;
 
 class Player : public GameObject, public IControllable, public IAnimatable {
@@ -22,25 +28,21 @@ private:
 	PlayerData data;
 	PlayerBullet* bullets = nullptr;
 	PlayerBullet* subBullets = nullptr;
-	Type type = Type::Empty;
-	Type subType = Type::Empty;
 	Vector2 posDest = { 0, };
 	Vector2 vectorMove = { 0, };
 	float alpha = 0;
 
 	SkillManager* skillManager = nullptr;
-	Skill crntSkill = Skill::Empty;
 	int skillCount = 0;
 
-	Pokemon pokemon;
-	SubPokemon subPokemon;
-	ObjectImage img_subPokemon[3];
+	Pokemon pokemon = Pokemon::Null;
+	SubPokemon subPokemon = SubPokemon::Null;
+	ObjectImage img_subPokemon;
 
 	void SetPosDest() override;
-	void FireBySector();
-	void FireByCircle();
 public:
-	Player(HWND hWnd, const RECT& rectDisplay, ObjectImage& image, float scaleX, float scaleY, Vector2 pos, PlayerData data);
+	Player(PlayerData data);
+	void Init(const RECT& rectDisplay);
 	void Paint(HDC hdc);
 	void PaintSkill(HDC hdc);
 
@@ -52,18 +54,30 @@ public:
 
 	void Animate() override;
 	void Fire();
+	void CreateSubBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg);
 	void MoveBullets();
 	void Hit(float damage, Type hitType);
 
-	void UseSkill(Skill skill);
+	void ActiveSkill(Skill skill);
+
+
+	bool IsUsingSkill() const;
 
 	inline float GetDamage_Q() const
 	{
 		return data.damage_Q;
 	}
+	inline float GetDamage_WE() const
+	{
+		return data.damage_WE;
+	}
 	inline Type GetType() const
 	{
-		return type;
+		return data.type;
+	}
+	inline Type GetSubType() const
+	{
+		return data.subType;
 	}
 	inline float GetHP() const
 	{
@@ -80,5 +94,30 @@ public:
 	inline float GetMaxMP() const
 	{
 		return data.maxmp;
+	}
+	inline void AddHP(float amount)
+	{
+		data.hp += amount;
+		if (data.hp > data.maxhp)
+		{
+			data.hp = data.maxhp;
+		}
+	}
+	inline void AddMP(float amount)
+	{
+		data.mp += amount;
+		if (data.mp > data.maxmp)
+		{
+			data.mp = data.maxmp;
+		}
+	}
+	inline bool ReduceMP(float amount)
+	{
+		if ((data.mp - amount) < 0)
+		{
+			return false;
+		}
+		data.mp -= amount;
+		return true;
 	}
 };

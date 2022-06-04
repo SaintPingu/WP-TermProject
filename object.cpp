@@ -1,10 +1,16 @@
 #include "stdafx.h"
 #include "object.h"
 
-GameObject::GameObject(ObjectImage& image, float scaleX, float scaleY, Vector2 pos)
+GameObject::GameObject(ObjectImage& image, Vector2 pos)
 {
 	this->image = &image;
-	this->image->ScaleImage(scaleX, scaleY);
+	bodySize = this->image->GetBodySize();
+
+	SetPos(pos);
+}
+void GameObject::Init(ObjectImage& image, Vector2 pos)
+{
+	this->image = &image;
 	bodySize = this->image->GetBodySize();
 
 	SetPos(pos);
@@ -55,7 +61,7 @@ Vector2 Lerp(Vector2 src, Vector2 dst, float alpha)
 	return transform;
 }
 
-void CalculateDamage(float& damage, Type destType, Type srcType)
+float CalculateDamage(float damage, Type destType, Type srcType)
 {
 	switch (destType)
 	{
@@ -63,13 +69,13 @@ void CalculateDamage(float& damage, Type destType, Type srcType)
 		switch (srcType)
 		{
 		case Type::Elec:
-			damage /= 0.8f;
-			break;
-		case Type::Fire:
-			damage /= 0.6f;
+			damage /= 1.35f;
 			break;
 		case Type::Water:
-			damage *= 1.2f;
+			damage /= 1.25f;
+			break;
+		case Type::Fire:
+			damage *= 1.15f;
 			break;
 		default:
 			assert(0);
@@ -80,13 +86,13 @@ void CalculateDamage(float& damage, Type destType, Type srcType)
 		switch (srcType)
 		{
 		case Type::Fire:
-			damage /= 0.8f;
-			break;
-		case Type::Water:
-			damage /= 0.6f;
+			damage /= 1.35f;
 			break;
 		case Type::Elec:
-			damage *= 1.2f;
+			damage /= 1.25f;
+			break;
+		case Type::Water:
+			damage *= 1.15f;
 			break;
 		default:
 			assert(0);
@@ -97,13 +103,13 @@ void CalculateDamage(float& damage, Type destType, Type srcType)
 		switch (srcType)
 		{
 		case Type::Water:
-			damage /= 0.8f;
-			break;
-		case Type::Elec:
-			damage /= 0.6f;
+			damage /= 1.35f;
 			break;
 		case Type::Fire:
-			damage *= 1.2f;
+			damage /= 1.25f;
+			break;
+		case Type::Elec:
+			damage *= 1.15f;
 			break;
 		default:
 			assert(0);
@@ -114,4 +120,6 @@ void CalculateDamage(float& damage, Type destType, Type srcType)
 		assert(0);
 		break;
 	}
+
+	return damage;
 }

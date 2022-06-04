@@ -3,8 +3,8 @@
 
 typedef struct BulletData {
 	Type bulletType = Type::Empty;
-	int damage = 0;
-	int speed = 0;
+	float damage = 0;
+	float speed = 0;
 }BulletData;
 
 class BulletController abstract : public ISprite {
@@ -17,10 +17,9 @@ protected:
 		Dir dir = Dir::Empty;
 		Vector2 unitVector;
 
-		RECT rectBody = { 0, };
-		RECT rectRotBody = { 0, };
+		FRECT rectBody = { 0, };
+		FRECT rectRotBody = { 0, };
 		RECT rectImage = { 0, };
-		POINT posCenter = { 0, };
 		Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data);
 	public:
 		Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data, Dir dir) : Bullet(center, bulletSize, rectImage, data) { this->dir = dir; };
@@ -29,8 +28,9 @@ protected:
 
 		void Paint(HDC hdc, const ObjectImage& bulletImage, const RECT& rectWindow);
 		bool Move(const RECT& rectWindow);
+		bool IsCollide(const RECT& rect) const;
 
-		inline int GetDamage() const
+		inline float GetDamage() const
 		{
 			return data.damage;
 		}
@@ -40,16 +40,13 @@ protected:
 		}
 		inline RECT GetRect() const
 		{
-			return rectBody;
-		}
-		inline POINT GetPos() const
-		{
-			return posCenter;
+			return rectRotBody;
 		}
 		inline Type GetType() const
 		{
 			return data.bulletType;
 		}
+		POINT GetPos() const;
 	};
 
 	BulletController(const RECT& rectDisplay, const ObjectImage& bulletImage);
@@ -62,12 +59,14 @@ protected:
 
 	RECT GetRectImage(Dir dir) const;
 	void SetRectImage(int frame);
+	void Pop(size_t& index);
 public:
 
 	void Paint(HDC hdc);
 
 	void CreateBullet(POINT center, const BulletData& data, Dir dir);
 	void CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg);
+	void DestroyCollideBullet(const RECT& rect);
 
 	virtual void Move() abstract;
 };

@@ -11,12 +11,11 @@ extern EffectManager* effects;
 BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data)
 {
 	this->rectImage = rectImage;
-	this->posCenter = center;
 	this->data = data;
 
-	rectBody.left = center.x - (bulletSize.x / 2);
+	rectBody.left = (float)center.x - ((float)bulletSize.x / 2);
 	rectBody.right = rectBody.left + bulletSize.x;
-	rectBody.top = center.y - (bulletSize.y / 2);
+	rectBody.top = (float)center.y - ((float)bulletSize.y / 2);
 	rectBody.bottom = rectBody.top + bulletSize.y;
 	rectRotBody = rectBody;
 }
@@ -48,8 +47,8 @@ void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage, co
 }
 bool BulletController::Bullet::Move(const RECT& rectDisplay)
 {
-	int moveX = 0;
-	int moveY = 0;
+	float moveX = 0;
+	float moveY = 0;
 	switch (dir)
 	{
 	case Dir::Empty:
@@ -97,8 +96,6 @@ bool BulletController::Bullet::Move(const RECT& rectDisplay)
 	rectRotBody.right += moveX;
 	rectRotBody.top += moveY;
 	rectRotBody.bottom += moveY;
-	posCenter.x += moveX;
-	posCenter.y += moveY;
 
 	switch (dir)
 	{
@@ -148,7 +145,20 @@ bool BulletController::Bullet::Move(const RECT& rectDisplay)
 
 	return true;
 }
+bool BulletController::Bullet::IsCollide(const RECT& rect) const
+{
+	RECT notuse = { 0, };
+	RECT rectBody = (RECT)rectRotBody;
+	return IntersectRect(&notuse, &rect, &rectBody);
+}
 
+POINT BulletController::Bullet::GetPos() const
+{
+	const int width = rectBody.right - rectBody.left;
+	const int height = rectBody.bottom - rectBody.top;
+	
+	return { (LONG)rectBody.left + (width / 2), (LONG)rectBody.top + (height / 2) };
+}
 
 
 RECT BulletController::GetRectImage(Dir dir) const
@@ -192,13 +202,15 @@ void PlayerBullet::Move()
 	{
 		if (enemies->CheckHit(bullets.at(i)->GetRect(), bullets.at(i)->GetDamage(), bullets.at(i)->GetType(), bullets[i]->GetPos()) == true)
 		{
-			bullets[i--] = bullets.back();
-			bullets.pop_back();
+			if (player->IsUsingSkill() == false)
+			{
+				player->AddMP(0.15f);
+			}
+			BulletController::Pop(i);
 		}
 		else if(bullets.at(i)->Move(*rectDisplay) == false)
 		{
-			bullets[i--] = bullets.back();
-			bullets.pop_back();
+			BulletController::Pop(i);
 		}
 	}
 }
@@ -209,14 +221,27 @@ void EnemyBullet::Move()
 		if (player->IsCollide(bullets.at(i)->GetRect()) == true)
 		{
 			player->Hit(bullets.at(i)->GetDamage(), bullets.at(i)->GetType());
-			effects->CreateHitEffect(bullets[i]->GetPos(), bullets.at(i)->GetType());
-			bullets[i--] = bullets.back();
-			bullets.pop_back();
+			effects->CreateHitEffect(bullets.at(i)->GetPos(), bullets.at(i)->GetType());
+			BulletController::Pop(i);
 		}
 		else if (bullets.at(i)->Move(*rectDisplay) == false)
 		{
-			bullets[i--] = bullets.back();
-			bullets.pop_back();
+			BulletController::Pop(i);
+		}
+	}
+}
+void BulletController::Pop(size_t& index)
+{
+	bullets[index--] = bullets.back();
+	bullets.pop_back();
+}
+void BulletController::DestroyCollideBullet(const RECT& rect)
+{
+	for (size_t i = 0; i < bullets.size(); ++i)
+	{
+		if (bullets.at(i)->IsCollide(rect) == true)
+		{
+			BulletController::Pop(i);
 		}
 	}
 }

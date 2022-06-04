@@ -10,7 +10,7 @@ extern GameData gameData;
 extern Player* player;
 extern EffectManager* effects;
 
-Enemy::Enemy(ObjectImage& image, float scaleX, float scaleY, Vector2 pos, EnemyData data) : GameObject(image, scaleX, scaleY, pos)
+Enemy::Enemy(ObjectImage& image, Vector2 pos, EnemyData data) : GameObject(image, pos)
 {
 	StartMove();
 	this->data = data;
@@ -284,7 +284,7 @@ void Melee::CheckAtkDelay()
 }
 void Range::CheckAtkDelay()
 {
-	if (IsMove() == false)
+	if (IsMove() == false)	
 	{
 		data.crnt_atkDelay -= ELAPSE_MOVE_OBJECT;
 		if (IsAtkDelayClear() == true)
@@ -310,9 +310,10 @@ void Range::Fire()
 	bulletData.damage = data.damage;
 	bulletData.speed = data.bulletSpeed;
 
-	Vector2 unitVector = { 0, 1 };
+	Vector2 unitVector = Vector2::Down();
 	int randDegree = (rand() % 10) - 5;
 
+	unitVector = Rotate(unitVector, randDegree);
 	enemies->CreateBullet(bulletPos, bulletData, unitVector);
 	unitVector = Rotate(unitVector, 20);
 	enemies->CreateBullet(bulletPos, bulletData, unitVector);
@@ -325,38 +326,139 @@ void Range::Fire()
 
 
 
-
-EnemyController::EnemyController(const RECT& rectDisplay)
+void EnemyController::Pop(size_t& index)
 {
-	image_beedrill.Load(L"images\\sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
-	image_zapdos.Load(L"images\\sprite_zapdos.png", { 58,58 }, { 12,12 }, { 36,46 });
-	image_zapdos_bullet.Load(L"images\\bullet_zapdos.png", { 14,14 });
-	
-	image_wingull.Load(L"images\\sprite_wingull.png", { 34,33 }, { 4,6 }, { 28,22 });
-	image_seadra.Load(L"images\\sprite_seadra.png", { 29,31 }, { 3,3 }, { 25,28 });
-	image_seadra_bullet.Load(L"images\\bullet_seadra.png", { 14,14 });
-	image_seadra_bullet.ScaleImage(1.2f, 1.2f);
-
-	image_ledyba.Load(L"images\\sprite_ledyba.png", { 37,37 }, { 6,6 }, { 27,27 });
-	image_latias.Load(L"images\\sprite_latias.png", { 44,34 }, { 2,4 }, { 42,29 });
-	image_latias_bullet.Load(L"images\\bullet_latias.png", { 14,14 });
-	image_latias_bullet.ScaleImage(0.8f, 0.8f);
-
+	effects->CreateExplodeEffect(enemies.at(index)->GetPosCenter(), enemies.at(index)->GetType());
+	enemies[index--] = enemies.back();
+	enemies.pop_back();
+}
+EnemyController::EnemyController()
+{
 	switch (gameData.stage)
 	{
 	case Stage::Electric:
-		bullets = new EnemyBullet(rectDisplay, image_zapdos_bullet);
+		meleeData.type = Type::Elec;
+		rangeData.type = Type::Elec;
+		imgMelee.Load(L"images\\sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
+		imgMelee.ScaleImage(1.2f, 1.2f);
+		imgRange.Load(L"images\\sprite_zapdos.png", { 58,58 }, { 12,12 }, { 36,46 });
+		imgRangeBullet.Load(L"images\\bullet_zapdos.png", { 14,14 });
+		imgRangeBullet.ScaleImage(0.9f, 0.9f);
+		createDelay_Melee = 1500;
+		createDelay_Range = 3000; 
+		createAmount_Melee = 6;
+		createAmount_Range = 7;
+
+		meleeData.hp = 5;
+		meleeData.speed = 1.5f;
+		meleeData.atkDelay = 1000;
+		meleeData.damage = 2;
+
+		meleeData.frameNum_Idle = 0;
+		meleeData.frameNum_IdleMax = 2;
+		meleeData.frameNum_Atk = 3;
+		meleeData.frameNum_AtkMax = 4;
+
+		rangeData.hp = 4.25f;
+		rangeData.speed = 2;
+		rangeData.atkDelay = 2000;
+		rangeData.damage = 1;
+
+		rangeData.frameNum_Idle = 0;
+		rangeData.frameNum_IdleMax = 2;
+		rangeData.frameNum_Atk = 3;
+		rangeData.frameNum_AtkMax = 4;
+		rangeData.frameNum_AtkRev = 4;
+		rangeData.bulletSpeed = 4;
+		meleeData.frameNum_AtkRev = 3;
 		break;
 	case Stage::Water:
-		bullets = new EnemyBullet(rectDisplay, image_seadra_bullet);
+		meleeData.type = Type::Water;
+		rangeData.type = Type::Water;
+		imgMelee.Load(L"images\\sprite_wingull.png", { 34,33 }, { 4,6 }, { 28,22 });
+		imgMelee.ScaleImage(1.2f, 1.2f);
+		imgRange.Load(L"images\\sprite_seadra.png", { 29,31 }, { 3,3 }, { 25,28 });
+		imgRange.ScaleImage(1.2f, 1.2f);
+		imgRangeBullet.Load(L"images\\bullet_seadra.png", { 14,14 });
+		imgRangeBullet.ScaleImage(1.2f, 1.2f);
+		createDelay_Melee = 1150;
+		createDelay_Range = 3250;
+		createAmount_Melee = 8;
+		createAmount_Range = 6;
+
+		meleeData.hp = 2.85f;
+		meleeData.speed = 2;
+		meleeData.atkDelay = 700;
+		meleeData.damage = 1.5f;
+
+		meleeData.frameNum_Idle = 0;
+		meleeData.frameNum_IdleMax = 2;
+		meleeData.frameNum_Atk = 3;
+		meleeData.frameNum_AtkMax = 4;
+		meleeData.frameNum_AtkRev = 3;
+
+		rangeData.hp = 5;
+		rangeData.speed = 0.7f;
+		rangeData.atkDelay = 2000;
+		rangeData.damage = 1.8f;
+
+		rangeData.frameNum_Idle = 0;
+		rangeData.frameNum_IdleMax = 2;
+		rangeData.frameNum_Atk = 3;
+		rangeData.frameNum_AtkMax = 6;
+		rangeData.frameNum_AtkRev = 3;
+		rangeData.bulletSpeed = 3;
 		break;
 	case Stage::Fire:
-		bullets = new EnemyBullet(rectDisplay, image_latias_bullet);
+		meleeData.type = Type::Fire;
+		rangeData.type = Type::Fire;
+		imgMelee.Load(L"images\\sprite_ledyba.png", { 37,37 }, { 6,6 }, { 27,27 });
+		imgMelee.ScaleImage(1.2f, 1.2f);
+		imgRange.Load(L"images\\sprite_latias.png", { 44,34 }, { 2,4 }, { 42,29 });
+		imgRange.ScaleImage(1.3f, 1.3f);
+		imgRangeBullet.Load(L"images\\bullet_latias.png", { 14,14 });
+		imgRangeBullet.ScaleImage(0.8f, 0.8f);
+		createDelay_Melee = 2000;
+		createDelay_Range = 3000;
+		createAmount_Melee = 6;
+		createAmount_Range = 5;
+
+		meleeData.hp = 7;
+		meleeData.speed = 1.65f;
+		meleeData.atkDelay = 1250;
+		meleeData.damage = 1.2f;
+
+		meleeData.frameNum_Idle = 0;
+		meleeData.frameNum_IdleMax = 1;
+		meleeData.frameNum_Atk = 2;
+		meleeData.frameNum_AtkMax = 5;
+		meleeData.frameNum_AtkRev = 5;
+
+		rangeData.hp = 7.25f;
+		rangeData.speed = 0.5f;
+		rangeData.atkDelay = 1250;
+		rangeData.damage = 0.75f;
+
+		rangeData.frameNum_Idle = 0;
+		rangeData.frameNum_IdleMax = 0;
+		rangeData.frameNum_Atk = 1;
+		rangeData.frameNum_AtkMax = 2;
+		rangeData.frameNum_AtkRev = 2;
+		rangeData.bulletSpeed = 3.5f;
 		break;
 	default:
 		assert(0);
 		break;
 	}
+
+	const float randHP_Melee = (float)(rand() % 6) / 10;
+	const float randHP_Range = (float)(rand() % 6) / 10;
+	meleeData.hp += randHP_Melee;
+	rangeData.hp += randHP_Range;
+}
+void EnemyController::Init(const RECT& rectDisplay)
+{
+	bullets = new EnemyBullet(rectDisplay, imgRangeBullet);
 }
 
 void EnemyController::CreateMelee()
@@ -368,80 +470,13 @@ void EnemyController::CreateMelee()
 	}
 	delay_Melee = 0;
 
-	int createCount = 5;
-	EnemyData data;
-
-	switch (gameData.stage)
-	{
-	case Stage::Electric:
-		data.type = Type::Elec;
-		data.hp = 4;
-		data.speed = 1.5f;
-		data.atkDelay = 1000;
-		data.damage = 2;
-		data.frameNum_Idle = 0;
-		data.frameNum_IdleMax = 2;
-		data.frameNum_Atk = 3;
-		data.frameNum_AtkMax = 4;
-		data.frameNum_AtkRev = 3;
-		break;
-	case Stage::Water:
-		data.type = Type::Water;
-		data.hp = 3;
-		data.speed = 2;
-		data.atkDelay = 700;
-		data.damage = 1.5f;
-		data.frameNum_Idle = 0;
-		data.frameNum_IdleMax = 2;
-		data.frameNum_Atk = 3;
-		data.frameNum_AtkMax = 4;
-		data.frameNum_AtkRev = 3;
-		break;
-	case Stage::Fire:
-		data.type = Type::Fire;
-		data.hp = 6;
-		data.speed = 1.7f;
-		data.atkDelay = 850;
-		data.damage = 1.5f;
-		data.frameNum_Idle = 0;
-		data.frameNum_IdleMax = 1;
-		data.frameNum_Atk = 2;
-		data.frameNum_AtkMax = 5;
-		data.frameNum_AtkRev = 5;
-		break;
-	default:
-		assert(0);
-		break;
-	}
-
-	for (int i = 0; i < createCount; ++i)
+	for (int i = 0; i < createAmount_Melee; ++i)
 	{
 		float xPos = rand() % WINDOWSIZE_X;
 		float yPos = -(rand() % 100);
-		switch (gameData.stage)
-		{
-		case Stage::Electric:
-		{
-			Melee* enemy = new Melee(image_beedrill, 1.2f, 1.2f, { xPos, yPos }, data);
-			enemies.emplace_back(enemy);
-		}
-		break;
-		case Stage::Water:
-		{
-			Melee* enemy = new Melee(image_wingull, 1.2f, 1.2f, { xPos, yPos }, data);
-			enemies.emplace_back(enemy);
-		}
-		break;
-		case Stage::Fire:
-		{
-			Melee* enemy = new Melee(image_ledyba, 1.2f, 1.2f, { xPos, yPos }, data);
-			enemies.emplace_back(enemy);
-		}
-		break;
-		default:
-			assert(0);
-			break;
-		}
+
+		Melee* enemy = new Melee(imgMelee, { xPos, yPos }, meleeData);
+		enemies.emplace_back(enemy);
 	}
 }
 void EnemyController::CreateRange()
@@ -453,84 +488,14 @@ void EnemyController::CreateRange()
 	}
 	delay_Range = 0;
 
-	int createCount = 3;
-	EnemyData data;
-
-	switch (gameData.stage)
+	for (int i = 0; i < createAmount_Range; ++i)
 	{
-	case Stage::Electric:
-		data.type = Type::Elec;
-		data.hp = 6;
-		data.speed = 1;
-		data.atkDelay = 2000;
-		data.damage = 1;
-		data.frameNum_Idle = 0;
-		data.frameNum_IdleMax = 2;
-		data.frameNum_Atk = 3;
-		data.frameNum_AtkMax = 4;
-		data.frameNum_AtkRev = 4;
-		data.bulletSpeed = 4;
-		break;
-	case Stage::Water:
-		data.type = Type::Water;
-		data.hp = 8;
-		data.speed = 0.7f;
-		data.atkDelay = 3000;
-		data.damage = 1.5f;
-		data.frameNum_Idle = 0;
-		data.frameNum_IdleMax = 2;
-		data.frameNum_Atk = 3;
-		data.frameNum_AtkMax = 6;
-		data.frameNum_AtkRev = 3;
-		data.bulletSpeed = 3;
-		break;
-	case Stage::Fire:
-		data.type = Type::Fire;
-		data.hp = 10;
-		data.speed = 1.3f;
-		data.atkDelay = 1800;
-		data.damage = 0.8f;
-		data.frameNum_Idle = 0;
-		data.frameNum_IdleMax = 0;
-		data.frameNum_Atk = 1;
-		data.frameNum_AtkMax = 2;
-		data.frameNum_AtkRev = 2;
-		data.bulletSpeed = 4.5f;
-		break;
-	default:
-		assert(0);
-		break;
-	}
-
-	for (int i = 0; i < createCount; ++i)
-	{
-		data.maxYPos = (rand() % 100) + 50;
+		rangeData.maxYPos = (rand() % 100) + 50;
 		float xPos = (rand() % (WINDOWSIZE_X - 100)) + 50;
 		float yPos = -(rand() % 100);
-		switch (gameData.stage)
-		{
-		case Stage::Electric:
-		{
-			Range* enemy = new Range(image_zapdos, 1, 1, { xPos, yPos }, data);
-			enemies.emplace_back(enemy);
-		}
-			break;
-		case Stage::Water:
-		{
-			Range* enemy = new Range(image_seadra, 1.2f, 1.2f, { xPos, yPos }, data);
-			enemies.emplace_back(enemy);
-		}
-		break;
-		case Stage::Fire:
-		{
-			Range* enemy = new Range(image_latias, 1.3f, 1.3f, { xPos, yPos }, data);
-			enemies.emplace_back(enemy);
-		}
-		break;
-		default:
-			assert(0);
-			break;
-		}
+
+		Range* enemy = new Range(imgRange, { xPos, yPos }, rangeData);
+		enemies.emplace_back(enemy);
 	}
 }
 
@@ -563,12 +528,10 @@ bool EnemyController::CheckHit(const RECT& rectSrc, float damage, Type hitType, 
 		if (enemies.at(i)->IsCollide(rectSrc) == true)
 		{
 			effects->CreateHitEffect(effectPoint, hitType);
-			CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
-			if (enemies.at(i)->Hit(damage) == true)
+			float calDamage = CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
+			if (enemies.at(i)->Hit(calDamage) == true)
 			{
-				effects->CreateExplodeEffect(enemies.at(i)->GetPosCenter(), enemies.at(i)->GetType());
-				enemies[i--] = enemies.back();
-				enemies.pop_back();
+				EnemyController::Pop(i);
 			}
 			return true;
 		}
@@ -586,12 +549,10 @@ void EnemyController::CheckHitAll(const RECT& rectSrc, float damage, Type hitTyp
 			effectPoint.x += (rand() % 20) - 10;
 			effectPoint.y += (rand() % 20) - 10;
 			effects->CreateHitEffect(effectPoint, hitType);
-			CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
-			if (enemies.at(i)->Hit(damage) == true)
+			float calDamage = CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
+			if (enemies.at(i)->Hit(calDamage) == true)
 			{
-				effects->CreateExplodeEffect(enemies.at(i)->GetPosCenter(), enemies.at(i)->GetType());
-				enemies[i--] = enemies.back();
-				enemies.pop_back();
+				EnemyController::Pop(i);
 			}
 		}
 	}
@@ -615,4 +576,8 @@ void EnemyController::CreateBullet(POINT center, const BulletData& data, Dir dir
 void EnemyController::MoveBullets()
 {
 	bullets->Move();
+}
+void EnemyController::DestroyCollideBullet(const RECT& rect)
+{
+	bullets->DestroyCollideBullet(rect);
 }

@@ -17,7 +17,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 
 	HWND hWnd;
 	MSG Message;
-	WNDCLASSEX WndClass;
+	WNDCLASSEX WndClass{};
 	hInst = hInstance;
 
 	LPCTSTR lpszClass = L"Window Class Name";
@@ -79,46 +79,37 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	static RECT rectWindow;
 	static RECT rectDisplay;
-	static ObjectImage moltres;
-	static ObjectImage articuno;
-	static ObjectImage thunder;
-	static ObjectImage bullet;
 	static CImage bkground;
 
 	switch (uMsg)
 	{
 	case WM_CREATE:
 	{
-		gameData.stage = Stage::Water;
+		gameData.stage = Stage::Fire;
 
 		bkground.Load(L"images\\background.png");
 		GetClientRect(hWnd, &rectWindow);
-		moltres.Load(_T("images\\sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,35 });
-		articuno.Load(_T("images\\sprite_articuno.png"), { 69, 69 }, { 29, 28 }, { 13,29 });
-		articuno.ScaleImage(1.2f, 1.2f);
-		thunder.Load(_T("images\\sprite_thunder.png"), { 53, 48 }, { 19, 10 }, { 17,24 });
+
+		enemies = new EnemyController();
+		effects = new EffectManager();
+
+		PlayerData playerData;
+		playerData.type = Type::Fire;
+		playerData.subType = Type::Water;
+		player = new Player(playerData);
 
 		gui = new GUIManager(rectWindow);
 		rectDisplay = gui->GetRectDisplay();
 
-		enemies = new EnemyController(rectDisplay);
-		effects = new EffectManager();
-		PlayerData playerData;
-		playerData.maxhp = 100;
-		playerData.hp = 100;
-		playerData.maxmp = 100;
-		playerData.mp = 30;
-		playerData.speed = 3;
-		playerData.damage = 1;
-		playerData.damage_Q = 0.1f;
-		player = new Player(hWnd, rectDisplay, articuno, 1.2f, 1.2f, { 200, 500 }, playerData);
-
+		player->Init(rectDisplay);
+		enemies->Init(rectDisplay);
 
 		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
 		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
 		SetTimer(hWnd, TIMERID_SHOOT_BULLET, ELAPSE_SHOOT_BULLET, T_FireBullet);
 		SetTimer(hWnd, TIMERID_MOVE_OBJECT, ELAPSE_MOVE_OBJECT, T_MoveObject);
 		SetTimer(hWnd, TIMERID_EFFECT, ELAPSE_EFFECT, T_Effect);
+		SetTimer(hWnd, TIMERID_GUI, ELAPSE_GUI, T_GUI);
 	}
 	break;
 	case WM_ERASEBKGND:

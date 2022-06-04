@@ -20,25 +20,30 @@ private:
 		}
 	};
 
-	Player* player = nullptr;
 	Effect* skillEffect = nullptr;
 	Skill crntSkill = Skill::Empty;
-	Type type = Type::Empty;
+
+	int skillCount = 0;
 
 	EffectImage imgSkill_Elec_Q;
 	EffectImage imgSkill_Fire_Q;
 	EffectImage imgSkill_Water_Q;
 
+	void FireBySector();
+	void FireByCircle();
+
 	RECT GetRectBody() const;
 public:
-	SkillManager(Player* player, Type type);
+	SkillManager();
 
-	void UseSkill(Skill skill);
+	void UseSkill();
 	void Paint(HDC hdc) const;
 	void Animate();
 
-	inline void ActiveSkill(Skill skill)
+	void ActiveSkill(Skill skill);
+	
+	inline bool IsUsingSkill() const
 	{
-		this->crntSkill = skill;
+		return (crntSkill != Skill::Empty) ? true : false;
 	}
 };

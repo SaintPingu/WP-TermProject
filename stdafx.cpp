@@ -25,7 +25,7 @@ bool OutOfRange(const RECT& rect, const RECT& rectRange)
 void GetRotationPos(const RECT& rect, const Vector2& unitVector, Vector2 vPoints[4])
 {
 	int rotationDir = unitVector.x > 0 ? 1 : -1;
-	float theta = Vector2::GetTheta(unitVector, Vector2::Forward());
+	float theta = Vector2::GetTheta(unitVector, Vector2::Up());
 	float rotationDegree = RADIAN_TO_DEGREE(theta) * rotationDir;
 
 	Vector2 posCenter;

@@ -7,21 +7,21 @@ class EnemyBullet;
 
 typedef struct EnemyData {
 	Type type = Type::Empty;
+
+	int atkDelay = 0;
+	int crnt_atkDelay = 0;
+	float bulletSpeed = 0;
+
+	float hp = 0;
+	float speed = 0;
+	float damage = 0;
+
+	int maxYPos = 0;
 	int frameNum_Idle = 0;
 	int frameNum_IdleMax = 0;
 	int frameNum_Atk = 0;
 	int frameNum_AtkMax = 0;
 	int frameNum_AtkRev = 0;
-	
-	int atkDelay = 0;
-	int crnt_atkDelay = 0;
-	float bulletSpeed = 0;
-
-	int hp = 0;
-	float speed = 0;
-	float damage = 0;
-
-	int maxYPos = 0;
 }EnemyData;
 
 class Enemy abstract : public GameObject, public IAnimatable, public IMovable {
@@ -36,7 +36,7 @@ protected:
 	EnemyData data;
 	void Paint(HDC hdc, int spriteRow);
 public:
-	Enemy(ObjectImage& image, float scaleX, float scaleY, Vector2 pos, EnemyData data);
+	Enemy(ObjectImage& image, Vector2 pos, EnemyData data);
 	virtual void Paint(HDC hdc) abstract;
 	virtual void Move() override;
 	virtual void CheckAtkDelay() abstract;
@@ -56,7 +56,7 @@ private:
 	void SetPosDest();
 	bool CheckCollidePlayer();
 public:
-	Melee(ObjectImage& image, float scaleX, float scaleY, Vector2 pos, EnemyData data) : Enemy(image, scaleX, scaleY, pos, data) {};
+	Melee(ObjectImage& image, Vector2 pos, EnemyData data) : Enemy(image, pos, data) {};
 	void Paint(HDC hdc) override;
 	void Move() override;
 	void CheckAtkDelay() override;
@@ -69,7 +69,7 @@ private:
 	void SetPosDest();
 	void Fire();
 public:
-	Range(ObjectImage& image, float scaleX, float scaleY, Vector2 pos, EnemyData data) : Enemy(image, scaleX, scaleY, pos, data) {};
+	Range(ObjectImage& image, Vector2 pos, EnemyData data) : Enemy(image, pos, data) {};
 	void Paint(HDC hdc) override;
 	void Move() override;
 	void CheckAtkDelay() override;
@@ -81,24 +81,24 @@ private:
 
 	EnemyBullet* bullets = nullptr;
 
-	const int createDelay_Melee = 2000;
-	const int createDelay_Range = 2500;
+	EnemyData meleeData;
+	EnemyData rangeData;
+
+	int createDelay_Melee = 0;
+	int createDelay_Range = 0;
 	int delay_Melee = 0;
 	int delay_Range = 0;
+	int createAmount_Melee = 0;
+	int createAmount_Range = 0;
 
-	ObjectImage image_beedrill;
-	ObjectImage image_zapdos;
-	ObjectImage image_zapdos_bullet;
+	ObjectImage imgMelee;
+	ObjectImage imgRange;
+	ObjectImage imgRangeBullet;
 
-	ObjectImage image_wingull;
-	ObjectImage image_seadra;
-	ObjectImage image_seadra_bullet;
-
-	ObjectImage image_ledyba;
-	ObjectImage image_latias;
-	ObjectImage image_latias_bullet;
+	void Pop(size_t& index);
 public:
-	EnemyController(const RECT& rectDisplay);
+	EnemyController();
+	void Init(const RECT& rectDisplay);
 	void CreateMelee();
 	void CreateRange();
 	void Paint(HDC hdc);
@@ -109,5 +109,6 @@ public:
 	void CheckAtkDelay();
 	void CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotate = false);
 	void CreateBullet(POINT center, const BulletData& data, Dir dir);
+	void DestroyCollideBullet(const RECT& rect);
 	void MoveBullets();
 };

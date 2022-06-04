@@ -79,6 +79,7 @@ class GUIImage : public Image {
 public:
 	void Load(const WCHAR* fileName, POINT imgSize, int alpha = 0xff);
 	void Paint(HDC hdc, const RECT& rectDest);
+	void PaintBlack(HDC hdc, const RECT& rectDest);
 	void PaintGauge(HDC hdc, const RECT& rectDest, float current, float max);
 };
 

@@ -3,7 +3,9 @@
 #include "player.h"
 #include "enemy.h"
 #include "effect.h"
+#include "bullet.h"
 
+extern Player* player;
 extern EnemyController* enemies;
 extern EffectManager* effects;
 
@@ -27,11 +29,12 @@ void SkillManager::Effect::Paint(HDC hdc, const RECT& rectBody) const
 }
 bool SkillManager::Effect::Animate()
 {
-	static int frameLoopCount = 2;
+	static int frameLoopCount = 4;
 
 	if (++frame >= imgSkill->GetMaxFrame())
 	{
-		frameLoopCount = 2;
+		frame = 0;
+		frameLoopCount = 4;
 		return false;
 	}
 
@@ -65,21 +68,22 @@ bool SkillManager::Effect::Animate()
 
 
 
-SkillManager::SkillManager(Player* player, Type type)
+SkillManager::SkillManager()
 {
-	this->player = player;
-	this->type = type;
-
+	Type type = player->GetType();
 	switch (type)
 	{
 	case Type::Elec:
 		imgSkill_Elec_Q.Load(_T("images\\sprite_skill_elec.png"), { 34,226 }, 10, 0xdf);
+		skillEffect = new Effect(imgSkill_Elec_Q, type);
 		break;
 	case Type::Fire:
 		imgSkill_Fire_Q.Load(_T("images\\sprite_skill_fire.png"), { 80,96 }, 50);
+		skillEffect = new Effect(imgSkill_Fire_Q, type);
 		break;
 	case Type::Water:
 		imgSkill_Water_Q.Load(_T("images\\skill_water.png"), { 273,843 }, 50, 0xaf);
+		skillEffect = new Effect(imgSkill_Water_Q, type);
 		break;
 	}
 }
@@ -87,7 +91,7 @@ SkillManager::SkillManager(Player* player, Type type)
 RECT SkillManager::GetRectBody() const
 {
 	RECT rectBody = { 0, };
-	switch (type)
+	switch (player->GetType())
 	{
 	case Type::Elec:
 		rectBody = player->GetRectBody();
@@ -109,10 +113,10 @@ RECT SkillManager::GetRectBody() const
 		int frame = skillEffect->GetFrame();
 		rectBody.left = 0;
 		rectBody.right = WINDOWSIZE_X;
-		rectBody.top = WINDOWSIZE_Y - (((float)frame / maxFrame) * WINDOWSIZE_Y*2);
+		rectBody.top = WINDOWSIZE_Y - (((float)frame / maxFrame) * WINDOWSIZE_Y * 2);
 		rectBody.bottom = rectBody.top + WINDOWSIZE_Y;
 	}
-		break;
+	break;
 	default:
 		assert(0);
 		break;
@@ -121,42 +125,32 @@ RECT SkillManager::GetRectBody() const
 	return rectBody;
 }
 
-void SkillManager::UseSkill(Skill skill)
+void SkillManager::UseSkill()
 {
-	if (crntSkill != Skill::Empty)
+	if (IsUsingSkill() == false)
 	{
 		return;
 	}
-	crntSkill = skill;
 
-	if (crntSkill == Skill::Identity)
+	switch (crntSkill)
 	{
-		switch (type)
-		{
-		case Type::Elec:
-			skillEffect = new Effect(imgSkill_Elec_Q, type);
-			break;
-		case Type::Fire:
-			skillEffect = new Effect(imgSkill_Fire_Q, type);
-			break;
-		case Type::Water:
-			skillEffect = new Effect(imgSkill_Water_Q, type);
-			break;
-		default:
-			assert(0);
-			break;
-		}
+	case Skill::Sector:
+		FireBySector();
+		break;
+	case Skill::Circle:
+		FireByCircle();
+		break;
+	case Skill::Identity:
+		break;
+	default:
+		assert(0);
+		break;
 	}
-	
 }
 
 void SkillManager::Paint(HDC hdc) const
 {
-	if (crntSkill == Skill::Empty)
-	{
-		return;
-	}
-	else if (skillEffect == nullptr)
+	if (crntSkill != Skill::Identity)
 	{
 		return;
 	}
@@ -167,19 +161,18 @@ void SkillManager::Paint(HDC hdc) const
 
 void SkillManager::Animate()
 {
-	if (skillEffect != nullptr)
+	if (crntSkill == Skill::Identity)
 	{
 		if (skillEffect->Animate() == false)
 		{
-			delete skillEffect;
-			skillEffect = nullptr;
 			crntSkill = Skill::Empty;
 			return;
 		}
 
 		RECT rectBody = GetRectBody();
 		rectBody.top += 20;
-		if (type == Type::Fire)
+		Type playerType = player->GetType();
+		if (playerType == Type::Fire)
 		{
 			if (skillEffect->GetFrame() < 17)
 			{
@@ -191,6 +184,102 @@ void SkillManager::Animate()
 				rectBody.right -= (rectBody.right - rectBody.left) / 2;
 			}
 		}
-		enemies->CheckHitAll(rectBody, player->GetDamage_Q(), type);
+		enemies->CheckHitAll(rectBody, player->GetDamage_Q(), player->GetType());
+		if (playerType == Type::Fire ||
+			playerType == Type::Elec)
+		{
+			enemies->DestroyCollideBullet(rectBody);
+		}
+	}
+}
+
+void SkillManager::ActiveSkill(Skill skill)
+{
+	if (IsUsingSkill() == true)
+	{
+		return;
+	}
+
+	switch (skill)
+	{
+	case Skill::Sector:
+		if (player->ReduceMP(15) == false)
+		{
+			return;
+		}
+		skillCount = 7;
+		break;
+	case Skill::Circle:
+		if (player->ReduceMP(10) == false)
+		{
+			return;
+		}
+		skillCount = 10;
+		break;
+	case Skill::Identity:
+		if (player->ReduceMP(30) == false)
+		{
+			return;
+		}
+		break;
+	default:
+		assert(0);
+		break;
+	}
+
+	crntSkill = skill;
+}
+
+void SkillManager::FireBySector()
+{
+	constexpr int bullets = 12;
+
+	RECT rectBody = player->GetRectBody();
+	BulletData bulletData;
+	bulletData.bulletType = player->GetSubType();
+	bulletData.damage = player->GetDamage_WE();
+	bulletData.speed = 10;
+
+	POINT bulletPos = { 0, };
+	bulletPos.y = rectBody.top;
+	bulletPos.y = rectBody.top;
+	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
+
+	Vector2 unitVector = Vector2::Up();
+	int startDegree = -10 - (skillCount * 10);
+	int rotationDegree = -(startDegree * 2) / bullets;
+	unitVector = Rotate(unitVector, startDegree);
+	for (int i = 0; i < bullets + 1; ++i)
+	{
+		player->CreateSubBullet(bulletPos, bulletData, unitVector, true);
+		unitVector = Rotate(unitVector, rotationDegree);
+	}
+
+	if (--skillCount <= 0)
+	{
+		skillCount = 0;
+		crntSkill = Skill::Empty;
+	}
+}
+void SkillManager::FireByCircle()
+{
+	POINT bulletPos = player->GetPosCenter();
+	BulletData bulletData;
+	bulletData.bulletType = player->GetSubType();
+	bulletData.damage = player->GetDamage_WE();
+	bulletData.speed = 10;
+
+	Vector2 unitVector = Vector2::Up();
+	unitVector = Rotate(unitVector, skillCount * 6); // Make different degree each fire
+	for (int i = 0; i < 18; ++i)
+	{
+		player->CreateSubBullet(bulletPos, bulletData, unitVector, true);
+		unitVector = Rotate(unitVector, 20);
+	}
+
+	if (--skillCount <= 0)
+	{
+		skillCount = 0;
+		crntSkill = Skill::Empty;
 	}
 }
