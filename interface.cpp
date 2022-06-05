@@ -3,8 +3,10 @@
 #include "player.h"
 #include "image.h"
 #include "timer.h"
+#include "boss.h"
 
 extern Player* player;
+extern Boss* boss;
 
 void GameStart(HWND hWnd, GameData& data, Player& player)
 {
@@ -30,7 +32,7 @@ void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData)
 	switch (wParam)
 	{
 	case _T('H'):
-		player->ShowHitbox();
+		gameData.isShowHitbox = !gameData.isShowHitbox;
 		break;
 	case _T('Q'):
 		player->ActiveSkill(Skill::Identity);
@@ -123,7 +125,8 @@ void CheckKeyUp(HWND hWnd, const WPARAM& wParam, GameData& gameData)
 
 GUIManager::GUIManager(const RECT& rectWindow)
 {
-	constexpr int fieldLength = 720; // 1m/s
+	//constexpr int fieldLength = 720; // 1m/s
+	constexpr int fieldLength = 1;
 
 	constexpr int main_guiHeight = 80;
 
@@ -267,9 +270,12 @@ void GUIManager::Paint(HDC hdc)
 	icon_W->Paint(hdc, rectSkill_W);
 	icon_E->Paint(hdc, rectSkill_E);
 
-	moveBarGUI->Paint(hdc, rectMoveBar);
-	gaugeMoveBarGUI->PaintGauge(hdc, rectGaugeMoveBar, iconMoveMinY - rectPokemonIcon.bottom, iconMoveMaxY);
-	icon_pokemon->Paint(hdc, rectPokemonIcon);
+	if (boss->IsCreated() == false)
+	{
+		moveBarGUI->Paint(hdc, rectMoveBar);
+		gaugeMoveBarGUI->PaintGauge(hdc, rectGaugeMoveBar, iconMoveMinY - rectPokemonIcon.bottom, iconMoveMaxY);
+		icon_pokemon->Paint(hdc, rectPokemonIcon);
+	}
 
 	hurtGUI_Fire.gui->Paint(hdc, *rectWindow);
 	hurtGUI_Water.gui->Paint(hdc, *rectWindow);
@@ -294,6 +300,32 @@ void GUIManager::Update()
 		rectPokemonIcon.top += corrValue;
 		rectPokemonIcon.bottom += corrValue;
 		isIconStop = true;
+
+		BossData bossData;
+		bossData.type = Type::Elec;
+		bossData.hp = 5000;
+		bossData.damage = 2;
+		bossData.speed = 1;
+		bossData.bulletSpeed[static_cast<int>(BossAct::Line)] = 6;
+		bossData.bulletSpeed[static_cast<int>(BossAct::Sector)] = 3;
+		bossData.bulletSpeed[static_cast<int>(BossAct::Circle)] = 4;
+		bossData.bulletSpeed[static_cast<int>(BossAct::Spiral)] = 5;
+		bossData.bulletSpeed[static_cast<int>(BossAct::Spread)] = 6;
+
+		bossData.actDelay = 3000;
+		bossData.crntActDelay = bossData.actDelay;
+		bossData.attackDelay[static_cast<int>(BossAct::Line)] = 40;
+		bossData.attackDelay[static_cast<int>(BossAct::Sector)] = 250;
+		bossData.attackDelay[static_cast<int>(BossAct::Circle)] = 200;
+		bossData.attackDelay[static_cast<int>(BossAct::Spiral)] = 10;
+		bossData.attackDelay[static_cast<int>(BossAct::Spread)] = 10;
+
+		bossData.frameNum_Idle = 0;
+		bossData.frameNum_IdleMax = 2;
+		bossData.frameNum_Atk = 3;
+		bossData.frameNum_AtkMax = 5;
+		bossData.frameNum_AtkRev = 5;
+		boss->Create(bossData);
 	}
 }
 RECT GUIManager::GetRectDisplay() const

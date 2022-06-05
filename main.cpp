@@ -4,6 +4,7 @@
 #include "player.h"
 #include "timer.h"
 #include "effect.h"
+#include "boss.h"
 
 void InitPaint(HWND hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBitmap, RECT& rectWindow);
 void ReleasePaint(HWND hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBitmap, RECT& rectWindow);
@@ -67,10 +68,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 }
 
 GameData gameData;
-Player* player;
-EnemyController* enemies;
-EffectManager* effects;
-GUIManager* gui;
+Player* player = nullptr;
+EnemyController* enemies = nullptr;
+EffectManager* effects = nullptr;
+GUIManager* gui = nullptr;
+Boss* boss = nullptr;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
@@ -92,9 +94,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		enemies = new EnemyController();
 		effects = new EffectManager();
+		boss = new Boss();
 
 		PlayerData playerData;
-		playerData.type = Type::Fire;
+		playerData.type = Type::Water;
 		playerData.subType = Type::Water;
 		player = new Player(playerData);
 
@@ -103,13 +106,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		player->Init(rectDisplay);
 		enemies->Init(rectDisplay);
+		boss->Init(rectDisplay);
 
 		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
 		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
-		SetTimer(hWnd, TIMERID_SHOOT_BULLET, ELAPSE_SHOOT_BULLET, T_FireBullet);
-		SetTimer(hWnd, TIMERID_MOVE_OBJECT, ELAPSE_MOVE_OBJECT, T_MoveObject);
 		SetTimer(hWnd, TIMERID_EFFECT, ELAPSE_EFFECT, T_Effect);
 		SetTimer(hWnd, TIMERID_GUI, ELAPSE_GUI, T_GUI);
+		SetTimer(hWnd, TIMERID_ANIMATION_BOSS, ELAPSE_ANIMATION_BOSS, T_AnimateBoss);
 	}
 	break;
 	case WM_ERASEBKGND:
@@ -118,6 +121,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		InitPaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
 		bkground.Draw(memDC, rectWindow);
+		boss->Paint(memDC);
 		player->Paint(memDC);
 		enemies->Paint(memDC);
 		player->PaintSkill(memDC);

@@ -12,6 +12,7 @@ protected:
 	class Bullet {
 	private:
 		BulletData data;
+		bool isSkillBullet = false;
 		bool isRotateImg = false;
 
 		Dir dir = Dir::Empty;
@@ -23,7 +24,7 @@ protected:
 		Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data);
 	public:
 		Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data, Dir dir) : Bullet(center, bulletSize, rectImage, data) { this->dir = dir; };
-		Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data, Vector2 unitVector, bool isRotateImg);
+		Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet = false);
 		~Bullet() {};
 
 		void Paint(HDC hdc, const ObjectImage& bulletImage, const RECT& rectWindow);
@@ -46,6 +47,10 @@ protected:
 		{
 			return data.bulletType;
 		}
+		inline bool IsSkillBullet() const
+		{
+			return isSkillBullet;
+		}
 		POINT GetPos() const;
 	};
 
@@ -57,15 +62,13 @@ protected:
 
 	const RECT* rectDisplay = nullptr;
 
-	RECT GetRectImage(Dir dir) const;
-	void SetRectImage(int frame);
 	void Pop(size_t& index);
 public:
 
 	void Paint(HDC hdc);
 
 	void CreateBullet(POINT center, const BulletData& data, Dir dir);
-	void CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg);
+	void CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg = false, bool isSkillBullet = false);
 	void DestroyCollideBullet(const RECT& rect);
 
 	virtual void Move() abstract;
@@ -80,4 +83,8 @@ class EnemyBullet : public BulletController {
 public:
 	EnemyBullet(const RECT& rectDisplay, const ObjectImage& bulletImage) : BulletController(rectDisplay, bulletImage) {};
 	void Move() override;
+	POINT GetBulletSize() const
+	{
+		return bulletImage.GetDrawSize();
+	}
 };

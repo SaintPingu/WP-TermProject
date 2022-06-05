@@ -22,6 +22,7 @@ private:
 
 	Effect* skillEffect = nullptr;
 	Skill crntSkill = Skill::Empty;
+	bool isIdentity = false;
 
 	int skillCount = 0;
 
@@ -29,8 +30,8 @@ private:
 	EffectImage imgSkill_Fire_Q;
 	EffectImage imgSkill_Water_Q;
 
-	void FireBySector();
-	void FireByCircle();
+	void ShotBySector();
+	void ShotByCircle();
 
 	RECT GetRectBody() const;
 public:
@@ -44,6 +45,6 @@ public:
 	
 	inline bool IsUsingSkill() const
 	{
-		return (crntSkill != Skill::Empty) ? true : false;
+		return (crntSkill == Skill::Sector || crntSkill == Skill::Circle) ? true : false;
 	}
 };

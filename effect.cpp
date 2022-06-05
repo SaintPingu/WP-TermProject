@@ -96,3 +96,10 @@ bool EffectManager::Effect::Animate()
 
 	return true;
 }
+
+
+void GetRandEffectPoint(POINT& effectPoint)
+{
+	effectPoint.x += (rand() % 20) - 10;
+	effectPoint.y += (rand() % 20) - 10;
+}

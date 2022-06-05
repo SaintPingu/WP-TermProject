@@ -4,8 +4,12 @@
 #include "enemy.h"
 #include "effect.h"
 #include "bullet.h"
+#include "boss.h"
+#include "interface.h"
 
+extern GameData gameData;
 extern Player* player;
+extern Boss* boss;
 extern EnemyController* enemies;
 extern EffectManager* effects;
 
@@ -135,22 +139,26 @@ void SkillManager::UseSkill()
 	switch (crntSkill)
 	{
 	case Skill::Sector:
-		FireBySector();
+		ShotBySector();
 		break;
 	case Skill::Circle:
-		FireByCircle();
-		break;
-	case Skill::Identity:
+		ShotByCircle();
 		break;
 	default:
 		assert(0);
 		break;
 	}
+
+	if (--skillCount <= 0)
+	{
+		skillCount = 0;
+		crntSkill = Skill::Empty;
+	}
 }
 
 void SkillManager::Paint(HDC hdc) const
 {
-	if (crntSkill != Skill::Identity)
+	if (isIdentity == false)
 	{
 		return;
 	}
@@ -161,17 +169,17 @@ void SkillManager::Paint(HDC hdc) const
 
 void SkillManager::Animate()
 {
-	if (crntSkill == Skill::Identity)
+	if (isIdentity == true)
 	{
 		if (skillEffect->Animate() == false)
 		{
-			crntSkill = Skill::Empty;
+			isIdentity = false;
 			return;
 		}
 
 		RECT rectBody = GetRectBody();
 		rectBody.top += 20;
-		Type playerType = player->GetType();
+		const Type playerType = player->GetType();
 		if (playerType == Type::Fire)
 		{
 			if (skillEffect->GetFrame() < 17)
@@ -184,7 +192,16 @@ void SkillManager::Animate()
 				rectBody.right -= (rectBody.right - rectBody.left) / 2;
 			}
 		}
-		enemies->CheckHitAll(rectBody, player->GetDamage_Q(), player->GetType());
+
+		const float damage = player->GetDamage_Q();
+		for (int i = 0; i < 5; ++i)
+		{
+			if (boss->CheckHit(rectBody, damage, playerType) == false)
+			{
+				break;
+			}
+		}
+		enemies->CheckHitAll(rectBody, damage, playerType);
 		if (playerType == Type::Fire ||
 			playerType == Type::Elec)
 		{
@@ -195,7 +212,14 @@ void SkillManager::Animate()
 
 void SkillManager::ActiveSkill(Skill skill)
 {
-	if (IsUsingSkill() == true)
+	if (skill == Skill::Identity)
+	{
+		if (isIdentity == true)
+		{
+			return;
+		}
+	}
+	else if (IsUsingSkill() == true)
 	{
 		return;
 	}
@@ -208,6 +232,7 @@ void SkillManager::ActiveSkill(Skill skill)
 			return;
 		}
 		skillCount = 7;
+		crntSkill = skill;
 		break;
 	case Skill::Circle:
 		if (player->ReduceMP(10) == false)
@@ -215,71 +240,61 @@ void SkillManager::ActiveSkill(Skill skill)
 			return;
 		}
 		skillCount = 10;
+		crntSkill = skill;
 		break;
 	case Skill::Identity:
 		if (player->ReduceMP(30) == false)
 		{
 			return;
 		}
+		isIdentity = true;
 		break;
 	default:
 		assert(0);
 		break;
 	}
-
-	crntSkill = skill;
 }
 
-void SkillManager::FireBySector()
+void SkillManager::ShotBySector()
 {
-	constexpr int bullets = 12;
+	constexpr int bulletCount = 12;
 
-	RECT rectBody = player->GetRectBody();
 	BulletData bulletData;
 	bulletData.bulletType = player->GetSubType();
 	bulletData.damage = player->GetDamage_WE();
 	bulletData.speed = 10;
 
+	const RECT rectBody = player->GetRectBody();
 	POINT bulletPos = { 0, };
-	bulletPos.y = rectBody.top;
 	bulletPos.y = rectBody.top;
 	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
 
 	Vector2 unitVector = Vector2::Up();
-	int startDegree = -10 - (skillCount * 10);
-	int rotationDegree = -(startDegree * 2) / bullets;
+	const float startDegree = 10 + (skillCount * 10);
+	const float rotationDegree = -(startDegree * 2) / bulletCount;
 	unitVector = Rotate(unitVector, startDegree);
-	for (int i = 0; i < bullets + 1; ++i)
+	for (int i = 0; i < bulletCount + 1; ++i)
 	{
-		player->CreateSubBullet(bulletPos, bulletData, unitVector, true);
+		player->CreateSubBullet(bulletPos, bulletData, unitVector, true, true);
 		unitVector = Rotate(unitVector, rotationDegree);
 	}
-
-	if (--skillCount <= 0)
-	{
-		skillCount = 0;
-		crntSkill = Skill::Empty;
-	}
 }
-void SkillManager::FireByCircle()
+void SkillManager::ShotByCircle()
 {
-	POINT bulletPos = player->GetPosCenter();
+	constexpr int bulletCount = 18;
+
 	BulletData bulletData;
 	bulletData.bulletType = player->GetSubType();
 	bulletData.damage = player->GetDamage_WE();
 	bulletData.speed = 10;
 
+	const POINT bulletPos = player->GetPosCenter();
+
 	Vector2 unitVector = Vector2::Up();
 	unitVector = Rotate(unitVector, skillCount * 6); // Make different degree each fire
-	for (int i = 0; i < 18; ++i)
+	for (int i = 0; i < bulletCount; ++i)
 	{
-		player->CreateSubBullet(bulletPos, bulletData, unitVector, true);
-		unitVector = Rotate(unitVector, 20);
-	}
-
-	if (--skillCount <= 0)
-	{
-		skillCount = 0;
-		crntSkill = Skill::Empty;
+		player->CreateSubBullet(bulletPos, bulletData, unitVector, true, true);
+		unitVector = Rotate(unitVector, 360 / bulletCount);
 	}
 }

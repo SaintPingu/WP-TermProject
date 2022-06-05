@@ -9,8 +9,6 @@ private:
 	POINT bodySize = { 0, };
 	RECT rectBody = { 0, };
 
-	bool isShowHitbox = false;
-
 protected:
 	Dir direction = Dir::Empty;
 
@@ -28,7 +26,7 @@ public:
 	void Paint(HDC hdc, const RECT* rectImage = nullptr);
 	RECT GetRectBody(POINT pos) const;
 
-	bool IsCollide(const RECT& rectSrc) const;
+	bool IsCollide(const RECT& rectSrc, RECT* lprcDst = nullptr) const;
 
 	inline RECT GetRectBody() const
 	{
@@ -37,11 +35,6 @@ public:
 	inline Vector2 GetPosCenter() const
 	{
 		return posCenter;
-	}
-
-	inline void ShowHitbox()
-	{
-		isShowHitbox = !(isShowHitbox);
 	}
 };
 

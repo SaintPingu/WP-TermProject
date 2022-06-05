@@ -1,47 +1,86 @@
 #pragma once
+#include "object.h"
 
-//typedef struct BossData {
-//	Type type = Type::Empty;
-//
-//	int atkDelay = 0;
-//	int crnt_atkDelay = 0;
-//	float bulletSpeed = 0;
-//
-//	float hp = 0;
-//	float speed = 0;
-//	float damage = 0;
-//
-//	int maxYPos = 0;
-//	int frameNum_Idle = 0;
-//	int frameNum_IdleMax = 0;
-//	int frameNum_Atk = 0;
-//	int frameNum_AtkMax = 0;
-//	int frameNum_AtkRev = 0;
-//}BossData;
-//
-//class Boss abstract : public GameObject, public IAnimatable, public IMovable {
-//protected:
-//	Vector2 posDest = { 0, };
-//	Vector2 unitVector = { 0, };
-//
-//	Dir GetDir() const;
-//	virtual void SetPosDest() abstract override;
-//	void ResetAtkDelay();
-//	bool IsAtkDelayClear();
-//	EnemyData data;
-//	void Paint(HDC hdc, int spriteRow);
-//public:
-//	Enemy(ObjectImage& image, Vector2 pos, EnemyData data);
-//	virtual void Paint(HDC hdc) abstract;
-//	virtual void Move() override;
-//	virtual void CheckAtkDelay() abstract;
-//
-//	int GetSpriteRow();
-//	void Animate() override;
-//	bool Hit(float damage);
-//
-//	inline Type GetType() const
-//	{
-//		return data.type;
-//	}
-//};
+enum class BossAct { Line = 0, Circle, Spiral, Sector, Spread, Skill1, Skill2, Idle };
+
+struct BulletData;
+class ObjectImage;
+class EnemyBullet;
+
+#define BOSS_BULLET_LIST 5
+
+typedef struct BossData {
+	Type type = Type::Empty;
+
+	int actDelay = 0;
+	int crntActDelay = 0;
+	int attackDelay[BOSS_BULLET_LIST] = { 0, };
+	int crntAttackDelay = 0;
+
+	float hp = 0;
+	float damage = 0;
+	float speed = 0;
+	float bulletSpeed[BOSS_BULLET_LIST] = { 0, };
+
+	int frameNum_Idle = 0;
+	int frameNum_IdleMax = 0;
+	int frameNum_Atk = 0;
+	int frameNum_AtkMax = 0;
+	int frameNum_AtkRev = 0;
+
+	bool isCreated = false;
+	bool isDeath = false;
+}BossData;
+
+class Boss : public GameObject, public IAnimatable, public IMovable {
+private:
+	const RECT* rectDisplay = nullptr;
+
+	BossData data;
+	ObjectImage* image = nullptr;
+	EnemyBullet* bullets = nullptr;
+	BossAct act = BossAct::Idle;
+
+	Vector2 posDest = { 0, };
+	Vector2 unitVector = { 0, };
+
+	int skillCount = 0;
+
+	void SetMove(Vector2 unitVector);
+	void SetPosDest() override;
+	void Death();
+	void StartAttack();
+	void Shot();
+	BulletData GetBulletData();
+
+	inline void ResetActDelay();
+	inline bool IsClearActDelay();
+	inline void ResetAttackDelay();
+	inline bool IsClearAttackDelay();
+
+	void ShotByLine();
+	void ShotByCircle();
+	void ShotBySpiral();
+	void ShotBySector();
+	void ShotBySpread();
+public:
+	void Init(const RECT& rectDisplay);
+	void Create(const BossData& data);
+	void Paint(HDC hdc);
+	void Move() override;
+	void CheckAttackDelay();
+	void CheckActDelay();
+
+	void Animate() override;
+	bool CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint = { -1, });
+	bool Hit(float damage);
+
+	inline Type GetType() const
+	{
+		return data.type;
+	}
+	inline bool IsCreated() const
+	{
+		return data.isCreated;
+	}
+};

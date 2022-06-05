@@ -15,6 +15,9 @@ typedef struct PlayerData {
 	float mp = 0;
 	float speed = 0;
 
+	float bulletSpeed = 0;
+	float shotDelay = 0;
+	float crntShotDelay = 0;
 	float damage = 0;
 	float subDamage = 0;
 	float damage_Q = 0; // per sec
@@ -40,6 +43,8 @@ private:
 	ObjectImage img_subPokemon;
 
 	void SetPosDest() override;
+	inline void ResetShotDelay();
+	inline bool IsClearShotDelay() const;
 public:
 	Player(PlayerData data);
 	void Init(const RECT& rectDisplay);
@@ -53,10 +58,11 @@ public:
 	Vector2 CheckCollideWindow(Vector2 pos) const;
 
 	void Animate() override;
-	void Fire();
-	void CreateSubBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg);
+	void CheckShot();
+	void Shot();
+	void CreateSubBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet = false);
 	void MoveBullets();
-	void Hit(float damage, Type hitType);
+	void Hit(float damage, Type hitType, POINT effectPoint = { -1, });
 
 	void ActiveSkill(Skill skill);
 

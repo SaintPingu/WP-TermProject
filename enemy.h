@@ -8,8 +8,8 @@ class EnemyBullet;
 typedef struct EnemyData {
 	Type type = Type::Empty;
 
-	int atkDelay = 0;
-	int crnt_atkDelay = 0;
+	int attackDelay = 0;
+	int crntAttackDelay = 0;
 	float bulletSpeed = 0;
 
 	float hp = 0;
@@ -26,20 +26,20 @@ typedef struct EnemyData {
 
 class Enemy abstract : public GameObject, public IAnimatable, public IMovable {
 protected:
+	EnemyData data;
 	Vector2 posDest = { 0, };
 	Vector2 unitVector = { 0, };
 
 	Dir GetDir() const;
 	virtual void SetPosDest() abstract override;
-	void ResetAtkDelay();
-	bool IsAtkDelayClear();
-	EnemyData data;
+	inline void ResetAttackDelay();
+	inline bool IsClearAttackDelay() const;
 	void Paint(HDC hdc, int spriteRow);
 public:
 	Enemy(ObjectImage& image, Vector2 pos, EnemyData data);
 	virtual void Paint(HDC hdc) abstract;
 	virtual void Move() override;
-	virtual void CheckAtkDelay() abstract;
+	virtual void CheckAttackDelay() abstract;
 
 	int GetSpriteRow();
 	void Animate() override;
@@ -59,7 +59,7 @@ public:
 	Melee(ObjectImage& image, Vector2 pos, EnemyData data) : Enemy(image, pos, data) {};
 	void Paint(HDC hdc) override;
 	void Move() override;
-	void CheckAtkDelay() override;
+	void CheckAttackDelay() override;
 };
 
 class Range : public Enemy {
@@ -72,7 +72,7 @@ public:
 	Range(ObjectImage& image, Vector2 pos, EnemyData data) : Enemy(image, pos, data) {};
 	void Paint(HDC hdc) override;
 	void Move() override;
-	void CheckAtkDelay() override;
+	void CheckAttackDelay() override;
 };
 
 class EnemyController {
@@ -93,21 +93,19 @@ private:
 
 	ObjectImage imgMelee;
 	ObjectImage imgRange;
-	ObjectImage imgRangeBullet;
 
 	void Pop(size_t& index);
 public:
-	EnemyController();
 	void Init(const RECT& rectDisplay);
-	void CreateMelee();
-	void CreateRange();
+	void CreateCheckMelee();
+	void CreateCheckRange();
 	void Paint(HDC hdc);
 	void Move();
 	void Animate();
 	bool CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint);
 	void CheckHitAll(const RECT& rectSrc, float damage, Type hitType);
-	void CheckAtkDelay();
-	void CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotate = false);
+	void CheckAttackDelay();
+	void CreateBullet(POINT center, const BulletData& data, Vector2 unitVector);
 	void CreateBullet(POINT center, const BulletData& data, Dir dir);
 	void DestroyCollideBullet(const RECT& rect);
 	void MoveBullets();

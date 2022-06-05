@@ -15,6 +15,8 @@ typedef struct tagGameData {
 	Difficulty difficulty = Difficulty::Easy;
 	Scene scene = Scene::Stage;
 	Stage stage = Stage::Empty;
+
+	bool isShowHitbox = false;
 }GameData;
 
 class GUIManager {

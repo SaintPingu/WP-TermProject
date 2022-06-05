@@ -5,9 +5,11 @@
 #include "timer.h"
 #include "effect.h"
 #include "interface.h"
+#include "boss.h"
 
 extern GameData gameData;
 extern Player* player;
+extern Boss* boss;
 extern EffectManager* effects;
 
 Enemy::Enemy(ObjectImage& image, Vector2 pos, EnemyData data) : GameObject(image, pos)
@@ -18,8 +20,8 @@ Enemy::Enemy(ObjectImage& image, Vector2 pos, EnemyData data) : GameObject(image
 
 Dir Enemy::GetDir() const
 {
-	float theta = atan2(unitVector.y, unitVector.x);
-	float crntDegree = RADIAN_TO_DEGREE(theta);
+	const float theta = atan2(unitVector.y, unitVector.x);
+	const float crntDegree = RADIAN_TO_DEGREE(theta);
 
 	constexpr int unitDegree = 45;
 	float degree = (float)unitDegree / 2;
@@ -82,7 +84,7 @@ void Melee::SetPosDest()
 	Vector2 posCenter = GetPosCenter();
 	Vector2 vectorToPlayer = posCenter - player->GetPosCenter();
 
-	float radius = GetRadius(vectorToPlayer.x, vectorToPlayer.y);
+	const float radius = GetRadius(vectorToPlayer.x, vectorToPlayer.y);
 
 	unitVector = vectorToPlayer / radius;
 
@@ -95,38 +97,36 @@ void Range::SetPosDest()
 		return;
 	}
 
-	Vector2 posCenter = GetPosCenter();
-
-	unitVector = { 0, -1 };
-	posDest = posCenter - (unitVector * data.speed);
+	unitVector = Vector2::Down();
+	posDest = Vector2::GetDest(GetPosCenter(), unitVector, data.speed);
 	if (posDest.y > data.maxYPos)
 	{
 		StopMove();
 	}
 }
 
-void Enemy::ResetAtkDelay()
+inline void Enemy::ResetAttackDelay()
 {
-	data.crnt_atkDelay = data.atkDelay;
+	data.crntAttackDelay = data.attackDelay;
 }
-bool Enemy::IsAtkDelayClear()
+inline bool Enemy::IsClearAttackDelay() const
 {
-	return (data.crnt_atkDelay <= 0);
+	return (data.crntAttackDelay <= 0);
 }
 
 void Enemy::Paint(HDC hdc, int spriteRow)
 {
-	RECT rectImage = GetRectImage(GetImage(), frame, spriteRow);
+	const RECT rectImage = ISprite::GetRectImage(GetImage(), frame, spriteRow);
 	GameObject::Paint(hdc, &rectImage);
 }
 void Melee::Paint(HDC hdc)
 {
-	int spriteRow = GetSpriteRow();
+	const int spriteRow = GetSpriteRow();
 	Enemy::Paint(hdc, spriteRow);
 }
 void Range::Paint(HDC hdc)
 {
-	int spriteRow = 0;
+	constexpr int spriteRow = 0;
 	Enemy::Paint(hdc, spriteRow);
 }
 
@@ -172,6 +172,7 @@ int Enemy::GetSpriteRow()
 	int spriteRow = 0;
 	switch (GetDir())
 	{
+	case Dir::Empty:
 	case Dir::Up:
 		spriteRow = 0;
 		break;
@@ -254,7 +255,7 @@ bool Melee::CheckCollidePlayer()
 	{
 		StopMove();
 		SetAction(Action::Attack, data.frameNum_Atk);
-		ResetAtkDelay();
+		ResetAttackDelay();
 
 		return true;
 	}
@@ -271,26 +272,26 @@ bool Enemy::Hit(float damage)
 	return false;
 }
 
-void Melee::CheckAtkDelay()
+void Melee::CheckAttackDelay()
 {
 	if (IsMove() == false)
 	{
-		data.crnt_atkDelay -= ELAPSE_MOVE_OBJECT;
-		if (data.crnt_atkDelay <= 0)
+		data.crntAttackDelay -= ELAPSE_INVALIDATE;
+		if (IsClearAttackDelay() == true)
 		{
 			StartMove();
 		}
 	}
 }
-void Range::CheckAtkDelay()
+void Range::CheckAttackDelay()
 {
 	if (IsMove() == false)	
 	{
-		data.crnt_atkDelay -= ELAPSE_MOVE_OBJECT;
-		if (IsAtkDelayClear() == true)
+		data.crntAttackDelay -= ELAPSE_INVALIDATE;
+		if (IsClearAttackDelay() == true)
 		{
 			Fire();
-			ResetAtkDelay();
+			ResetAttackDelay();
 		}
 	}
 }
@@ -332,8 +333,9 @@ void EnemyController::Pop(size_t& index)
 	enemies[index--] = enemies.back();
 	enemies.pop_back();
 }
-EnemyController::EnemyController()
+void EnemyController::Init(const RECT& rectDisplay)
 {
+	ObjectImage imgRangeBullet;
 	switch (gameData.stage)
 	{
 	case Stage::Electric:
@@ -345,13 +347,13 @@ EnemyController::EnemyController()
 		imgRangeBullet.Load(L"images\\bullet_zapdos.png", { 14,14 });
 		imgRangeBullet.ScaleImage(0.9f, 0.9f);
 		createDelay_Melee = 1500;
-		createDelay_Range = 3000; 
+		createDelay_Range = 3000;
 		createAmount_Melee = 6;
 		createAmount_Range = 7;
 
 		meleeData.hp = 5;
 		meleeData.speed = 1.5f;
-		meleeData.atkDelay = 1000;
+		meleeData.attackDelay = 1000;
 		meleeData.damage = 2;
 
 		meleeData.frameNum_Idle = 0;
@@ -361,7 +363,7 @@ EnemyController::EnemyController()
 
 		rangeData.hp = 4.25f;
 		rangeData.speed = 2;
-		rangeData.atkDelay = 2000;
+		rangeData.attackDelay = 2000;
 		rangeData.damage = 1;
 
 		rangeData.frameNum_Idle = 0;
@@ -381,6 +383,7 @@ EnemyController::EnemyController()
 		imgRange.ScaleImage(1.2f, 1.2f);
 		imgRangeBullet.Load(L"images\\bullet_seadra.png", { 14,14 });
 		imgRangeBullet.ScaleImage(1.2f, 1.2f);
+
 		createDelay_Melee = 1150;
 		createDelay_Range = 3250;
 		createAmount_Melee = 8;
@@ -388,7 +391,7 @@ EnemyController::EnemyController()
 
 		meleeData.hp = 2.85f;
 		meleeData.speed = 2;
-		meleeData.atkDelay = 700;
+		meleeData.attackDelay = 700;
 		meleeData.damage = 1.5f;
 
 		meleeData.frameNum_Idle = 0;
@@ -399,7 +402,7 @@ EnemyController::EnemyController()
 
 		rangeData.hp = 5;
 		rangeData.speed = 0.7f;
-		rangeData.atkDelay = 2000;
+		rangeData.attackDelay = 2000;
 		rangeData.damage = 1.8f;
 
 		rangeData.frameNum_Idle = 0;
@@ -418,6 +421,7 @@ EnemyController::EnemyController()
 		imgRange.ScaleImage(1.3f, 1.3f);
 		imgRangeBullet.Load(L"images\\bullet_latias.png", { 14,14 });
 		imgRangeBullet.ScaleImage(0.8f, 0.8f);
+
 		createDelay_Melee = 2000;
 		createDelay_Range = 3000;
 		createAmount_Melee = 6;
@@ -425,7 +429,7 @@ EnemyController::EnemyController()
 
 		meleeData.hp = 7;
 		meleeData.speed = 1.65f;
-		meleeData.atkDelay = 1250;
+		meleeData.attackDelay = 1250;
 		meleeData.damage = 1.2f;
 
 		meleeData.frameNum_Idle = 0;
@@ -436,7 +440,7 @@ EnemyController::EnemyController()
 
 		rangeData.hp = 7.25f;
 		rangeData.speed = 0.5f;
-		rangeData.atkDelay = 1250;
+		rangeData.attackDelay = 1250;
 		rangeData.damage = 0.75f;
 
 		rangeData.frameNum_Idle = 0;
@@ -455,14 +459,17 @@ EnemyController::EnemyController()
 	const float randHP_Range = (float)(rand() % 6) / 10;
 	meleeData.hp += randHP_Melee;
 	rangeData.hp += randHP_Range;
-}
-void EnemyController::Init(const RECT& rectDisplay)
-{
+
 	bullets = new EnemyBullet(rectDisplay, imgRangeBullet);
 }
 
-void EnemyController::CreateMelee()
+void EnemyController::CreateCheckMelee()
 {
+	if (boss->IsCreated() == true)
+	{
+		return;
+	}
+
 	delay_Melee += ELAPSE_INVALIDATE;
 	if (delay_Melee < createDelay_Melee)
 	{
@@ -479,8 +486,13 @@ void EnemyController::CreateMelee()
 		enemies.emplace_back(enemy);
 	}
 }
-void EnemyController::CreateRange()
+void EnemyController::CreateCheckRange()
 {
+	if (boss->IsCreated() == true)
+	{
+		return;
+	}
+
 	delay_Range += ELAPSE_INVALIDATE;
 	if (delay_Range < createDelay_Range)
 	{
@@ -546,8 +558,7 @@ void EnemyController::CheckHitAll(const RECT& rectSrc, float damage, Type hitTyp
 		if (enemies.at(i)->IsCollide(rectSrc) == true)
 		{
 			POINT effectPoint = enemies.at(i)->GetPosCenter();
-			effectPoint.x += (rand() % 20) - 10;
-			effectPoint.y += (rand() % 20) - 10;
+			GetRandEffectPoint(effectPoint);
 			effects->CreateHitEffect(effectPoint, hitType);
 			float calDamage = CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
 			if (enemies.at(i)->Hit(calDamage) == true)
@@ -558,16 +569,16 @@ void EnemyController::CheckHitAll(const RECT& rectSrc, float damage, Type hitTyp
 	}
 }
 
-void EnemyController::CheckAtkDelay()
+void EnemyController::CheckAttackDelay()
 {
 	for (Enemy* enemy : enemies)
 	{
-		enemy->CheckAtkDelay();
+		enemy->CheckAttackDelay();
 	}
 }
-void EnemyController::CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg)
+void EnemyController::CreateBullet(POINT center, const BulletData& data, Vector2 unitVector)
 {
-	bullets->CreateBullet(center, data, unitVector, isRotateImg);
+	bullets->CreateBullet(center, data, unitVector);
 }
 void EnemyController::CreateBullet(POINT center, const BulletData& data, Dir dir)
 {

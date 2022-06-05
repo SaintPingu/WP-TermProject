@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "image.h"
+#include "interface.h"
+
+extern GameData gameData;
 
 void Image::Load(const WCHAR* fileName, POINT imgSize, int alpha)
 {
@@ -62,6 +65,11 @@ void Image::PaintRotation(HDC hdc, Vector2 vPoints[3]) const
 
 	DeleteDC(memDCBack);
 	DeleteDC(memDCObject);
+
+	if (gameData.isShowHitbox == true)
+	{
+		PaintHitbox(hdc, rectDraw);
+	}
 }
 void Image::SetAlpha(int alpha)
 {
@@ -99,6 +107,11 @@ void ObjectImage::Paint(HDC hdc, const RECT& rectBody, const RECT* rectImage) co
 	rectDraw.bottom = rectDraw.top + drawSize.y;
 
 	Image::Paint(hdc, rectDraw, *rectImage);
+
+	if (gameData.isShowHitbox == true)
+	{
+		PaintHitbox(hdc, rectBody);
+	}
 }
 void ObjectImage::Paint(const RECT& rectDest, HDC hdc) const
 {

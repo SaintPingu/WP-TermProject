@@ -31,3 +31,5 @@ public:
 	void CreateExplodeEffect(POINT pos, Type type);
 	void Animate();
 };
+
+void GetRandEffectPoint(POINT& effectPoint);

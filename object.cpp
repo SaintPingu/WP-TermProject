@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "object.h"
+#include "interface.h"
+
+extern GameData gameData;
 
 GameObject::GameObject(ObjectImage& image, Vector2 pos)
 {
@@ -30,10 +33,7 @@ void GameObject::SetPos(Vector2 pos)
 void GameObject::Paint(HDC hdc, const RECT* rectImage)
 {
 	image->Paint(hdc, rectBody, rectImage);
-	if (isShowHitbox == true)
-	{
-		FrameRect(hdc, &rectBody, (HBRUSH)GetStockObject(WHITE_BRUSH));
-	}
+	
 }
 
 RECT GameObject::GetRectBody(POINT pos) const
@@ -46,10 +46,17 @@ RECT GameObject::GetRectBody(POINT pos) const
 	return rectBody;
 }
 
-bool GameObject::IsCollide(const RECT& rectSrc) const
+bool GameObject::IsCollide(const RECT& rectSrc, RECT* lprcDst) const
 {
-	RECT notuse;
-	return (bool)IntersectRect(&notuse, &rectBody, &rectSrc);
+	if (lprcDst == nullptr)
+	{
+		RECT notuse = { 0, };
+		return (bool)IntersectRect(&notuse, &rectBody, &rectSrc);
+	}
+	else
+	{
+		return (bool)IntersectRect(lprcDst, &rectBody, &rectSrc);
+	}
 }
 
 

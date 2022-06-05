@@ -4,19 +4,28 @@
 #include "enemy.h"
 #include "effect.h"
 #include "interface.h"
+#include "boss.h"
 
+extern Player* player;
 extern EnemyController* enemies;
+extern Boss* boss;
+extern EffectManager* effects;
+extern GUIManager* gui;
 void CALLBACK T_Invalidate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	InvalidateRect(hWnd, NULL, FALSE);
-	enemies->CreateMelee();
-	enemies->CreateRange();
-	enemies->CheckAtkDelay();
-}
+	player->CheckShot();
+	enemies->CreateCheckMelee();
+	enemies->CreateCheckRange();
+	enemies->CheckAttackDelay();
+	boss->CheckActDelay();
+	boss->CheckAttackDelay();
 
-extern Player* player;
-extern EffectManager* effects;
-extern GUIManager* gui;
+	player->MoveBullets();
+	enemies->MoveBullets();
+	enemies->Move();
+	boss->Move();
+}
 
 void CALLBACK T_Animate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
@@ -24,21 +33,14 @@ void CALLBACK T_Animate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 	enemies->Animate();
 }
 
+void CALLBACK T_AnimateBoss(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+{
+	boss->Animate();
+}
+
 void CALLBACK T_MovePlayer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	player->Move(hWnd, TIMERID_MOVE_PLAYER);
-}
-
-void CALLBACK T_FireBullet(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
-{
-	player->Fire();
-}
-
-void CALLBACK T_MoveObject(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
-{
-	player->MoveBullets();
-	enemies->MoveBullets();
-	enemies->Move();
 }
 
 void CALLBACK T_Effect(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)

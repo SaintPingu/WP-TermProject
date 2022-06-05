@@ -3,9 +3,11 @@
 #include "enemy.h"
 #include "player.h"
 #include "effect.h"
+#include "boss.h"
 
-extern EnemyController* enemies;
 extern Player* player;
+extern EnemyController* enemies;
+extern Boss* boss;
 extern EffectManager* effects;
 
 BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data)
@@ -19,11 +21,12 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage,
 	rectBody.bottom = rectBody.top + bulletSize.y;
 	rectRotBody = rectBody;
 }
-BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data, Vector2 unitVector, bool isRotateImg) : Bullet(center, bulletSize, rectImage, data)
+BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet) : Bullet(center, bulletSize, rectImage, data)
 {
 	this->dir = Dir::Empty;
 	this->unitVector = unitVector;
 	this->isRotateImg = isRotateImg;
+	this->isSkillBullet = isSkillBullet;
 
 	Vector2 vPoints[4];
 	GetRotationPos(rectBody, unitVector, vPoints);
@@ -43,7 +46,6 @@ void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage, co
 		GetRotationPos(rectBody, unitVector, vPoints);
 		bulletImage.PaintRotation(hdc, vPoints);
 	}
-	//FrameRect(hdc, &rectRotBody, (HBRUSH)GetStockObject(BLACK_BRUSH));
 }
 bool BulletController::Bullet::Move(const RECT& rectDisplay)
 {
@@ -161,11 +163,6 @@ POINT BulletController::Bullet::GetPos() const
 }
 
 
-RECT BulletController::GetRectImage(Dir dir) const
-{
-	return ISprite::GetRectImage(bulletImage, 0);
-}
-void BulletController::SetRectImage(int frame) {};
 
 BulletController::BulletController(const RECT& rectDisplay, const ObjectImage& bulletImage)
 {
@@ -185,14 +182,16 @@ void BulletController::Paint(HDC hdc)
 
 void BulletController::CreateBullet(POINT center, const BulletData& data, Dir dir)
 {
-	RECT rectImage = GetRectImage(dir);
+	constexpr int frame = 0;
+	RECT rectImage = ISprite::GetRectImage(bulletImage, frame);
 	Bullet* bullet = new Bullet(center, bulletSize, rectImage, data, dir);
 	bullets.emplace_back(bullet);
 }
-void BulletController::CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg)
+void BulletController::CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet)
 {
-	RECT rectImage = GetRectImage(Dir::Up);
-	Bullet* bullet = new Bullet(center, bulletSize, rectImage, data, unitVector, isRotateImg);
+	constexpr int frame = 0;
+	RECT rectImage = ISprite::GetRectImage(bulletImage, frame);
+	Bullet* bullet = new Bullet(center, bulletSize, rectImage, data, unitVector, isRotateImg, isSkillBullet);
 	bullets.emplace_back(bullet);
 }
 
@@ -200,11 +199,20 @@ void PlayerBullet::Move()
 {
 	for (size_t i = 0; i < bullets.size(); ++i)
 	{
-		if (enemies->CheckHit(bullets.at(i)->GetRect(), bullets.at(i)->GetDamage(), bullets.at(i)->GetType(), bullets[i]->GetPos()) == true)
+		const RECT rectBullet = bullets.at(i)->GetRect();
+		const float bulletDamage = bullets.at(i)->GetDamage();
+		const Type bulletType = bullets.at(i)->GetType();
+		const POINT bulletPos = bullets.at(i)->GetPos();
+		if ((enemies->CheckHit(rectBullet, bulletDamage, bulletType, bulletPos) == true) ||
+			(boss->CheckHit(rectBullet, bulletDamage, bulletType, bulletPos) == true))
 		{
-			if (player->IsUsingSkill() == false)
+			if (bullets.at(i)->IsSkillBullet() == false)
 			{
 				player->AddMP(0.15f);
+			}
+			else
+			{
+				int a = 5;
 			}
 			BulletController::Pop(i);
 		}
@@ -220,8 +228,7 @@ void EnemyBullet::Move()
 	{
 		if (player->IsCollide(bullets.at(i)->GetRect()) == true)
 		{
-			player->Hit(bullets.at(i)->GetDamage(), bullets.at(i)->GetType());
-			effects->CreateHitEffect(bullets.at(i)->GetPos(), bullets.at(i)->GetType());
+			player->Hit(bullets.at(i)->GetDamage(), bullets.at(i)->GetType(), bullets.at(i)->GetPos());
 			BulletController::Pop(i);
 		}
 		else if (bullets.at(i)->Move(*rectDisplay) == false)

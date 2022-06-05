@@ -3,9 +3,11 @@
 #include "bullet.h"
 #include "timer.h"
 #include "skill.h"
+#include "effect.h"
 #include "interface.h"
 
 extern GUIManager* gui;
+extern EffectManager* effects;
 
 Player::Player( PlayerData data)
 {
@@ -39,10 +41,12 @@ void Player::Init(const RECT& rectDisplay)
 		data.speed = 4;
 		data.damage = 1.25f;
 		data.damage_Q = 10.5f / damagePer_ms;
+		data.bulletSpeed = 8;
+		data.shotDelay = 90;
 		break;
 	case Type::Water:
 		pokemon = Pokemon::Articuno;
-		img_pokemon.Load(_T("images\\sprite_articuno.png"), { 69, 69 }, { 29, 28 }, { 13,29 });
+		img_pokemon.Load(_T("images\\sprite_articuno.png"), { 69, 69 }, { 29, 28 }, { 13,23 });
 		img_pokemon.ScaleImage(1.2f, 1.2f);
 		bulletImage.Load(_T("images\\bullet_ice.png"), { 7,15 });
 		bulletImage.ScaleImage(0.9f, 0.9f);
@@ -53,10 +57,12 @@ void Player::Init(const RECT& rectDisplay)
 		data.speed = 2.5f;
 		data.damage = 1;
 		data.damage_Q = 3.85f / damagePer_ms;
+		data.bulletSpeed = 6;
+		data.shotDelay = 110;
 		break;
 	case Type::Fire:
 		pokemon = Pokemon::Moltres;
-		img_pokemon.Load(_T("images\\sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,35 });
+		img_pokemon.Load(_T("images\\sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,28 });
 		bulletImage.Load(_T("images\\bullet_fire.png"), { 11,16 });
 		bulletImage.ScaleImage(0.9f, 0.9f);
 
@@ -66,13 +72,16 @@ void Player::Init(const RECT& rectDisplay)
 		data.speed = 3;
 		data.damage = 1.25f;
 		data.damage_Q = 15.5f / damagePer_ms;
+		data.bulletSpeed = 7;
+		data.shotDelay = 100;
 		break;
 	default:
 		assert(0);
 		break;
 	}
+	data.maxhp = 1000000; // debug
+	data.mp = 100; // debug
 	data.hp = data.maxhp;
-	//data.mp = 2000; // debug
 
 	switch (data.subType)
 	{
@@ -109,7 +118,7 @@ void Player::Init(const RECT& rectDisplay)
 
 void Player::Paint(HDC hdc)
 {
-	RECT rectImage = GetRectImage(GetImage(), frame);
+	RECT rectImage =ISprite::GetRectImage(GetImage(), frame);
 	GameObject::Paint(hdc, &rectImage);
 
 	const ObjectImage& image = GetImage();
@@ -183,8 +192,7 @@ void Player::SetPosDest()
 		break;
 	}
 
-	Vector2 posCenter = GetPosCenter();
-	posDest = posCenter + vectorMove;
+	posDest = Vector2::GetDest(GetPosCenter(), vectorMove);
 }
 
 void Player::SetDirection(Dir inputDir)
@@ -359,13 +367,21 @@ void Player::Animate()
 
 	skillManager->Animate();
 }
-void Player::Fire()
+inline bool Player::IsClearShotDelay() const
+{
+	return (data.crntShotDelay <= 0);
+}
+inline void Player::ResetShotDelay()
+{
+	data.crntShotDelay = data.shotDelay;
+}
+void Player::Shot()
 {
 	RECT rectBody = GetRectBody();
 	BulletData bulletData;
 	bulletData.bulletType = data.type;
 	bulletData.damage = data.damage;
-	bulletData.speed = 7;
+	bulletData.speed = data.bulletSpeed;
 
 	POINT bulletPos = { 0, };
 	bulletPos.y = rectBody.top;
@@ -381,9 +397,18 @@ void Player::Fire()
 
 	skillManager->UseSkill();
 }
-void Player::CreateSubBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg)
+void Player::CheckShot()
 {
-	subBullets->CreateBullet(center, data, unitVector, isRotateImg);
+	data.crntShotDelay -= ELAPSE_INVALIDATE;
+	if (IsClearShotDelay() == true)
+	{
+		Shot();
+		ResetShotDelay();
+	}
+}
+void Player::CreateSubBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet)
+{
+	subBullets->CreateBullet(center, data, unitVector, isRotateImg, isSkillBullet);
 }
 
 void Player::MoveBullets()
@@ -392,10 +417,17 @@ void Player::MoveBullets()
 	subBullets->Move();
 }
 
-void Player::Hit(float damage, Type hitType)
+void Player::Hit(float damage, Type hitType, POINT effectPoint)
 {
-	damage = CalculateDamage(damage, data.type, hitType);
+	if (effectPoint.x == -1)
+	{
+		effectPoint = GetPosCenter();
+		GetRandEffectPoint(effectPoint);
+	}
+	effects->CreateHitEffect(effectPoint, hitType);
 	gui->DisplayHurtFrame(hitType);
+
+	damage = CalculateDamage(damage, data.type, hitType);
 	if ((data.hp -= damage) <= 0)
 	{
 		data.speed = 0;

@@ -27,7 +27,7 @@ enum class Action { Idle = 0, Attack, Hurt, Death };
 enum class Pokemon { Null = 0, Moltres, Articuno, Thunder };
 enum class SubPokemon { Null = 0, Pikachu = 0, Squirtle, Charmander };
 enum class Type { Empty = 0, Fire, Elec, Water };
-enum class Skill { Empty = 0, Identity, Sector, Circle, Ultimate };
+enum class Skill { Empty = 0, Identity, Sector, Circle };
 
 #define PI 3.141592
 #define DEGREE_TO_RADIAN(degree) ((PI/180) * (degree))
@@ -192,6 +192,10 @@ struct Vector2 {
 	{
 		return { static_cast<float>(rhs.x), static_cast<float>(rhs.y) };
 	}
+	inline constexpr bool operator==(const Vector2& rhs) const
+	{
+		return (x == rhs.x && y == rhs.y) ? true : false;
+	}
 
 	inline Vector2 Normalized() const
 	{
@@ -231,6 +235,10 @@ struct Vector2 {
 	{
 		return { 1, 0 };
 	}
+	static inline constexpr Vector2 GetDest(Vector2 posCenter, Vector2 vector, float speed = 1)
+	{
+		return posCenter + (vector * speed);
+	}
 };
 
 typedef struct FRECT {
@@ -253,3 +261,4 @@ Vector2 Rotate(Vector2 vector, float degree);
 bool OutOfRange(const RECT& rect, const RECT& rectRange);
 void GetRotationPos(const RECT& rect, const Vector2& unitVector, Vector2 vPoints[3]);
 RECT GetRotatedBody(Vector2 vPoints[3]);
+void PaintHitbox(HDC hdc, RECT rectBody);
