@@ -24,8 +24,8 @@ void GameObject::SetPos(Vector2 pos)
 	posCenter.x = pos.x;
 	posCenter.y = pos.y;
 
-	rectBody.left = (LONG)posCenter.x - (bodySize.x / 2);
-	rectBody.top = (LONG)posCenter.y - (bodySize.y / 2);
+	rectBody.left = posCenter.x - ((float)bodySize.x / 2);
+	rectBody.top = posCenter.y - ((float)bodySize.y / 2);
 	rectBody.right = rectBody.left + bodySize.x;
 	rectBody.bottom = rectBody.top + bodySize.y;
 }
@@ -36,26 +36,27 @@ void GameObject::Paint(HDC hdc, const RECT* rectImage)
 	
 }
 
-RECT GameObject::GetRectBody(POINT pos) const
+FRECT GameObject::GetRectBody(Vector2 pos) const
 {
-	RECT rectBody = { 0, };
-	rectBody.left = pos.x - (bodySize.x / 2);
+	FRECT rectBody = { 0, };
+	rectBody.left = pos.x - ((float)bodySize.x / 2);
 	rectBody.right = rectBody.left + bodySize.x;
-	rectBody.top = pos.y - (bodySize.y / 2);
+	rectBody.top = pos.y - ((float)bodySize.y / 2);
 	rectBody.bottom = rectBody.top + bodySize.y;
 	return rectBody;
 }
 
 bool GameObject::IsCollide(const RECT& rectSrc, RECT* lprcDst) const
 {
+	RECT rect = rectBody;
 	if (lprcDst == nullptr)
 	{
 		RECT notuse = { 0, };
-		return (bool)IntersectRect(&notuse, &rectBody, &rectSrc);
+		return (bool)IntersectRect(&notuse, &rect, &rectSrc);
 	}
 	else
 	{
-		return (bool)IntersectRect(lprcDst, &rectBody, &rectSrc);
+		return (bool)IntersectRect(lprcDst, &rect, &rectSrc);
 	}
 }
 

@@ -20,11 +20,10 @@ protected:
 
 		FRECT rectBody = { 0, };
 		FRECT rectRotBody = { 0, };
-		RECT rectImage = { 0, };
-		Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data);
+		Bullet(POINT center, POINT bulletSize, const BulletData& data);
 	public:
-		Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data, Dir dir) : Bullet(center, bulletSize, rectImage, data) { this->dir = dir; };
-		Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet = false);
+		Bullet(POINT center, POINT bulletSize, const BulletData& data, Dir dir) : Bullet(center, bulletSize, data) { this->dir = dir; };
+		Bullet(POINT center, POINT bulletSize, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet = false);
 		~Bullet() {};
 
 		void Paint(HDC hdc, const ObjectImage& bulletImage, const RECT& rectWindow);

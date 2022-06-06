@@ -7,7 +7,7 @@ private:
 
 	Vector2 posCenter;
 	POINT bodySize = { 0, };
-	RECT rectBody = { 0, };
+	FRECT rectBody = { 0, };
 
 protected:
 	Dir direction = Dir::Empty;
@@ -24,11 +24,11 @@ protected:
 
 public:
 	void Paint(HDC hdc, const RECT* rectImage = nullptr);
-	RECT GetRectBody(POINT pos) const;
+	FRECT GetRectBody(Vector2 pos) const;
 
 	bool IsCollide(const RECT& rectSrc, RECT* lprcDst = nullptr) const;
 
-	inline RECT GetRectBody() const
+	inline FRECT GetRectBody() const
 	{
 		return rectBody;
 	}

@@ -83,7 +83,7 @@ void EffectManager::Animate()
 
 void EffectManager::Effect::Paint(HDC hdc) const
 {
-	RECT rectImage = ISprite::GetRectImage(*effectImage, frame, 0);
+	RECT rectImage = ISprite::GetRectImage(*effectImage, frame);
 	effectImage->Paint(hdc, pos, &rectImage);
 }
 

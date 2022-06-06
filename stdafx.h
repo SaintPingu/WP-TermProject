@@ -2,13 +2,14 @@
 #pragma warning(disable:28251)
 #pragma warning(disable:4244)
 #include <Windows.h>
-#include <math.h>
 #include <time.h>
 #include <tchar.h>
 #include <gdiplus.h>
 #include <atlImage.h>
+#include <cmath>
 #include <vector>
 #include <cassert>
+#include <algorithm>
 
 
 #define WINDOWSIZE_X 500
@@ -21,7 +22,7 @@
 
 enum class Difficulty { Easy = 0, Normal, Hard };
 enum class Scene { Start = 0, Loading, Lobby, Stage, Battle };
-enum class Stage { Empty = 0, Fire, Water, Electric, Dark };
+enum class Stage { Empty = 0, Fire, Water, Elec, Dark };
 enum class Action { Idle = 0, Attack, Hurt, Death };
 
 enum class Pokemon { Null = 0, Moltres, Articuno, Thunder };
@@ -196,6 +197,10 @@ struct Vector2 {
 	{
 		return (x == rhs.x && y == rhs.y) ? true : false;
 	}
+	inline constexpr bool operator!=(const Vector2& rhs) const
+	{
+		return (x != rhs.x || y != rhs.y) ? true : false;
+	}
 
 	inline Vector2 Normalized() const
 	{
@@ -209,11 +214,11 @@ struct Vector2 {
 	{
 		return sqrtf(v.x * v.x + v.y * v.y);
 	}
-	static inline constexpr float Dot(const Vector2 lhs, const Vector2 rhs)
+	static inline constexpr float Dot(const Vector2& lhs, const Vector2& rhs)
 	{
 		return (lhs.x * rhs.x) + (lhs.y * rhs.y);
 	}
-	static inline float GetTheta(const Vector2 lhs, const Vector2 rhs)
+	static inline float GetTheta(const Vector2& lhs, const Vector2& rhs)
 	{
 		float dot = Vector2::Dot(lhs, rhs);
 		return acos(dot / (Vector2::GetNorm(lhs) * Vector2::GetNorm(rhs)));
@@ -239,6 +244,19 @@ struct Vector2 {
 	{
 		return posCenter + (vector * speed);
 	}
+	// Linear transform to find the orthogonal vector of the edge
+	static Vector2 Get_Normalized_Proj_Axis(const Vector2& crntPoint, const Vector2& nextPoint)
+	{
+		const float axisX = -(nextPoint.y - crntPoint.y);
+		const float axisY = nextPoint.x - crntPoint.x;
+		const float magnitude = hypot(axisX, axisY);
+
+		Vector2 axisNormalized = { 0, };
+		axisNormalized.x = axisX / magnitude;
+		axisNormalized.y = axisY / magnitude;
+
+		return axisNormalized;
+	}
 };
 
 typedef struct FRECT {
@@ -259,6 +277,10 @@ typedef struct FRECT {
 
 Vector2 Rotate(Vector2 vector, float degree);
 bool OutOfRange(const RECT& rect, const RECT& rectRange);
-void GetRotationPos(const RECT& rect, const Vector2& unitVector, Vector2 vPoints[3]);
-RECT GetRotatedBody(Vector2 vPoints[3]);
+void GetRotationPos(const RECT& rect, const Vector2& unitVector, Vector2 vPoints[4]);
+RECT GetRotatedBody(Vector2 vPoints[4]);
 void PaintHitbox(HDC hdc, RECT rectBody);
+void SetRectByWindow(RECT& rect);
+void CheckOverflowAdd(BYTE& lhs, const BYTE& rhs);
+void CheckOverflowSub(BYTE& lhs, const BYTE& rhs);
+bool SATIntersect(const FRECT& rectSrc, const Vector2 vSrc[4]);

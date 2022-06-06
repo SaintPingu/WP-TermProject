@@ -23,7 +23,7 @@ class GUIManager {
 private:
 	typedef struct HurtGUI {
 		GUIImage* gui = nullptr;
-		float alpha = 0;
+		BYTE alpha = 0x00;
 
 		void ReduceAlpha();
 	}HurtGUI;
@@ -34,7 +34,7 @@ private:
 	float iconMoveAmount = 0;
 	bool isIconStop = false;
 
-	const float hurtGUI_alpha = 0x90;
+	const BYTE hurtGUI_alpha = 0x90;
 
 	RECT rectMain = { 0, };
 	RECT rectSkill_Q = { 0, };

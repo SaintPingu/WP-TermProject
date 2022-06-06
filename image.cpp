@@ -4,7 +4,7 @@
 
 extern GameData gameData;
 
-void Image::Load(const WCHAR* fileName, POINT imgSize, int alpha)
+void Image::Load(const WCHAR* fileName, POINT imgSize, BYTE alpha)
 {
 	Gdiplus::Bitmap* bitmap = new Gdiplus::Bitmap(fileName, false);
 	bitmap->GetHBITMAP(NULL, &hBitmap);
@@ -30,48 +30,51 @@ void Image::Paint(HDC hdc, const RECT& rectDraw, const RECT& rectImage) const
 
 	AlphaBlend(hdc, rectDraw.left, rectDraw.top, (rectDraw.right - rectDraw.left), (rectDraw.bottom - rectDraw.top),
 		memDC, rectImage.left, rectImage.top, (rectImage.right - rectImage.left), (rectImage.bottom - rectImage.top), bFunction);
-	//FrameRect(hdc, &rectDraw, (HBRUSH)GetStockObject(BLACK_BRUSH));
 	
 	DeleteDC(memDC);
 }
-void Image::PaintRotation(HDC hdc, Vector2 vPoints[3]) const
+void Image::PaintRotation(HDC hdc, Vector2 vPoints[4], const RECT* rectImage) const
 {
-	HDC memDCBack = CreateCompatibleDC(hdc);
-	HDC memDCObject = CreateCompatibleDC(hdc);
+	if (rectImage == nullptr)
+	{
+		rectImage = &this->rectImage;
+	}
 
-	static HBITMAP hBitmapBack = CreateCompatibleBitmap(hdc, WINDOWSIZE_X, WINDOWSIZE_Y);
-	SelectObject(memDCBack, hBitmapBack);
-	SelectObject(memDCObject, hBitmap);
+	// Init memDC
+	static HBITMAP hBitmap_Back = CreateCompatibleBitmap(hdc, WINDOWSIZE_X, WINDOWSIZE_Y);
+	HDC memDC_Back = CreateCompatibleDC(hdc);
+	HDC memDC_Object = CreateCompatibleDC(hdc);
+	SelectObject(memDC_Back, hBitmap_Back);
+	SelectObject(memDC_Object, hBitmap);
 
+	// Get rotated rectangle
 	POINT points[3] = { vPoints[0], vPoints[1], vPoints[2] };
 	RECT rectDraw = GetRotatedBody(vPoints);
-	int wDest = rectDraw.right - rectDraw.left;
-	int hDest = rectDraw.bottom - rectDraw.top;
+	const int wDest = rectDraw.right - rectDraw.left;
+	const int hDest = rectDraw.bottom - rectDraw.top;
 
-	RECT rectFill = { 0,0,rectImage.right + rectImage.bottom, rectImage.right  + rectImage.bottom};
-	FillRect(memDCBack, &rectFill, transBrush);
-	rectFill = rectDraw;
-	rectFill.right += wDest;
-	rectFill.bottom += hDest;
-	FillRect(memDCBack, &rectFill, transBrush);
+	// erase a painted on memDC
+	FillRect(memDC_Back, &rectDraw, (HBRUSH)GetStockObject(BLACK_BRUSH));
 
-	AlphaBlend(memDCBack, 0, 0, rectImage.right, rectImage.bottom,
-		memDCObject, rectImage.left, rectImage.top, rectImage.right, rectImage.bottom, bFunction);
+	// paint by rotated points on memDC
+	const int imgWidth = rectImage->right - rectImage->left;
+	const int imgHeight = rectImage->bottom - rectImage->top;
+	PlgBlt(memDC_Back, points, memDC_Object, rectImage->left, rectImage->top, imgWidth, imgHeight, NULL, 0, 0);
 
-	PlgBlt(memDCBack, points, memDCBack, 0, 0, rectImage.right, rectImage.bottom, NULL, 0, 0);
+	// paint on hdc with alphablend
+	AlphaBlend(hdc, rectDraw.left, rectDraw.top, wDest, hDest,
+		memDC_Back, rectDraw.left, rectDraw.top, wDest, hDest, bFunction);
 
-	TransparentBlt(hdc, rectDraw.left, rectDraw.top, wDest, hDest, memDCBack, rectDraw.left, rectDraw.top, wDest, hDest, transRGB);
-	//FrameRect(hdc, &rectDraw, (HBRUSH)GetStockObject(BLACK_BRUSH));
-
-	DeleteDC(memDCBack);
-	DeleteDC(memDCObject);
+	DeleteDC(memDC_Back);
+	DeleteDC(memDC_Object);
 
 	if (gameData.isShowHitbox == true)
 	{
+		Polygon(hdc, points, 3);
 		PaintHitbox(hdc, rectDraw);
 	}
 }
-void Image::SetAlpha(int alpha)
+void Image::SetAlpha(BYTE alpha)
 {
 	bFunction.SourceConstantAlpha = alpha;
 }
@@ -138,7 +141,7 @@ void ObjectImage::ScaleImage(float scaleX, float scaleY)
 }
 
 
-void EffectImage::Load(const WCHAR* fileName, POINT imgSize, int maxFrame, int alpha)
+void EffectImage::Load(const WCHAR* fileName, POINT imgSize, int maxFrame, BYTE alpha)
 {
 	Image::Load(fileName, imgSize, alpha);
 	++rectImage.left;
@@ -183,7 +186,7 @@ void EffectImage::ScaleImage(float scaleX, float scaleY)
 
 
 
-void GUIImage::Load(const WCHAR* fileName, POINT imgSize, int alpha)
+void GUIImage::Load(const WCHAR* fileName, POINT imgSize, BYTE alpha)
 {
 	Image::Load(fileName, imgSize, alpha);
 }
@@ -230,10 +233,6 @@ void GUIImage::PaintGauge(HDC hdc, const RECT& rectDest, float current, float ma
 
 	DeleteDC(memDC);
 	DeleteObject(hBitmap);
-}
-void GUIImage::SetAlpha(int alpha)
-{
-	Image::SetAlpha(alpha);
 }
 
 

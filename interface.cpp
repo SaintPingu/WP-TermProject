@@ -5,6 +5,7 @@
 #include "timer.h"
 #include "boss.h"
 
+extern GameData gameData;
 extern Player* player;
 extern Boss* boss;
 
@@ -302,9 +303,10 @@ void GUIManager::Update()
 		isIconStop = true;
 
 		BossData bossData;
-		bossData.type = Type::Elec;
 		bossData.hp = 5000;
 		bossData.damage = 2;
+		bossData.damage_skill1 = 5;
+		bossData.damage_skill2 = 2;
 		bossData.speed = 1;
 		bossData.bulletSpeed[static_cast<int>(BossAct::Line)] = 6;
 		bossData.bulletSpeed[static_cast<int>(BossAct::Sector)] = 3;
@@ -313,7 +315,8 @@ void GUIManager::Update()
 		bossData.bulletSpeed[static_cast<int>(BossAct::Spread)] = 6;
 
 		bossData.actDelay = 3000;
-		bossData.crntActDelay = bossData.actDelay;
+		//bossData.crntActDelay = bossData.actDelay;
+		bossData.crntActDelay = 0; // debug
 		bossData.attackDelay[static_cast<int>(BossAct::Line)] = 40;
 		bossData.attackDelay[static_cast<int>(BossAct::Sector)] = 250;
 		bossData.attackDelay[static_cast<int>(BossAct::Circle)] = 200;
@@ -321,10 +324,31 @@ void GUIManager::Update()
 		bossData.attackDelay[static_cast<int>(BossAct::Spread)] = 10;
 
 		bossData.frameNum_Idle = 0;
-		bossData.frameNum_IdleMax = 2;
-		bossData.frameNum_Atk = 3;
-		bossData.frameNum_AtkMax = 5;
-		bossData.frameNum_AtkRev = 5;
+		switch (gameData.stage)
+		{
+		case Stage::Elec:
+			bossData.type = Type::Elec;
+			bossData.frameNum_IdleMax = 2;
+			bossData.frameNum_Atk = 3;
+			bossData.frameNum_AtkMax = 5;
+			bossData.frameNum_AtkRev = 5;
+			break;
+		case Stage::Water:
+			bossData.type = Type::Water;
+			bossData.frameNum_IdleMax = 2;
+			bossData.frameNum_Atk = 3;
+			bossData.frameNum_AtkMax = 3;
+			bossData.frameNum_AtkRev = 3;
+			break;
+		case Stage::Fire:
+			bossData.type = Type::Fire;
+			bossData.frameNum_IdleMax = 1;
+			bossData.frameNum_Atk = 2;
+			bossData.frameNum_AtkMax = 6;
+			bossData.frameNum_AtkRev = 6;
+			break;
+		}
+	
 		boss->Create(bossData);
 	}
 }
@@ -359,10 +383,9 @@ void GUIManager::DisplayHurtFrame(Type type)
 
 void GUIManager::HurtGUI::ReduceAlpha()
 {
-	if (--alpha < 0)
+	if (alpha == 0x00)
 	{
-		alpha = 0;
 		return;
 	}
-	gui->SetAlpha(alpha);
+	gui->SetAlpha(alpha--);
 }

@@ -14,14 +14,14 @@ private:
 protected:
 	RECT rectImage = { 0, };
 	POINT drawSize = { 0, };
-	void Load(const WCHAR* fileName, POINT imgSize, int alpha = 0xff);
+	void Load(const WCHAR* fileName, POINT imgSize, BYTE alpha = 0xff);
 	void Paint(HDC hdc, const RECT& rectDraw, const RECT& rectImage) const;
-	void SetAlpha(int alpha);
 	float scaleX = 1;
 	float scaleY = 1;
 
 public:
-	void PaintRotation(HDC hdc, Vector2 vPoints[3]) const;
+	void PaintRotation(HDC hdc, Vector2 vPoints[4], const RECT* rectImage = nullptr) const;
+	void SetAlpha(BYTE alpha);
 
 	inline RECT GetRectImage() const
 	{
@@ -35,6 +35,18 @@ public:
 	{
 		scaleX = this->scaleX;
 		scaleY = this->scaleY;
+	}
+	inline BYTE GetAlpha() const
+	{
+		return bFunction.SourceConstantAlpha;
+	}
+	inline void ReduceAlpha(BYTE amount)
+	{
+		CheckOverflowSub(bFunction.SourceConstantAlpha, amount);
+	}
+	inline void IncreaseAlpha(BYTE amount)
+	{
+		CheckOverflowAdd(bFunction.SourceConstantAlpha, amount);
 	}
 };
 
@@ -64,9 +76,9 @@ class EffectImage : public Image {
 private:
 	int maxFrame = 0;
 public:
-	void Load(const WCHAR* fileName, POINT imgSize, int maxFrame, int alpha = 0xff);
-	void Paint(HDC hdc, POINT drawPoint, const RECT* rectImage) const;
-	void Paint(HDC hdc, const RECT& rectDest, const RECT* rectImage) const;
+	void Load(const WCHAR* fileName, POINT imgSize, int maxFrame = 0, BYTE alpha = 0xff);
+	void Paint(HDC hdc, POINT drawPoint, const RECT* rectImage = nullptr) const;
+	void Paint(HDC hdc, const RECT& rectDest, const RECT* rectImage = nullptr) const;
 	void ScaleImage(float scaleX, float scaleY);
 
 	inline int GetMaxFrame() const
@@ -78,11 +90,10 @@ public:
 
 class GUIImage : public Image {
 public:
-	void Load(const WCHAR* fileName, POINT imgSize, int alpha = 0xff);
+	void Load(const WCHAR* fileName, POINT imgSize, BYTE alpha = 0xff);
 	void Paint(HDC hdc, const RECT& rectDest);
 	void PaintBlack(HDC hdc, const RECT& rectDest);
 	void PaintGauge(HDC hdc, const RECT& rectDest, float current, float max);
-	void SetAlpha(int alpha);
 };
 
 

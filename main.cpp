@@ -12,8 +12,7 @@ void ReleasePaint(HWND hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBi
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 HINSTANCE hInst;
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow)
-{
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow){
 	srand((unsigned int)time(NULL));
 
 	HWND hWnd;
@@ -87,7 +86,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 	{
-		gameData.stage = Stage::Electric;
+		gameData.stage = Stage::Elec;
 
 		bkground.Load(L"images\\background.png");
 		GetClientRect(hWnd, &rectWindow);
@@ -97,8 +96,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		boss = new Boss();
 
 		PlayerData playerData;
-		playerData.type = Type::Water;
-		playerData.subType = Type::Water;
+		playerData.type = Type::Elec;
+		playerData.subType = Type::Elec;
 		player = new Player(playerData);
 
 		gui = new GUIManager(rectWindow);

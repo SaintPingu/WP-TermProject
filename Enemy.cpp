@@ -338,7 +338,7 @@ void EnemyController::Init(const RECT& rectDisplay)
 	ObjectImage imgRangeBullet;
 	switch (gameData.stage)
 	{
-	case Stage::Electric:
+	case Stage::Elec:
 		meleeData.type = Type::Elec;
 		rangeData.type = Type::Elec;
 		imgMelee.Load(L"images\\sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });

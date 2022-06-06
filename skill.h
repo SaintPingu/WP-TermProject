@@ -1,8 +1,6 @@
 #pragma once
 #include "image.h"
 
-class Player;
-
 class SkillManager {
 private:
 	class Effect : public ISprite {
@@ -47,4 +45,57 @@ public:
 	{
 		return (crntSkill == Skill::Sector || crntSkill == Skill::Circle) ? true : false;
 	}
+};
+
+
+class BossSkillManager {
+private:
+	class Effect : public ISprite {
+	private:
+		EffectImage imgSkill;
+		Vector2 posCenter = { 0, };
+		Vector2 unitVector = Vector2::Down();
+		bool isRotated = false;
+		float damage = 0;
+
+		RECT GetRectBody() const;
+	public:
+		Effect(const EffectImage& imgSkill, const Vector2 pos, float damage);
+		Effect(const EffectImage& imgSkill, const Vector2 pos, float rotationDegree, float damage);
+		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector, float damage);
+		void Paint(HDC hdc) const;
+		bool Animate();
+		inline void IncreaseAlpha()
+		{
+			imgSkill.IncreaseAlpha(0x20);
+		}
+		inline void Rotate(float degree)
+		{
+			isRotated = true;
+			unitVector = ::Rotate(unitVector, degree);
+		}
+		inline Vector2 GetUnitVector() const
+		{
+			return unitVector;
+		}
+	};
+
+	bool isWarning = false;
+	float rotationDegree = 0.0f;
+
+	EffectImage imgSkill1;
+	EffectImage imgSkill1_Warning;
+	EffectImage imgSkill2;
+	EffectImage imgSkill2_Warning;
+
+	std::vector<Effect>skillEffects;
+	void Skill1_Elec();
+	void Skill1_Elec_Create();
+
+public:
+	BossSkillManager();
+	void Paint(HDC hdc);
+	void Animate();
+
+	void UseSkill();
 };

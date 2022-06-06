@@ -10,9 +10,8 @@ extern EnemyController* enemies;
 extern Boss* boss;
 extern EffectManager* effects;
 
-BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data)
+BulletController::Bullet::Bullet(POINT center, POINT bulletSize, const BulletData& data)
 {
-	this->rectImage = rectImage;
 	this->data = data;
 
 	rectBody.left = (float)center.x - ((float)bulletSize.x / 2);
@@ -21,7 +20,7 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage,
 	rectBody.bottom = rectBody.top + bulletSize.y;
 	rectRotBody = rectBody;
 }
-BulletController::Bullet::Bullet(POINT center, POINT bulletSize, RECT rectImage, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet) : Bullet(center, bulletSize, rectImage, data)
+BulletController::Bullet::Bullet(POINT center, POINT bulletSize, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet) : Bullet(center, bulletSize, data)
 {
 	this->dir = Dir::Empty;
 	this->unitVector = unitVector;
@@ -38,7 +37,7 @@ void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage, co
 {
 	if (isRotateImg == false)
 	{
-		bulletImage.Paint(hdc, rectRotBody, &rectImage);
+		bulletImage.Paint(hdc, rectRotBody);
 	}
 	else
 	{
@@ -182,16 +181,12 @@ void BulletController::Paint(HDC hdc)
 
 void BulletController::CreateBullet(POINT center, const BulletData& data, Dir dir)
 {
-	constexpr int frame = 0;
-	RECT rectImage = ISprite::GetRectImage(bulletImage, frame);
-	Bullet* bullet = new Bullet(center, bulletSize, rectImage, data, dir);
+	Bullet* bullet = new Bullet(center, bulletSize, data, dir);
 	bullets.emplace_back(bullet);
 }
 void BulletController::CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet)
 {
-	constexpr int frame = 0;
-	RECT rectImage = ISprite::GetRectImage(bulletImage, frame);
-	Bullet* bullet = new Bullet(center, bulletSize, rectImage, data, unitVector, isRotateImg, isSkillBullet);
+	Bullet* bullet = new Bullet(center, bulletSize, data, unitVector, isRotateImg, isSkillBullet);
 	bullets.emplace_back(bullet);
 }
 

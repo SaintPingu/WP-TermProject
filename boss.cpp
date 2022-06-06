@@ -5,6 +5,7 @@
 #include "timer.h"
 #include "effect.h"
 #include "interface.h"
+#include "skill.h"
 
 extern GameData gameData;
 extern Player* player;
@@ -42,19 +43,16 @@ void Boss::Death()
 }
 void Boss::StartAttack()
 {
-	//act = static_cast<BossAct>((rand() % 7) + 1);
+	//act = static_cast<BossAct>(rand() % 6);
 	SetAction(Action::Attack, data.frameNum_Atk);
-	act = BossAct::Sector;
+	act = BossAct::Skill1;
 
-	switch (act)
+	if (act == BossAct::Skill1)
 	{
-	case BossAct::Sector:
-		skillCount = 15;
-		break;
-	case BossAct::Circle:
-		skillCount = 10;
-		break;
-	case BossAct::Line:
+		skill->UseSkill();
+		return;
+	}
+	else if (act == BossAct::Line)
 	{
 		int random = rand() % 2;
 		if (random != 0)
@@ -65,16 +63,8 @@ void Boss::StartAttack()
 		{
 			SetMove(Vector2::Right());
 		}
-		skillCount = INT_MAX;
 	}
-	break;
-	case BossAct::Spiral:
-		skillCount = 360;
-		break;
-	case BossAct::Spread:
-		skillCount = 720;
-		break;
-	}
+	skillCount = maxSkillCount[static_cast<int>(act)];
 }
 void Boss::Shot()
 {
@@ -131,19 +121,37 @@ void Boss::Init(const RECT& rectDisplay)
 	
 	switch (gameData.stage)
 	{
-	case Stage::Electric:
+	case Stage::Elec:
 		image->Load(_T("images\\sprite_boss_elec.png"), { 73,68 }, { 3,7 }, { 69,50 });
 		image->ScaleImage(4, 4);
-		imgBullet.Load(L"images\\bullet_boss_elec.png", { 425,413 });
+		imgBullet.Load(_T("images\\bullet_boss_elec.png"), { 400,400 });
+		imgBullet.ScaleImage(0.05f, 0.05f);
+		break;
+	case Stage::Water:
+		image->Load(_T("images\\sprite_boss_water.png"), { 65,41 }, { 2,3 }, { 63,36 });
+		image->ScaleImage(4, 4);
+		imgBullet.Load(_T("images\\bullet_boss_water.png"), { 400,400 });
+		imgBullet.ScaleImage(0.05f, 0.05f);
+		break;
+	case Stage::Fire:
+		image->Load(_T("images\\sprite_boss_fire.png"), { 54,44 }, { 6,12 }, { 44,29 });
+		image->ScaleImage(4, 4);
+		imgBullet.Load(_T("images\\bullet_boss_fire.png"), { 400,400 });
 		imgBullet.ScaleImage(0.05f, 0.05f);
 		break;
 	}
 
 	bullets = new EnemyBullet(rectDisplay, imgBullet);
+	maxSkillCount[static_cast<unsigned int>(BossAct::Line)] = INT_MAX;
+	maxSkillCount[static_cast<unsigned int>(BossAct::Circle)] = 10;
+	maxSkillCount[static_cast<unsigned int>(BossAct::Spiral)] = 360;
+	maxSkillCount[static_cast<unsigned int>(BossAct::Sector)] = 15;
+	maxSkillCount[static_cast<unsigned int>(BossAct::Spread)] = 720;
 }
 void Boss::Create(const BossData& data)
 {
 	this->data = data;
+	skill = new BossSkillManager();
 
 	Vector2 posCenter = { WINDOWSIZE_X / 2 , -300 };
 	GameObject::Init(*image, posCenter);
@@ -179,7 +187,7 @@ void Boss::SetPosDest()
 		static bool isReturn = false;
 
 		const RECT rectBody = GetRectBody();
-		const int minXPos = bullets->GetBulletSize().x * 5;
+		const int minXPos = bullets->GetBulletSize().x * 4;
 		const int maxXPos = rectDisplay->right - minXPos;
 		const Vector2 posCenter = GetPosCenter();
 
@@ -226,6 +234,7 @@ void Boss::Paint(HDC hdc)
 	GameObject::Paint(hdc, &rectImage);
 
 	bullets->Paint(hdc);
+	skill->Paint(hdc);
 }
 
 void Boss::Move()
@@ -334,7 +343,11 @@ bool Boss::Hit(float damage)
 
 void Boss::Animate()
 {
-	if (isRevFrame == true)
+	if (IsCreated() == false)
+	{
+		return;
+	}
+	else if (isRevFrame == true)
 	{
 		--frame;
 	}
@@ -373,12 +386,11 @@ void Boss::Animate()
 		assert(0);
 		break;
 	}
+
+	skill->Animate();
 }
 
-//imgRangeBullet.Load(L"images\\bullet_boss_fire.png", { 375,367 });
-//imgRangeBullet.ScaleImage(0.06f, 0.06f);
-//imgRangeBullet.Load(L"images\\bullet_boss_water.png", { 231,235 });
-//imgRangeBullet.ScaleImage(0.08f, 0.08f);
+
 
 void Boss::ShotByLine()
 {
@@ -427,7 +439,11 @@ void Boss::ShotBySpiral()
 
 	static int rotation = 8;
 	static Vector2 unitVector = Vector2::Down();
-	if (abs(skillCount % (360 / rotation)) == 0)
+	if (skillCount == 360)
+	{
+		unitVector = Vector2::Down();
+	}
+	if (abs(skillCount % (180 / rotation)) == 0)
 	{
 		rotation = ((rand() % 3) + 4) * 2;
 		const bool sign = rand() % 2;

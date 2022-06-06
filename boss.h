@@ -6,6 +6,7 @@ enum class BossAct { Line = 0, Circle, Spiral, Sector, Spread, Skill1, Skill2, I
 struct BulletData;
 class ObjectImage;
 class EnemyBullet;
+class BossSkillManager;
 
 #define BOSS_BULLET_LIST 5
 
@@ -19,6 +20,8 @@ typedef struct BossData {
 
 	float hp = 0;
 	float damage = 0;
+	float damage_skill1 = 0;
+	float damage_skill2 = 0;
 	float speed = 0;
 	float bulletSpeed[BOSS_BULLET_LIST] = { 0, };
 
@@ -44,7 +47,9 @@ private:
 	Vector2 posDest = { 0, };
 	Vector2 unitVector = { 0, };
 
+	int maxSkillCount[BOSS_BULLET_LIST] = { 0, };
 	int skillCount = 0;
+	BossSkillManager* skill = nullptr;
 
 	void SetMove(Vector2 unitVector);
 	void SetPosDest() override;
@@ -75,6 +80,10 @@ public:
 	bool CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint = { -1, });
 	bool Hit(float damage);
 
+	inline void ReSetBossAct()
+	{
+		act = BossAct::Idle;
+	}
 	inline Type GetType() const
 	{
 		return data.type;
@@ -82,5 +91,21 @@ public:
 	inline bool IsCreated() const
 	{
 		return data.isCreated;
+	}
+	inline BossAct GetAct() const
+	{
+		return act;
+	}
+	inline void SetAct(BossAct act)
+	{
+		this->act = act;
+	}
+	inline float GetDamage_Skill1() const
+	{
+		return data.damage_skill1;
+	}
+	inline float GetDamage_Skill2() const
+	{
+		return data.damage_skill2;
 	}
 };
