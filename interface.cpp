@@ -305,8 +305,8 @@ void GUIManager::Update()
 		BossData bossData;
 		bossData.hp = 5000;
 		bossData.damage = 2;
-		bossData.damage_skill1 = 5;
-		bossData.damage_skill2 = 2;
+		bossData.damage_skill1 = 4.5f;
+		bossData.damage_skill2 = 0.5f;
 		bossData.speed = 1;
 		bossData.bulletSpeed[static_cast<int>(BossAct::Line)] = 6;
 		bossData.bulletSpeed[static_cast<int>(BossAct::Sector)] = 3;
@@ -314,7 +314,7 @@ void GUIManager::Update()
 		bossData.bulletSpeed[static_cast<int>(BossAct::Spiral)] = 5;
 		bossData.bulletSpeed[static_cast<int>(BossAct::Spread)] = 6;
 
-		bossData.actDelay = 3000;
+		bossData.actDelay = 1500;
 		//bossData.crntActDelay = bossData.actDelay;
 		bossData.crntActDelay = 0; // debug
 		bossData.attackDelay[static_cast<int>(BossAct::Line)] = 40;

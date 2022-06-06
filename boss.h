@@ -77,6 +77,7 @@ public:
 	void CheckActDelay();
 
 	void Animate() override;
+	void AnimateSkill();
 	bool CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint = { -1, });
 	bool Hit(float damage);
 
@@ -107,5 +108,9 @@ public:
 	inline float GetDamage_Skill2() const
 	{
 		return data.damage_skill2;
+	}
+	RECT GetRectDisplay() const
+	{
+		return *rectDisplay;
 	}
 };

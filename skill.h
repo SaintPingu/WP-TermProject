@@ -65,9 +65,9 @@ private:
 		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector, float damage);
 		void Paint(HDC hdc) const;
 		bool Animate();
-		inline void IncreaseAlpha()
+		inline void IncreaseAlpha(BYTE alpha)
 		{
-			imgSkill.IncreaseAlpha(0x20);
+			imgSkill.IncreaseAlpha(alpha);
 		}
 		inline void Rotate(float degree)
 		{
@@ -77,6 +77,14 @@ private:
 		inline Vector2 GetUnitVector() const
 		{
 			return unitVector;
+		}
+		inline Vector2 GetPosCenter() const
+		{
+			return posCenter;
+		}
+		inline float GetDamage() const
+		{
+			return damage;
 		}
 	};
 
@@ -88,10 +96,12 @@ private:
 	EffectImage imgSkill2;
 	EffectImage imgSkill2_Warning;
 
+	std::vector<Effect>warningEffects;
 	std::vector<Effect>skillEffects;
 	void Skill1_Elec();
 	void Skill1_Elec_Create();
-
+	void Skill2_Elec();
+	void Skill2_Elec_Create();
 public:
 	BossSkillManager();
 	void Paint(HDC hdc);

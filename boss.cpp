@@ -45,14 +45,15 @@ void Boss::StartAttack()
 {
 	//act = static_cast<BossAct>(rand() % 6);
 	SetAction(Action::Attack, data.frameNum_Atk);
-	act = BossAct::Skill1;
+	act = BossAct::Skill2;
 
-	if (act == BossAct::Skill1)
+	switch (act)
 	{
+	case BossAct::Skill1:
+	case BossAct::Skill2:
 		skill->UseSkill();
 		return;
-	}
-	else if (act == BossAct::Line)
+	case BossAct::Line:
 	{
 		int random = rand() % 2;
 		if (random != 0)
@@ -63,6 +64,8 @@ void Boss::StartAttack()
 		{
 			SetMove(Vector2::Right());
 		}
+	}
+	break;
 	}
 	skillCount = maxSkillCount[static_cast<int>(act)];
 }
@@ -386,10 +389,11 @@ void Boss::Animate()
 		assert(0);
 		break;
 	}
-
+}
+void Boss::AnimateSkill()
+{
 	skill->Animate();
 }
-
 
 
 void Boss::ShotByLine()

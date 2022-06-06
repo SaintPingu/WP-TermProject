@@ -397,10 +397,12 @@ BossSkillManager::BossSkillManager()
 	case Type::Elec:
 		imgSkill1.Load(_T("images\\sprite_boss_skill1_elec.png"), { 32,224 }, 9);
 		imgSkill1.ScaleImage(1.0f, 6.0f);
-		imgSkill1_Warning.Load(_T("images\\boss_skill1_elec_warning.png"), { 31,223 }, 8, 0x10);
+		imgSkill1_Warning.Load(_T("images\\boss_skill1_elec_warning.png"), { 31,223 }, 16, 0x10);
 		imgSkill1_Warning.ScaleImage(1.0f, 6.0f);
 		imgSkill2.Load(_T("images\\sprite_boss_skill2_elec.png"), { 80,80 }, 15);
-		imgSkill2_Warning.Load(_T("images\\boss_skill2_elec_warning.png"), { 80,80 });
+		imgSkill2.ScaleImage(0.5f, 0.5f);
+		imgSkill2_Warning.Load(_T("images\\boss_skill2_elec_warning.png"), { 79,79 }, 15, 0x00);
+		imgSkill2_Warning.ScaleImage(0.5f, 0.5f);
 		break;
 	case Type::Water:
 		break;
@@ -414,6 +416,10 @@ BossSkillManager::BossSkillManager()
 
 void BossSkillManager::Paint(HDC hdc)
 {
+	for (Effect& effect : warningEffects)
+	{
+		effect.Paint(hdc);
+	}
 	for (Effect& effect : skillEffects)
 	{
 		effect.Paint(hdc);
@@ -431,26 +437,58 @@ void BossSkillManager::UseSkill()
 			break;
 		}
 		break;
-
+	case BossAct::Skill2:
+		switch (boss->GetType())
+		{
+		case Type::Elec:
+			Skill2_Elec_Create();
+			break;
+		}
+		break;
+	default:
+		assert(0);
+		break;
 	}
 }
 void BossSkillManager::Skill1_Elec_Create()
 {
 	isWarning = true;
 
+	constexpr int lineCount = 9;
+	const float rotationDegreePerAnimation = 3.0f + (((rand() % 10) + 1) * 0.1f);
+
 	int sign = rand() % 2;
 	if (sign == 0)
 	{
 		sign = -1;
 	}
-	rotationDegree = 2 * sign;
+	rotationDegree = rotationDegreePerAnimation * sign;
 
-	float startDegree = (rand() % 20);
-	for (size_t i = 0; i < 9; ++i)
+	float startDegree = (rand() % 180);
+	for (int i = 0; i < lineCount; ++i)
 	{
 		skillEffects.emplace_back(imgSkill1_Warning, boss->GetPosCenter(), startDegree + (20.0f * i), 0.0f);
 	}
 }
+void BossSkillManager::Skill2_Elec_Create()
+{
+	isWarning = true;
+
+	constexpr int creationCount = 120;
+
+	RECT rectDisplay = boss->GetRectDisplay();
+	for (int i = 0; i < creationCount; ++i)
+	{
+		const float randX = rand() % (rectDisplay.left + (rectDisplay.right - rectDisplay.left));
+		const float randY = rand() % (rectDisplay.top + (rectDisplay.bottom - rectDisplay.top));
+
+		const Vector2 pos = { randX, randY };
+		warningEffects.emplace_back(imgSkill2_Warning, pos, 0.0f);
+	}
+
+}
+
+
 void BossSkillManager::Skill1_Elec()
 {
 	bool isWarningEnd = false;
@@ -475,8 +513,9 @@ void BossSkillManager::Skill1_Elec()
 		}
 		else if (isWarning == true)
 		{
+			rotationDegree -= (rotationDegree / abs(rotationDegree)) * 0.02f;
 			skillEffects.at(i).Rotate(rotationDegree);
-			skillEffects.at(i).IncreaseAlpha();
+			skillEffects.at(i).IncreaseAlpha(0x0d);
 		}
 	}
 
@@ -492,10 +531,62 @@ void BossSkillManager::Skill1_Elec()
 	}
 	else if (isSkillEnd == true)
 	{
-		isWarning = true;
 		boss->ReSetBossAct();
 	}
 }
+void BossSkillManager::Skill2_Elec()
+{
+	static size_t showCount = 0;
+	bool isWarningEnd = false;
+
+	showCount += 5;
+	if (showCount > warningEffects.size())
+	{
+		showCount = warningEffects.size();
+	}
+	if (showCount == 0)
+	{
+		isWarningEnd = true;
+	}
+
+	std::vector<Vector2>positions;
+	for (size_t i = 0; i < showCount; ++i)
+	{
+		if (warningEffects.at(i).Animate() == false)
+		{
+			positions.emplace_back(warningEffects.at(i).GetPosCenter());
+			warningEffects[i--] = warningEffects.back();
+			warningEffects.pop_back();
+			--showCount;
+		}
+		else
+		{
+			warningEffects.at(i).IncreaseAlpha(0x07);
+		}
+	}
+
+	for (size_t i = 0; i < skillEffects.size(); ++i)
+	{
+		if (skillEffects.at(i).Animate() == false)
+		{
+			skillEffects[i--] = skillEffects.back();
+			skillEffects.pop_back();
+		}
+	}
+
+	for (const Vector2& position : positions)
+	{
+		const float damage = boss->GetDamage_Skill2();
+		skillEffects.emplace_back(imgSkill2, position, damage);
+	}
+
+	if (isWarningEnd == true && skillEffects.empty() == true)
+	{
+		showCount = 0;
+		boss->ReSetBossAct();
+	}
+}
+
 void BossSkillManager::Animate()
 {
 	switch (boss->GetType())
@@ -504,6 +595,10 @@ void BossSkillManager::Animate()
 		if (boss->GetAct() == BossAct::Skill1)
 		{
 			Skill1_Elec();
+		}
+		else if (boss->GetAct() == BossAct::Skill2)
+		{
+			Skill2_Elec();
 		}
 		break;
 	}
