@@ -118,6 +118,11 @@ void Player::Init(const RECT& rectDisplay)
 
 void Player::Paint(HDC hdc)
 {
+	if (data.isDeath == true)
+	{
+		return;
+	}
+
 	RECT rectImage =ISprite::GetRectImage(GetImage(), frame);
 	GameObject::Paint(hdc, &rectImage);
 
@@ -337,7 +342,11 @@ Vector2 Player::CheckCollideWindow(Vector2 pos) const
 
 void Player::Animate()
 {
-	if (isRevFrame == true)
+	if (data.isDeath == true)
+	{
+		return;
+	}
+	else if (isRevFrame == true)
 	{
 		--frame;
 	}
@@ -408,6 +417,11 @@ void Player::CheckShot()
 }
 void Player::CreateSubBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet)
 {
+	if (Player::data.isDeath == true)
+	{
+		return;
+	}
+
 	subBullets->CreateBullet(center, data, unitVector, isRotateImg, isSkillBullet);
 }
 
@@ -419,7 +433,11 @@ void Player::MoveBullets()
 
 void Player::Hit(float damage, Type hitType, POINT effectPoint)
 {
-	if (effectPoint.x == -1)
+	if (data.isDeath == true)
+	{
+		return;
+	}
+	else if (effectPoint.x == -1)
 	{
 		effectPoint = GetPosCenter();
 		GetRandEffectPoint(effectPoint);
@@ -430,12 +448,18 @@ void Player::Hit(float damage, Type hitType, POINT effectPoint)
 	damage = CalculateDamage(damage, data.type, hitType);
 	if ((data.hp -= damage) <= 0)
 	{
-		data.speed = 0;
+		data.isDeath = true;
+		effects->CreateHitEffect(GetPosCenter(), data.type);
 	}
 }
 
 void Player::ActiveSkill(Skill skill)
 {
+	if (data.isDeath == true)
+	{
+		return;
+	}
+
 	skillManager->ActiveSkill(skill);
 }
 

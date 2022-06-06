@@ -53,18 +53,26 @@ private:
 	class Effect : public ISprite {
 	private:
 		EffectImage imgSkill;
+		FRECT rectDraw = { -1, };
 		Vector2 posCenter = { 0, };
-		Vector2 unitVector = Vector2::Down();
-		bool isRotated = false;
-		float damage = 0;
+		Vector2 unitVector_imgRotation = Vector2::Down();
+		Vector2 unitVector_direction = Vector2::Zero();
 
-		RECT GetRectBody() const;
+		float speed = 1;
+		float damage = 0;
+		bool isRotated = false;
+
+		bool Move();
 	public:
+		Effect(const EffectImage& imgSkill, const FRECT rectDraw, float damage);
 		Effect(const EffectImage& imgSkill, const Vector2 pos, float damage);
 		Effect(const EffectImage& imgSkill, const Vector2 pos, float rotationDegree, float damage);
-		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector, float damage);
+		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, float damage);
+		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, Vector2 unitVector_direction, float speed, float damage);
 		void Paint(HDC hdc) const;
 		bool Animate();
+
+		RECT GetRectBody() const;
 		inline void IncreaseAlpha(BYTE alpha)
 		{
 			imgSkill.IncreaseAlpha(alpha);
@@ -72,11 +80,11 @@ private:
 		inline void Rotate(float degree)
 		{
 			isRotated = true;
-			unitVector = ::Rotate(unitVector, degree);
+			unitVector_imgRotation = ::Rotate(unitVector_imgRotation, degree);
 		}
-		inline Vector2 GetUnitVector() const
+		inline Vector2 GetUnitVector_ImgRotation() const
 		{
-			return unitVector;
+			return unitVector_imgRotation;
 		}
 		inline Vector2 GetPosCenter() const
 		{
@@ -85,6 +93,14 @@ private:
 		inline float GetDamage() const
 		{
 			return damage;
+		}
+		inline FRECT GetRectDraw() const
+		{
+			return rectDraw;
+		}
+		inline int GetFrame() const
+		{
+			return frame;
 		}
 	};
 
@@ -102,6 +118,13 @@ private:
 	void Skill1_Elec_Create();
 	void Skill2_Elec();
 	void Skill2_Elec_Create();
+
+	void Skill1_Water();
+	void Skill1_Water_Create();
+	void Skill2_Water();
+	void Skill2_Water_Create();
+
+	void MoveSkills();
 public:
 	BossSkillManager();
 	void Paint(HDC hdc);

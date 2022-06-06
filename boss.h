@@ -70,7 +70,7 @@ private:
 	void ShotBySpread();
 public:
 	void Init(const RECT& rectDisplay);
-	void Create(const BossData& data);
+	void Create();
 	void Paint(HDC hdc);
 	void Move() override;
 	void CheckAttackDelay();
@@ -114,3 +114,5 @@ public:
 		return *rectDisplay;
 	}
 };
+
+BossData CreateBossData();

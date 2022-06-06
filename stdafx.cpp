@@ -157,20 +157,19 @@ void ComputeProjections(const std::vector<Vector2>& bounds_a, const std::vector<
 		projections_b.push_back(projection_b);
 	}
 }
-// Check if the projections of two polygons overlap
 bool IsOverlapping(const std::vector<double>& projections_a, const std::vector<double>& projections_b) {
 	const double maxProjection_a = *std::max_element(projections_a.begin(), projections_a.end());
 	const double minProjection_a = *std::min_element(projections_a.begin(), projections_a.end());
 	const double maxProjection_b = *std::max_element(projections_b.begin(), projections_b.end());
 	const double minProjection_b = *std::min_element(projections_b.begin(), projections_b.end());
 
-	// True if projection overlaps but does not necessarily mean the polygons are intersecting yet
+	// does not necessarily mean the polygons are intersecting yet
 	return !(maxProjection_a < minProjection_b or maxProjection_b < minProjection_a);
 }
 
 bool SATIntersect(const FRECT& rectSrc, const Vector2 vSrc[4])
 {
-	constexpr int vertexSize = 4;
+	constexpr int vertexCount = 4;
 	Vector2 vLT = { rectSrc.left, rectSrc.top };
 	Vector2 vRT = { rectSrc.right, rectSrc.top };
 	Vector2 vLB = { rectSrc.left, rectSrc.bottom };
@@ -182,12 +181,11 @@ bool SATIntersect(const FRECT& rectSrc, const Vector2 vSrc[4])
 	bounds_a.emplace_back(vRB);
 
 	std::vector<Vector2> bounds_b;
-	for (int i = 0; i < vertexSize; ++i)
+	for (int i = 0; i < vertexCount; ++i)
 	{
 		bounds_b.emplace_back(vSrc[i]);
 	}
 
-	// Check if two convex polygons intersect
 	std::vector<double> proj_a;
 	std::vector<double> proj_b;
 	proj_a.reserve(bounds_a.size());
@@ -217,6 +215,34 @@ bool SATIntersect(const FRECT& rectSrc, const Vector2 vSrc[4])
 		}
 	}
 
-	// Intersects if all projections overlap
 	return true;
+}
+
+void ScaleRect(FRECT& rect, float scaleX, float scaleY)
+{
+	Vector2 size = { 0, };
+	size.x = (rect.right - rect.left);
+	size.y = (rect.bottom - rect.top);
+
+	Vector2 posCenter = { 0, };
+	posCenter.x = rect.left + (size.x / 2);
+	posCenter.y = rect.top + (size.y / 2);
+
+	size.x *= scaleX;
+	size.y *= scaleY;
+
+	rect.left = posCenter.x - (size.x / 2);
+	rect.top = posCenter.y - (size.y / 2);
+	rect.right = rect.left = size.x;
+	rect.bottom = rect.top = size.y;
+}
+FRECT GetRect(const Vector2& posCenter, float radius)
+{
+	FRECT rect = { 0, };
+	rect.left = posCenter.x - (radius / 2);
+	rect.top = posCenter.y - (radius / 2);
+	rect.right = rect.left + radius;
+	rect.bottom = rect.top + radius;
+
+	return rect;
 }

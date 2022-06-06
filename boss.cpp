@@ -151,16 +151,16 @@ void Boss::Init(const RECT& rectDisplay)
 	maxSkillCount[static_cast<unsigned int>(BossAct::Sector)] = 15;
 	maxSkillCount[static_cast<unsigned int>(BossAct::Spread)] = 720;
 }
-void Boss::Create(const BossData& data)
+void Boss::Create()
 {
-	this->data = data;
+	data = CreateBossData();
 	skill = new BossSkillManager();
 
 	Vector2 posCenter = { WINDOWSIZE_X / 2 , -300 };
 	GameObject::Init(*image, posCenter);
 	SetMove(Vector2::Down());
 
-	this->data.isCreated = true;
+	data.isCreated = true;
 }
 void Boss::SetPosDest()
 {
@@ -493,4 +493,71 @@ void Boss::ShotBySpread()
 
 	Vector2 unitVector = Rotate(Vector2::Up(), rotation);
 	bullets->CreateBullet(bulletPos, bulletData, unitVector);
+}
+
+BossData CreateBossData()
+{
+	BossData bossData;
+
+	bossData.bulletSpeed[static_cast<int>(BossAct::Line)] = 6;
+	bossData.bulletSpeed[static_cast<int>(BossAct::Sector)] = 3;
+	bossData.bulletSpeed[static_cast<int>(BossAct::Circle)] = 4;
+	bossData.bulletSpeed[static_cast<int>(BossAct::Spiral)] = 5;
+	bossData.bulletSpeed[static_cast<int>(BossAct::Spread)] = 6;
+
+	bossData.attackDelay[static_cast<int>(BossAct::Line)] = 40;
+	bossData.attackDelay[static_cast<int>(BossAct::Sector)] = 250;
+	bossData.attackDelay[static_cast<int>(BossAct::Circle)] = 200;
+	bossData.attackDelay[static_cast<int>(BossAct::Spiral)] = 10;
+	bossData.attackDelay[static_cast<int>(BossAct::Spread)] = 10;
+
+	bossData.frameNum_Idle = 0;
+	switch (gameData.stage)
+	{
+	case Stage::Elec:
+		bossData.type = Type::Elec;
+
+		bossData.hp = 5000;
+		bossData.damage = 2;
+		bossData.speed = 1;
+		bossData.damage_skill1 = 4.5f;
+		bossData.damage_skill2 = 0.5f;
+
+		bossData.actDelay = 1500;
+		//bossData.crntActDelay = bossData.actDelay;
+		bossData.crntActDelay = 0; // debug
+
+		bossData.frameNum_IdleMax = 2;
+		bossData.frameNum_Atk = 3;
+		bossData.frameNum_AtkMax = 5;
+		bossData.frameNum_AtkRev = 5;
+		break;
+	case Stage::Water:
+		bossData.type = Type::Water;
+
+		bossData.hp = 5000;
+		bossData.damage = 2;
+		bossData.speed = 1;
+		bossData.damage_skill1 = 4.5f;
+		bossData.damage_skill2 = 2.5f;
+
+		bossData.actDelay = 1500;
+		//bossData.crntActDelay = bossData.actDelay;
+		bossData.crntActDelay = 0; // debug
+
+		bossData.frameNum_IdleMax = 2;
+		bossData.frameNum_Atk = 3;
+		bossData.frameNum_AtkMax = 3;
+		bossData.frameNum_AtkRev = 3;
+		break;
+	case Stage::Fire:
+		bossData.type = Type::Fire;
+		bossData.frameNum_IdleMax = 1;
+		bossData.frameNum_Atk = 2;
+		bossData.frameNum_AtkMax = 6;
+		bossData.frameNum_AtkRev = 6;
+		break;
+	}
+
+	return bossData;
 }

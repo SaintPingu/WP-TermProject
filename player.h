@@ -22,6 +22,8 @@ typedef struct PlayerData {
 	float subDamage = 0;
 	float damage_Q = 0; // per sec
 	float damage_WE = 0;
+
+	bool isDeath = false;
 }PlayerData;
 
 class Player : public GameObject, public IControllable, public IAnimatable {

@@ -240,6 +240,10 @@ struct Vector2 {
 	{
 		return { 1, 0 };
 	}
+	static inline constexpr Vector2 Zero()
+	{
+		return { 0, 0 };
+	}
 	static inline constexpr Vector2 GetDest(Vector2 posCenter, Vector2 vector, float speed = 1)
 	{
 		return posCenter + (vector * speed);
@@ -284,3 +288,5 @@ void SetRectByWindow(RECT& rect);
 void CheckOverflowAdd(BYTE& lhs, const BYTE& rhs);
 void CheckOverflowSub(BYTE& lhs, const BYTE& rhs);
 bool SATIntersect(const FRECT& rectSrc, const Vector2 vSrc[4]);
+void ScaleRect(FRECT& rect, float scaleX, float scaleY);
+FRECT GetRect(const Vector2& posCenter, float radius);
