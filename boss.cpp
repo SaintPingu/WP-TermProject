@@ -48,7 +48,7 @@ void Boss::StartAttack()
 	{
 		SetAction(Action::Attack, data.frameNum_Atk);
 	}
-	act = BossAct::Skill1;
+	act = BossAct::Skill2;
 
 	switch (act)
 	{
@@ -566,8 +566,8 @@ BossData CreateBossData()
 
 		bossData.hp = 5000;
 		bossData.damage = 2;
-		bossData.damage_skill1 = 4.5f;
-		bossData.damage_skill2 = 2.5f;
+		bossData.damage_skill1 = 7.5f;
+		bossData.damage_skill2 = 15.0f;
 		bossData.actDelay = 1250;
 
 		bossData.frameNum_IdleMax = 1;

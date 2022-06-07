@@ -36,6 +36,14 @@ public:
 	{
 		return posCenter;
 	}
+	inline float GetBodyWidth() const
+	{
+		return rectBody.right - rectBody.left;
+	}
+	inline float GetBodyHeight() const
+	{
+		return rectBody.bottom - rectBody.top;
+	}
 };
 
 Vector2 Lerp(Vector2 src, Vector2 dst, float alpha);

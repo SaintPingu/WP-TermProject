@@ -96,7 +96,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		boss = new Boss();
 
 		PlayerData playerData;
-		playerData.type = Type::Water;
+		playerData.type = Type::Elec;
 		playerData.subType = Type::Fire;
 		player = new Player(playerData);
 

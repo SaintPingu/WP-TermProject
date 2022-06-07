@@ -54,6 +54,7 @@ private:
 		int rotationCount = 0;
 		float speed = 1;
 		float damage = 0;
+		bool isActiveDamage = true;
 		bool isRotated = false;
 		bool isHitOnce = false;
 
@@ -113,6 +114,14 @@ private:
 		inline int GetRotationCount() const
 		{
 			return data.rotationCount;
+		}
+		inline void ActiveDamage(bool active)
+		{
+			this->data.isActiveDamage = active;
+		}
+		inline void SetPosCenter(Vector2 pos)
+		{
+			this->posCenter = pos;
 		}
 	};
 

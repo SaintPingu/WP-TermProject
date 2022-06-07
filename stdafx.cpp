@@ -274,3 +274,23 @@ FRECT GetRect(const Vector2& posCenter, float radius)
 
 	return rect;
 }
+
+void Round(float& num, int digit)
+{
+	for (int i = 0; i < digit; ++i)
+	{
+		num *= 10;
+	}
+	num = std::round(num);
+	for (int i = 0; i < digit; ++i)
+	{
+		num /= 10;
+	}
+}
+bool IsFractionalZero(float num)
+{
+	int integer = num;
+	float fractionalPart = num - integer;
+
+	return (fractionalPart < 0.001) ? true : false;
+}

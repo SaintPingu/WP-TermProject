@@ -10,7 +10,6 @@
 #include <vector>
 #include <cassert>
 #include <algorithm>
-#include <exception>
 
 
 #define WINDOWSIZE_X 500
@@ -296,6 +295,9 @@ void CheckOverflowSub(BYTE& lhs, const BYTE& rhs);
 bool SATIntersect(const FRECT& rectSrc, const Vector2 vSrc[4]);
 void ScaleRect(FRECT& rect, float scaleX, float scaleY);
 FRECT GetRect(const Vector2& posCenter, float radius);
+void Round(float& num, int digit);
+bool IsFractionalZero(float num);
+
 
 template <typename T>
 inline constexpr int GetSign(T num)
