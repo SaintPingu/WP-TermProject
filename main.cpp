@@ -86,7 +86,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 	{
-		gameData.stage = Stage::Water;
+		gameData.stage = Stage::Fire;
 
 		bkground.Load(L"images\\background.png");
 		GetClientRect(hWnd, &rectWindow);
@@ -97,7 +97,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		PlayerData playerData;
 		playerData.type = Type::Water;
-		playerData.subType = Type::Elec;
+		playerData.subType = Type::Fire;
 		player = new Player(playerData);
 
 		gui = new GUIManager(rectWindow);

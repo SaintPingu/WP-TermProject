@@ -18,10 +18,12 @@ private:
 	EffectImage explode_fire;
 	EffectImage explode_elec;
 	EffectImage explode_water;
+	EffectImage explode_dark;
 
 	EffectImage cloud_fire;
 	EffectImage cloud_elec;
 	EffectImage cloud_water;
+	EffectImage cloud_dark;
 
 	std::vector<Effect> effects;
 public:

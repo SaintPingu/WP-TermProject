@@ -450,6 +450,44 @@ void EnemyController::Init(const RECT& rectDisplay)
 		rangeData.frameNum_AtkRev = 2;
 		rangeData.bulletSpeed = 3.5f;
 		break;
+	case Stage::Dark:
+		meleeData.type = Type::Dark;
+		rangeData.type = Type::Dark;
+		imgMelee.Load(L"images\\sprite_crobat.png", { 40,30 }, { 5,7 }, { 32,19 });
+		imgMelee.ScaleImage(1.1f, 1.1f);
+		imgRange.Load(L"images\\sprite_aerodactyl.png", { 40,40 }, { 6,9 }, { 30,27 });
+		imgRange.ScaleImage(1.5f, 1.5f);
+		imgRangeBullet.Load(L"images\\bullet_aerodactyl.png", { 10,10 });
+		imgRangeBullet.ScaleImage(1.6f, 1.6f);
+
+		createDelay_Melee = 2000;
+		createDelay_Range = 3000;
+		createAmount_Melee = 11;
+		createAmount_Range = 5;
+
+		meleeData.hp = 4.0f;
+		meleeData.speed = 2.25f;
+		meleeData.attackDelay = 850;
+		meleeData.damage = 0.8f;
+
+		meleeData.frameNum_Idle = 0;
+		meleeData.frameNum_IdleMax = 2;
+		meleeData.frameNum_Atk = 2;
+		meleeData.frameNum_AtkMax = 4;
+		meleeData.frameNum_AtkRev = 4;
+
+		rangeData.hp = 8.5f;
+		rangeData.speed = 0.75f;
+		rangeData.attackDelay = 2000;
+		rangeData.damage = 1.25f;
+
+		rangeData.frameNum_Idle = 0;
+		rangeData.frameNum_IdleMax = 2;
+		rangeData.frameNum_Atk = 2;
+		rangeData.frameNum_AtkMax = 4;
+		rangeData.frameNum_AtkRev = 4;
+		rangeData.bulletSpeed = 3.0f;
+		break;
 	default:
 		assert(0);
 		break;

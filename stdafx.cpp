@@ -11,6 +11,34 @@ Vector2 Rotate(Vector2 vector, float degree)
 
 	return result;
 }
+void Rotate(const Vector2& vSrc, const Vector2& vDst, Vector2& unitVector, float t)
+{
+	if (t < 0)
+	{
+		t = 0;
+	}
+	else if (t > 1)
+	{
+		t = 1;
+	}
+
+	const Vector2 vToTarget = (vDst - vSrc).Normalized();
+	const float a = atan2(unitVector.x, unitVector.y);
+	const float b = atan2(vToTarget.x, vToTarget.y);
+	const float theta = a - b;
+
+	float rotationDegree = RADIAN_TO_DEGREE(theta);
+	if (abs(rotationDegree) > 180)
+	{
+		rotationDegree -= GetSign(rotationDegree) * 360;
+	}
+	if (abs(rotationDegree) > 45)
+	{
+		rotationDegree = GetSign(rotationDegree) * 45;
+	}
+	unitVector = Rotate(unitVector, rotationDegree * t);
+}
+
 
 bool OutOfRange(const RECT& rect, const RECT& rectRange)
 {
@@ -22,11 +50,11 @@ bool OutOfRange(const RECT& rect, const RECT& rectRange)
 	return false;
 }
 
-void GetRotationPos(const RECT& rect, const Vector2& unitVector, Vector2 vPoints[4])
+void GetRotationPos(const RECT& rect, const Vector2& unitVector, Vector2 basisVector, Vector2 vPoints[4])
 {
-	const int rotationDir = unitVector.x > 0 ? 1 : -1;
-	const float theta = Vector2::GetTheta(unitVector, Vector2::Up());
-	const float rotationDegree = RADIAN_TO_DEGREE(theta) * rotationDir;
+	const int rotationSign = unitVector.x > 0 ? 1 : -1;
+	const float theta = Vector2::GetTheta(unitVector, basisVector);
+	const float rotationDegree = RADIAN_TO_DEGREE(theta) * rotationSign;
 
 	Vector2 posCenter = { 0, };
 	posCenter.x = rect.left + ((float)(rect.right - rect.left) / 2);

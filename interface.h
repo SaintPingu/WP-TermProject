@@ -63,6 +63,7 @@ private:
 	HurtGUI hurtGUI_Fire;
 	HurtGUI hurtGUI_Water;
 	HurtGUI hurtGUI_Elec;
+	HurtGUI hurtGUI_Dark;
 public:
 	GUIManager(const RECT& rectWindow);
 	void Paint(HDC hdc);

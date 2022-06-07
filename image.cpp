@@ -48,7 +48,7 @@ void Image::PaintRotation(HDC hdc, Vector2 vPoints[4], const RECT* rectImage) co
 	SelectObject(memDC_Object, hBitmap);
 
 	// Get rotated rectangle
-	POINT points[3] = { vPoints[0], vPoints[1], vPoints[2] };
+	POINT points[4] = { vPoints[0], vPoints[1], vPoints[2], vPoints[3] };
 	RECT rectDraw = GetRotatedBody(vPoints);
 	const int wDest = rectDraw.right - rectDraw.left;
 	const int hDest = rectDraw.bottom - rectDraw.top;
@@ -70,7 +70,9 @@ void Image::PaintRotation(HDC hdc, Vector2 vPoints[4], const RECT* rectImage) co
 
 	if (gameData.isShowHitbox == true)
 	{
-		Polygon(hdc, points, 3);
+		std::swap(points[0], points[1]);
+		SelectObject(hdc, (HBRUSH)GetStockObject(NULL_BRUSH));
+		Polygon(hdc, points, 4);
 		PaintHitbox(hdc, rectDraw);
 	}
 }

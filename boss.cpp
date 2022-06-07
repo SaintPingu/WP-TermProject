@@ -44,8 +44,11 @@ void Boss::Death()
 void Boss::StartAttack()
 {
 	//act = static_cast<BossAct>(rand() % 6);
-	SetAction(Action::Attack, data.frameNum_Atk);
-	act = BossAct::Skill2;
+	if (data.type != Type::Dark)
+	{
+		SetAction(Action::Attack, data.frameNum_Atk);
+	}
+	act = BossAct::Skill1;
 
 	switch (act)
 	{
@@ -138,9 +141,18 @@ void Boss::Init(const RECT& rectDisplay)
 		break;
 	case Stage::Fire:
 		image->Load(_T("images\\sprite_boss_fire.png"), { 54,44 }, { 6,12 }, { 44,29 });
-		image->ScaleImage(4, 4);
+		image->ScaleImage(6, 6);
 		imgBullet.Load(_T("images\\bullet_boss_fire.png"), { 400,400 });
 		imgBullet.ScaleImage(0.05f, 0.05f);
+		break;
+	case Stage::Dark:
+		image->Load(_T("images\\sprite_boss_dark.png"), { 110,110 }, { 20,30 }, { 67,50 });
+		image->ScaleImage(5, 5);
+		imgBullet.Load(_T("images\\bullet_boss_dark.png"), { 700,700 });
+		imgBullet.ScaleImage(0.03f, 0.03f);
+		break;
+	default:
+		assert(0);
 		break;
 	}
 
@@ -364,8 +376,15 @@ void Boss::Animate()
 	case Action::Idle:
 		if (frame > data.frameNum_IdleMax)
 		{
-			isRevFrame = true;
-			--frame;
+			if (data.type == Type::Dark)
+			{
+				frame = data.frameNum_Idle;
+			}
+			else
+			{
+				isRevFrame = true;
+				--frame;
+			}
 		}
 		else if (frame < data.frameNum_Idle)
 		{
@@ -382,7 +401,10 @@ void Boss::Animate()
 		else if (isRevFrame == true && frame < data.frameNum_AtkRev)
 		{
 			isRevFrame = false;
-			SetAction(Action::Idle, data.frameNum_Idle);
+			if (data.type != Type::Dark)
+			{
+				SetAction(Action::Idle, data.frameNum_Idle);
+			}
 		}
 		break;
 	default:
@@ -450,11 +472,6 @@ void Boss::ShotBySpiral()
 	if (abs(skillCount % (180 / rotation)) == 0)
 	{
 		rotation = ((rand() % 3) + 4) * 2;
-		const bool sign = rand() % 2;
-		if (sign == true)
-		{
-			rotation *= -1;
-		}
 	}
 	unitVector = Rotate(unitVector, rotation);
 	bullets->CreateBullet(bulletPos, bulletData, unitVector);
@@ -499,6 +516,8 @@ BossData CreateBossData()
 {
 	BossData bossData;
 
+	bossData.speed = 1;
+
 	bossData.bulletSpeed[static_cast<int>(BossAct::Line)] = 6;
 	bossData.bulletSpeed[static_cast<int>(BossAct::Sector)] = 3;
 	bossData.bulletSpeed[static_cast<int>(BossAct::Circle)] = 4;
@@ -519,16 +538,12 @@ BossData CreateBossData()
 
 		bossData.hp = 5000;
 		bossData.damage = 2;
-		bossData.speed = 1;
 		bossData.damage_skill1 = 4.5f;
 		bossData.damage_skill2 = 0.5f;
-
 		bossData.actDelay = 1500;
-		//bossData.crntActDelay = bossData.actDelay;
-		bossData.crntActDelay = 0; // debug
 
 		bossData.frameNum_IdleMax = 2;
-		bossData.frameNum_Atk = 3;
+		bossData.frameNum_Atk = 1;
 		bossData.frameNum_AtkMax = 5;
 		bossData.frameNum_AtkRev = 5;
 		break;
@@ -537,27 +552,46 @@ BossData CreateBossData()
 
 		bossData.hp = 5000;
 		bossData.damage = 2;
-		bossData.speed = 1;
 		bossData.damage_skill1 = 4.5f;
 		bossData.damage_skill2 = 2.5f;
-
-		bossData.actDelay = 1500;
-		//bossData.crntActDelay = bossData.actDelay;
-		bossData.crntActDelay = 0; // debug
+		bossData.actDelay = 1750;
 
 		bossData.frameNum_IdleMax = 2;
-		bossData.frameNum_Atk = 3;
+		bossData.frameNum_Atk = 2;
 		bossData.frameNum_AtkMax = 3;
 		bossData.frameNum_AtkRev = 3;
 		break;
 	case Stage::Fire:
 		bossData.type = Type::Fire;
+
+		bossData.hp = 5000;
+		bossData.damage = 2;
+		bossData.damage_skill1 = 4.5f;
+		bossData.damage_skill2 = 2.5f;
+		bossData.actDelay = 1250;
+
 		bossData.frameNum_IdleMax = 1;
-		bossData.frameNum_Atk = 2;
+		bossData.frameNum_Atk = 1;
 		bossData.frameNum_AtkMax = 6;
 		bossData.frameNum_AtkRev = 6;
 		break;
+	case Stage::Dark:
+		bossData.type = Type::Dark;
+
+		bossData.hp = 5000;
+		bossData.damage = 5;
+		bossData.damage_skill1 = 4.5f;
+		bossData.damage_skill2 = 2.5f;
+		bossData.actDelay = 1750;
+
+		bossData.frameNum_IdleMax = 14;
+		bossData.frameNum_Atk = 0;
+		bossData.frameNum_AtkMax = 0;
+		bossData.frameNum_AtkRev = 0;
+		break;
 	}
+	bossData.crntActDelay = 0; // debug
+	//bossData.crntActDelay = bossData.actDelay;
 
 	return bossData;
 }

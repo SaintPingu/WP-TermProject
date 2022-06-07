@@ -28,7 +28,7 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, const BulletDat
 	this->isSkillBullet = isSkillBullet;
 
 	Vector2 vPoints[4];
-	GetRotationPos(rectBody, unitVector, vPoints);
+	GetRotationPos(rectBody, unitVector, Vector2::Up(), vPoints);
 	rectRotBody = GetRotatedBody(vPoints);
 }
 
@@ -42,7 +42,7 @@ void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage, co
 	else
 	{
 		Vector2 vPoints[4];
-		GetRotationPos(rectBody, unitVector, vPoints);
+		GetRotationPos(rectBody, unitVector, Vector2::Up(), vPoints);
 		bulletImage.PaintRotation(hdc, vPoints);
 	}
 }

@@ -31,6 +31,7 @@ void CALLBACK T_Animate(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	player->Animate();
 	enemies->Animate();
+
 	boss->AnimateSkill();
 }
 

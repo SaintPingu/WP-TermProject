@@ -79,7 +79,7 @@ void Player::Init(const RECT& rectDisplay)
 		assert(0);
 		break;
 	}
-	//data.maxhp = 1000000; // debug
+	data.maxhp = 1000000; // debug
 	//data.mp = 100; // debug
 	data.hp = data.maxhp;
 

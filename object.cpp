@@ -85,6 +85,8 @@ float CalculateDamage(float damage, Type destType, Type srcType)
 		case Type::Fire:
 			damage *= 1.15f;
 			break;
+		case Type::Dark:
+			break;
 		default:
 			assert(0);
 			break;
@@ -101,6 +103,8 @@ float CalculateDamage(float damage, Type destType, Type srcType)
 			break;
 		case Type::Water:
 			damage *= 1.15f;
+			break;
+		case Type::Dark:
 			break;
 		default:
 			assert(0);
@@ -119,10 +123,14 @@ float CalculateDamage(float damage, Type destType, Type srcType)
 		case Type::Elec:
 			damage *= 1.15f;
 			break;
+		case Type::Dark:
+			break;
 		default:
 			assert(0);
 			break;
 		}
+		break;
+	case Type::Dark:
 		break;
 	default:
 		assert(0);

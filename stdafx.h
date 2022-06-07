@@ -10,6 +10,7 @@
 #include <vector>
 #include <cassert>
 #include <algorithm>
+#include <exception>
 
 
 #define WINDOWSIZE_X 500
@@ -27,7 +28,7 @@ enum class Action { Idle = 0, Attack, Hurt, Death };
 
 enum class Pokemon { Null = 0, Moltres, Articuno, Thunder };
 enum class SubPokemon { Null = 0, Pikachu = 0, Squirtle, Charmander };
-enum class Type { Empty = 0, Fire, Elec, Water };
+enum class Type { Empty = 0, Fire, Elec, Water, Dark };
 enum class Skill { Empty = 0, Identity, Sector, Circle };
 
 #define PI 3.141592
@@ -218,6 +219,10 @@ struct Vector2 {
 	{
 		return (lhs.x * rhs.x) + (lhs.y * rhs.y);
 	}
+	static inline constexpr float GetZAxis(const Vector2& lhs, const Vector2& rhs)
+	{
+		return (lhs.x * rhs.y) - (rhs.x - lhs.y);
+	}
 	static inline float GetTheta(const Vector2& lhs, const Vector2& rhs)
 	{
 		float dot = Vector2::Dot(lhs, rhs);
@@ -280,8 +285,9 @@ typedef struct FRECT {
 }FRECT;
 
 Vector2 Rotate(Vector2 vector, float degree);
+void Rotate(const Vector2& vSrc, const Vector2& vDst, Vector2& vector, float t);
 bool OutOfRange(const RECT& rect, const RECT& rectRange);
-void GetRotationPos(const RECT& rect, const Vector2& unitVector, Vector2 vPoints[4]);
+void GetRotationPos(const RECT& rect, const Vector2& unitVector, Vector2 basisVector, Vector2 vPoints[4]);
 RECT GetRotatedBody(Vector2 vPoints[4]);
 void PaintHitbox(HDC hdc, RECT rectBody);
 void SetRectByWindow(RECT& rect);
@@ -290,3 +296,9 @@ void CheckOverflowSub(BYTE& lhs, const BYTE& rhs);
 bool SATIntersect(const FRECT& rectSrc, const Vector2 vSrc[4]);
 void ScaleRect(FRECT& rect, float scaleX, float scaleY);
 FRECT GetRect(const Vector2& posCenter, float radius);
+
+template <typename T>
+inline constexpr int GetSign(T num)
+{
+	return num / abs(num);
+}

@@ -50,6 +50,15 @@ public:
 
 class BossSkillManager {
 private:
+	typedef struct SkillData {
+		int rotationCount = 0;
+		float speed = 1;
+		float damage = 0;
+		bool isRotated = false;
+		bool isHitOnce = false;
+
+	}SkillData;
+
 	class Effect : public ISprite {
 	private:
 		EffectImage imgSkill;
@@ -58,17 +67,15 @@ private:
 		Vector2 unitVector_imgRotation = Vector2::Down();
 		Vector2 unitVector_direction = Vector2::Zero();
 
-		float speed = 1;
-		float damage = 0;
-		bool isRotated = false;
+		SkillData data;
 
 		bool Move();
 	public:
-		Effect(const EffectImage& imgSkill, const FRECT rectDraw, float damage);
-		Effect(const EffectImage& imgSkill, const Vector2 pos, float damage);
-		Effect(const EffectImage& imgSkill, const Vector2 pos, float rotationDegree, float damage);
-		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, float damage);
-		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, Vector2 unitVector_direction, float speed, float damage);
+		Effect(const EffectImage& imgSkill, const FRECT rectDraw, SkillData data = {});
+		Effect(const EffectImage& imgSkill, const Vector2 pos, SkillData data = {});
+		Effect(const EffectImage& imgSkill, const Vector2 pos, float rotationDegree, SkillData data = {});
+		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, SkillData data);
+		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, Vector2 unitVector_direction, SkillData data);
 		void Paint(HDC hdc) const;
 		bool Animate();
 
@@ -77,9 +84,10 @@ private:
 		{
 			imgSkill.IncreaseAlpha(alpha);
 		}
+		bool RotateToPlayer(float t);
 		inline void Rotate(float degree)
 		{
-			isRotated = true;
+			data.isRotated = true;
 			unitVector_imgRotation = ::Rotate(unitVector_imgRotation, degree);
 		}
 		inline Vector2 GetUnitVector_ImgRotation() const
@@ -92,7 +100,7 @@ private:
 		}
 		inline float GetDamage() const
 		{
-			return damage;
+			return data.damage;
 		}
 		inline FRECT GetRectDraw() const
 		{
@@ -101,6 +109,10 @@ private:
 		inline int GetFrame() const
 		{
 			return frame;
+		}
+		inline int GetRotationCount() const
+		{
+			return data.rotationCount;
 		}
 	};
 
@@ -114,17 +126,20 @@ private:
 
 	std::vector<Effect>warningEffects;
 	std::vector<Effect>skillEffects;
-	void Skill1_Elec();
 	void Skill1_Elec_Create();
-	void Skill2_Elec();
+	void Skill1_Elec();
 	void Skill2_Elec_Create();
+	void Skill2_Elec();
 
-	void Skill1_Water();
 	void Skill1_Water_Create();
-	void Skill2_Water();
+	void Skill1_Water();
 	void Skill2_Water_Create();
+	void Skill2_Water();
 
-	void MoveSkills();
+	void Skill1_Fire_Create();
+	void Skill1_Fire();
+	void Skill2_Fire_Create();
+	void Skill2_Fire();
 public:
 	BossSkillManager();
 	void Paint(HDC hdc);

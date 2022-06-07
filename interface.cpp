@@ -151,6 +151,7 @@ GUIManager::GUIManager(const RECT& rectWindow)
 	hurtGUI_Fire.gui = new GUIImage();
 	hurtGUI_Water.gui = new GUIImage();
 	hurtGUI_Elec.gui = new GUIImage();
+	hurtGUI_Dark.gui = new GUIImage();
 
 	switch (player->GetType())
 	{
@@ -250,9 +251,10 @@ GUIManager::GUIManager(const RECT& rectWindow)
 	gagueGUI_mp->Load(_T("images\\gauge_mp.png"), { 130, 130 });
 	moveBarGUI->Load(_T("images\\moveBar.png"), { 20, 223 });
 
-	hurtGUI_Fire.gui->Load(_T("images\\frame_hurt_fire.png"), { 317, 564 }, 0);
-	hurtGUI_Water.gui->Load(_T("images\\frame_hurt_water.png"), { 239, 371 }, 0);
-	hurtGUI_Elec.gui->Load(_T("images\\frame_hurt_elec.png"), { 239, 371 }, 0);
+	hurtGUI_Fire.gui->Load(_T("images\\frame_hurt_fire.png"), { 317, 564 }, 0x00);
+	hurtGUI_Water.gui->Load(_T("images\\frame_hurt_water.png"), { 239, 371 }, 0x00);
+	hurtGUI_Elec.gui->Load(_T("images\\frame_hurt_elec.png"), { 239, 371 }, 0x00);
+	hurtGUI_Dark.gui->Load(_T("images\\frame_hurt_dark.png"), { 239, 371 }, 0x00);
 }
 
 void GUIManager::Paint(HDC hdc)
@@ -281,6 +283,7 @@ void GUIManager::Paint(HDC hdc)
 	hurtGUI_Fire.gui->Paint(hdc, *rectWindow);
 	hurtGUI_Water.gui->Paint(hdc, *rectWindow);
 	hurtGUI_Elec.gui->Paint(hdc, *rectWindow);
+	hurtGUI_Dark.gui->Paint(hdc, *rectWindow);
 }
 
 void GUIManager::Update()
@@ -288,6 +291,7 @@ void GUIManager::Update()
 	hurtGUI_Fire.ReduceAlpha();
 	hurtGUI_Water.ReduceAlpha();
 	hurtGUI_Elec.ReduceAlpha();
+	hurtGUI_Dark.ReduceAlpha();
 
 	if (isIconStop == true)
 	{
@@ -324,6 +328,9 @@ void GUIManager::DisplayHurtFrame(Type type)
 		break;
 	case Type::Elec:
 		hurtGUI_Elec.alpha = hurtGUI_alpha;
+		break;
+	case Type::Dark:
+		CheckOverflowAdd(hurtGUI_Dark.alpha, 0x50);
 		break;
 	default:
 		assert(0);

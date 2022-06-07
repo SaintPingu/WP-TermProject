@@ -60,8 +60,6 @@ bool SkillManager::Effect::Animate()
 		break;
 	}
 
-	
-
 	return true;
 }
 
@@ -88,6 +86,9 @@ SkillManager::SkillManager()
 	case Type::Water:
 		imgSkill_Water_Q.Load(_T("images\\skill_water.png"), { 273,843 }, 50, 0xaf);
 		skillEffect = new Effect(imgSkill_Water_Q, type);
+		break;
+	default:
+		assert(0);
 		break;
 	}
 }
@@ -318,49 +319,49 @@ RECT BossSkillManager::Effect::GetRectBody() const
 
 	return rectBody;
 }
-BossSkillManager::Effect::Effect(const EffectImage& imgSkill, const FRECT rectDraw, float damage)
+BossSkillManager::Effect::Effect(const EffectImage& imgSkill, const FRECT rectDraw, SkillData data)
 {
 	this->imgSkill = imgSkill;
 	this->rectDraw = rectDraw;
-	this->damage = damage;
+	this->data = data;
 }
-BossSkillManager::Effect::Effect(const EffectImage& imgSkill, const Vector2 pos, float damage)
+BossSkillManager::Effect::Effect(const EffectImage& imgSkill, const Vector2 pos, SkillData data)
 {
 	this->imgSkill = imgSkill;
 	this->posCenter = pos;
-	this->damage = damage;
+	this->data = data;
 }
-BossSkillManager::Effect::Effect(const EffectImage& imgSkill, const Vector2 pos, float rotationDegree, float damage) : Effect(imgSkill, pos, damage)
+BossSkillManager::Effect::Effect(const EffectImage& imgSkill, const Vector2 pos, float rotationDegree, SkillData data) : Effect(imgSkill, pos, data)
 {
 	if (rotationDegree != 0)
 	{
-		isRotated = true;
+		data.isRotated = true;
 		unitVector_imgRotation = ::Rotate(Vector2::Down(), rotationDegree);
 	}
 }
-BossSkillManager::Effect::Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, float damage) : Effect(imgSkill, pos, damage)
+BossSkillManager::Effect::Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, SkillData data) : Effect(imgSkill, pos, data)
 {
 	if (unitVector_imgRotation != Vector2::Down())
 	{
-		isRotated = true;
+		data.isRotated = true;
 	}
 	else
 	{
-		isRotated = false;
+		data.isRotated = false;
 	}
 
 	this->unitVector_imgRotation = unitVector_imgRotation;
 }
-BossSkillManager::Effect::Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, Vector2 unitVector_direction, float speed, float damage) : Effect(imgSkill, pos, unitVector_imgRotation, damage)
+BossSkillManager::Effect::Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, Vector2 unitVector_direction, SkillData data) : Effect(imgSkill, pos, unitVector_imgRotation, data)
 {
-	this->speed = speed;
+	this->data = data;
 	this->unitVector_direction = unitVector_direction;
 }
 void BossSkillManager::Effect::Paint(HDC hdc) const
 {
 	const RECT rectBody = GetRectBody();
 	RECT rectImage = { 0, };
-	if (damage == 0)
+	if (data.damage == 0)
 	{
 		rectImage = imgSkill.GetRectImage();
 	}
@@ -374,15 +375,25 @@ void BossSkillManager::Effect::Paint(HDC hdc) const
 	{
 		imgSkill.Paint(hdc, rectDraw, &rectImage);
 	}
-	else if (isRotated == false)
+	else if (data.isRotated == false)
 	{
 		imgSkill.Paint(hdc, rectBody, &rectImage);
 	}
 	else
 	{
 		Vector2 vPoints[4];
-		GetRotationPos(rectBody, unitVector_imgRotation, vPoints);
+		if (unitVector_direction == Vector2::Zero())
+		{
+			GetRotationPos(rectBody, unitVector_imgRotation, Vector2::Up(), vPoints);
+		}
+		else
+		{
+			GetRotationPos(rectBody, unitVector_direction, Vector2::Up(), vPoints);
+		}
 		imgSkill.PaintRotation(hdc, vPoints, &rectImage);
+
+		MoveToEx(hdc, posCenter.x, posCenter.y, NULL);
+		LineTo(hdc, posCenter.x + (unitVector_direction.x*100), posCenter.y + (unitVector_direction.y * 100));
 	}
 }
 bool BossSkillManager::Effect::Animate()
@@ -392,17 +403,17 @@ bool BossSkillManager::Effect::Animate()
 	{
 		return false;
 	}
-	else if (damage > 0)
+	else if (data.damage > 0)
 	{
 		RECT rectBody = rectBody = GetRectBody();
 
-		if (isRotated == true)
+		if (data.isRotated == true)
 		{
 			Vector2 vPoints[4];
-			GetRotationPos(rectBody, unitVector_imgRotation, vPoints);
+			GetRotationPos(rectBody, unitVector_imgRotation, Vector2::Up(), vPoints);
 			if (SATIntersect(player->GetRectBody(), vPoints) == true)
 			{
-				player->Hit(damage, boss->GetType());
+				player->Hit(data.damage, boss->GetType());
 			}
 		}
 		else
@@ -416,7 +427,7 @@ bool BossSkillManager::Effect::Animate()
 			const RECT rectPlayer = player->GetRectBody();
 			if (IntersectRect(&notuse, &rectBody, &rectPlayer) == TRUE)
 			{
-				player->Hit(damage, boss->GetType());
+				player->Hit(data.damage, boss->GetType());
 			}
 		}
 		
@@ -431,9 +442,10 @@ bool BossSkillManager::Effect::Move()
 		return true;
 	}
 
-	posCenter = posCenter + (unitVector_direction * speed);
+	posCenter = posCenter + (unitVector_direction * data.speed);
 	const RECT rectDisplay = boss->GetRectDisplay();
 	const RECT rectBody = GetRectBody();
+
 	if (rectBody.top > rectDisplay.bottom)
 	{
 		return false;
@@ -441,7 +453,32 @@ bool BossSkillManager::Effect::Move()
 
 	return true;
 }
+bool BossSkillManager::Effect::RotateToPlayer(float t)
+{
+	constexpr int maxRotation = 35;
+	constexpr int maxMove = 100;
+	data.isRotated = true;
 
+	RECT rectBody = rectBody = GetRectBody();
+	Vector2 vPoints[4];
+	GetRotationPos(rectBody, unitVector_imgRotation, Vector2::Up(), vPoints);
+	if (SATIntersect(player->GetRectBody(), vPoints) == true)
+	{
+		player->Hit(data.damage, boss->GetType());
+		return false;
+	}
+
+	if (data.rotationCount++ < maxRotation)
+	{
+		::Rotate(posCenter, player->GetPosCenter(), unitVector_direction, t);
+	}
+	else if (data.rotationCount > maxMove)
+	{
+		return false;
+	}
+
+	return true;
+}
 
 
 
@@ -472,6 +509,10 @@ BossSkillManager::BossSkillManager()
 		imgSkill2_Warning.ScaleImage(0.5f, 0.5f);
 		break;
 	case Type::Fire:
+		imgSkill1.Load(_T("images\\boss_skill1_fire.png"), { 17,30 });
+		imgSkill1.ScaleImage(2.0f, 2.0f);
+		break;
+	case Type::Dark:
 		break;
 	default:
 		assert(0);
@@ -514,6 +555,16 @@ void BossSkillManager::UseSkill()
 			Skill2_Water_Create();
 		}
 		break;
+	case Type::Fire:
+		if (boss->GetAct() == BossAct::Skill1)
+		{
+			Skill1_Fire_Create();
+		}
+		else if (boss->GetAct() == BossAct::Skill2)
+		{
+			Skill2_Fire_Create();
+		}
+		break;
 	default:
 		assert(0);
 		break;
@@ -536,7 +587,7 @@ void BossSkillManager::Skill1_Elec_Create()
 	const float startDegree = (rand() % 180);
 	for (int i = 0; i < lineCount; ++i)
 	{
-		skillEffects.emplace_back(imgSkill1_Warning, boss->GetPosCenter(), startDegree + (20.0f * i), 0.0f);
+		skillEffects.emplace_back(imgSkill1_Warning, boss->GetPosCenter(), startDegree + (20.0f * i));
 	}
 }
 void BossSkillManager::Skill1_Elec()
@@ -563,7 +614,7 @@ void BossSkillManager::Skill1_Elec()
 		}
 		else if (isWarning == true)
 		{
-			rotationDegree -= (rotationDegree / abs(rotationDegree)) * 0.02f;
+			rotationDegree -= GetSign(rotationDegree) * 0.02f;
 			skillEffects.at(i).Rotate(rotationDegree);
 			skillEffects.at(i).IncreaseAlpha(0x0d);
 		}
@@ -573,10 +624,11 @@ void BossSkillManager::Skill1_Elec()
 	{
 		isWarning = false;
 
-		const float damage = boss->GetDamage_Skill1();
+		SkillData skillData;
+		skillData.damage = boss->GetDamage_Skill1();
 		for (const Vector2& unitVector : unitVectors)
 		{
-			skillEffects.emplace_back(imgSkill1, boss->GetPosCenter(), unitVector, damage);
+			skillEffects.emplace_back(imgSkill1, boss->GetPosCenter(), unitVector, skillData);
 		}
 	}
 	else if (isSkillEnd == true)
@@ -598,7 +650,7 @@ void BossSkillManager::Skill2_Elec_Create()
 		const float randY = rand() % (rectDisplay.top + (rectDisplay.bottom - rectDisplay.top));
 
 		const Vector2 pos = { randX, randY };
-		warningEffects.emplace_back(imgSkill2_Warning, pos, 0.0f);
+		warningEffects.emplace_back(imgSkill2_Warning, pos);
 	}
 }
 void BossSkillManager::Skill2_Elec()
@@ -641,10 +693,11 @@ void BossSkillManager::Skill2_Elec()
 		}
 	}
 
+	SkillData skillData;
+	skillData.damage = boss->GetDamage_Skill2();
 	for (const Vector2& position : positions)
 	{
-		const float damage = boss->GetDamage_Skill2();
-		skillEffects.emplace_back(imgSkill2, position, damage);
+		skillEffects.emplace_back(imgSkill2, position, skillData);
 	}
 
 	if (isWarningEnd == true && skillEffects.empty() == true)
@@ -666,9 +719,10 @@ void BossSkillManager::Skill1_Water_Create()
 		const float randY = -100;
 
 		const Vector2 pos = { randX, randY };
-		const float damage = boss->GetDamage_Skill1();
-		constexpr float speed = 50.0f;
-		skillEffects.emplace_back(imgSkill1, pos, Vector2::Down(), Vector2::Down(), speed, damage);
+		SkillData skillData;
+		skillData.damage = boss->GetDamage_Skill1();
+		skillData.speed = 50.0f;
+		skillEffects.emplace_back(imgSkill1, pos, Vector2::Down(), Vector2::Down(), skillData);
 	}
 }
 void BossSkillManager::Skill1_Water()
@@ -689,10 +743,6 @@ void BossSkillManager::Skill1_Water()
 			skillEffects.erase(skillEffects.begin() + i--);
 			--showCount;
 		}
-		else
-		{
-			skillEffects.at(i).IncreaseAlpha(0x10);
-		}
 	}
 
 	if (skillEffects.empty() == true)
@@ -712,7 +762,7 @@ void BossSkillManager::Skill2_Water_Create()
 	float radius = 20;
 	FRECT rectDraw = GetRect(mainPosCenter, radius);
 
-	warningEffects.emplace_back(imgSkill2_Warning, rectDraw, 0.0f);
+	warningEffects.emplace_back(imgSkill2_Warning, rectDraw);
 
 	float rotationPerCount = 360.0f / lines;
 	float degree = (rand() % 45);
@@ -724,7 +774,7 @@ void BossSkillManager::Skill2_Water_Create()
 		{
 			Vector2 posCenter = mainPosCenter + rotationVector;
 			FRECT rectDraw = GetRect(posCenter, radius);
-			warningEffects.emplace_back(imgSkill2_Warning, rectDraw, 0.0f);
+			warningEffects.emplace_back(imgSkill2_Warning, rectDraw);
 			rotationVector = Rotate(rotationVector, rotationPerCount);
 		}
 		degree += 5;
@@ -750,12 +800,13 @@ void BossSkillManager::Skill2_Water()
 		showCount = size;
 	}
 
+	SkillData skillData;
+	skillData.damage = boss->GetDamage_Skill2();
 	for (size_t i = 0; i < showCount; ++i)
 	{
 		if (warningEffects.at(i).Animate() == false)
 		{
-			const float damage = boss->GetDamage_Skill2();
-			skillEffects.emplace_back(imgSkill2, warningEffects.at(i).GetRectDraw(), damage);
+			skillEffects.emplace_back(imgSkill2, warningEffects.at(i).GetRectDraw(), skillData);
 			warningEffects.erase(warningEffects.begin() + i--);
 			--showCount;
 		}
@@ -795,6 +846,63 @@ void BossSkillManager::Skill2_Water()
 		boss->ReSetBossAct();
 	}
 }
+void BossSkillManager::Skill1_Fire_Create()
+{
+	// do nothing
+}
+void BossSkillManager::Skill1_Fire()
+{
+	constexpr int creationCount = 10;
+	static float skillDelayCount = 0;
+	static int skillCount = 0;
+
+	if (skillDelayCount <= 10 && (int)(skillDelayCount * 10) % 10 == 0)
+	{
+		++skillCount;
+
+		const FRECT rectBoss = boss->GetRectBody();
+		Vector2 posCenter = { 0, };
+		posCenter.x = rectBoss.left + ((rectBoss.right - rectBoss.left) / 2);
+		posCenter.y = rectBoss.bottom;
+
+		const Vector2 vToPlayer = (player->GetPosCenter() - posCenter).Normalized();
+
+		SkillData skillData;
+		skillData.speed = 16.0f;
+		skillData.damage = boss->GetDamage_Skill1();
+		skillEffects.emplace_back(imgSkill1, posCenter, Vector2::Down(), vToPlayer, skillData);
+	}
+	skillDelayCount += 0.1f;
+
+	for (int i = 0; i < skillCount; ++i)
+	{
+		skillEffects.at(i).Animate();
+		if (skillEffects.at(i).RotateToPlayer(0.225f) == false)
+		{
+			skillEffects.erase(skillEffects.begin() + i--);
+			--skillCount;
+		}
+	}
+
+	if(skillEffects.empty() == true)
+	{
+		skillCount = 0;
+		skillDelayCount = 0;
+		boss->ReSetBossAct();
+	}
+}
+void BossSkillManager::Skill2_Fire_Create()
+{
+
+}
+void BossSkillManager::Skill2_Fire()
+{
+
+}
+
+
+
+
 
 
 void BossSkillManager::Animate()
@@ -824,6 +932,24 @@ void BossSkillManager::Animate()
 		else if (boss->GetAct() == BossAct::Skill2)
 		{
 			Skill2_Water();
+		}
+		break;
+	case Type::Fire:
+		if (boss->GetAct() == BossAct::Skill1)
+		{
+			Skill1_Fire();
+		}
+		else if (boss->GetAct() == BossAct::Skill2)
+		{
+			Skill2_Fire();
+		}
+		break;
+	case Type::Dark:
+		if (boss->GetAct() == BossAct::Skill1)
+		{
+		}
+		else if (boss->GetAct() == BossAct::Skill2)
+		{
 		}
 		break;
 	default:
