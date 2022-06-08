@@ -21,16 +21,13 @@ typedef struct PlayerData {
 	float damage = 0;
 	float subDamage = 0;
 	float damage_Q = 0; // per sec
-	float damage_WE = 0;
 
 	bool isDeath = false;
 }PlayerData;
 
 class Player : public GameObject, public IControllable, public IAnimatable {
 private:
-	const RECT* rectDisplay = nullptr;
-
-	PlayerData data;
+	PlayerData playerData;
 	PlayerBullet* bullets = nullptr;
 	PlayerBullet* subBullets = nullptr;
 	Vector2 posDest = { 0, };
@@ -42,14 +39,21 @@ private:
 
 	Pokemon pokemon = Pokemon::Null;
 	SubPokemon subPokemon = SubPokemon::Null;
-	ObjectImage img_subPokemon;
+	ObjectImage img_subPokemon{};
 
 	void SetPosDest() override;
-	inline void ResetShotDelay();
-	inline bool IsClearShotDelay() const;
+	inline bool IsClearShotDelay() const
+	{
+		return (playerData.crntShotDelay <= 0);
+	}
+	inline void ResetShotDelay()
+	{
+		playerData.crntShotDelay = playerData.shotDelay;
+	}
 public:
-	Player(PlayerData data);
-	void Init(const RECT& rectDisplay);
+	Player(Type type, Type subType);
+	~Player();
+	void Init();
 	void Paint(HDC hdc);
 	void PaintSkill(HDC hdc);
 
@@ -57,75 +61,73 @@ public:
 	void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc) override;
 	void Move(HWND hWnd, int timerID) override;
 	void Stop(Dir dir) override;
-	Vector2 CheckCollideWindow(Vector2 pos) const;
+	void CheckCollideWindow(Vector2& pos) const;
 
 	void Animate() override;
 	void CheckShot();
 	void Shot();
 	void CreateSubBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet = false);
-	void MoveBullets();
 	void Hit(float damage, Type hitType, POINT effectPoint = { -1, });
 
+
 	void ActiveSkill(Skill skill);
-
-
+	void MoveBullets();
 	bool IsUsingSkill() const;
-
 	inline float GetDamage_Q() const
 	{
-		return data.damage_Q;
+		return playerData.damage_Q;
 	}
 	inline float GetDamage_WE() const
 	{
-		return data.damage_WE;
+		return playerData.subDamage;
 	}
 	inline Type GetType() const
 	{
-		return data.type;
+		return playerData.type;
 	}
 	inline Type GetSubType() const
 	{
-		return data.subType;
+		return playerData.subType;
 	}
 	inline float GetHP() const
 	{
-		return data.hp;
+		return playerData.hp;
 	}
 	inline float GetMaxHP() const
 	{
-		return data.maxhp;
+		return playerData.maxhp;
 	}
 	inline float GetMP() const
 	{
-		return data.mp;
+		return playerData.mp;
 	}
 	inline float GetMaxMP() const
 	{
-		return data.maxmp;
+		return playerData.maxmp;
 	}
 	inline void AddHP(float amount)
 	{
-		data.hp += amount;
-		if (data.hp > data.maxhp)
+		playerData.hp += amount;
+		if (playerData.hp > playerData.maxhp)
 		{
-			data.hp = data.maxhp;
+			playerData.hp = playerData.maxhp;
 		}
 	}
 	inline void AddMP(float amount)
 	{
-		data.mp += amount;
-		if (data.mp > data.maxmp)
+		playerData.mp += amount;
+		if (playerData.mp > playerData.maxmp)
 		{
-			data.mp = data.maxmp;
+			playerData.mp = playerData.maxmp;
 		}
 	}
 	inline bool ReduceMP(float amount)
 	{
-		if ((data.mp - amount) < 0)
+		if ((playerData.mp - amount) < 0)
 		{
 			return false;
 		}
-		data.mp -= amount;
+		playerData.mp -= amount;
 		return true;
 	}
 };

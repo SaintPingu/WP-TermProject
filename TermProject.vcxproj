@@ -28,6 +28,7 @@
     <ClCompile Include="interface.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="object.cpp" />
+    <ClCompile Include="scene.cpp" />
     <ClCompile Include="skill.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -46,6 +47,7 @@
     <ClInclude Include="image.h" />
     <ClInclude Include="interface.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="scene.h" />
     <ClInclude Include="skill.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="timer.h" />

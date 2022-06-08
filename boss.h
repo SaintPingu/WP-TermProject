@@ -9,6 +9,7 @@ class EnemyBullet;
 class BossSkillManager;
 
 #define BOSS_BULLET_LIST 5
+#define BOSS_SKILL_LIST 8
 
 typedef struct BossData {
 	Type type = Type::Empty;
@@ -37,8 +38,6 @@ typedef struct BossData {
 
 class Boss : public GameObject, public IAnimatable, public IMovable {
 private:
-	const RECT* rectDisplay = nullptr;
-
 	BossData data;
 	ObjectImage* image = nullptr;
 	EnemyBullet* bullets = nullptr;
@@ -47,9 +46,9 @@ private:
 	Vector2 posDest = { 0, };
 	Vector2 unitVector = { 0, };
 
-	int maxSkillCount[BOSS_BULLET_LIST] = { 0, };
-	int skillCount = 0;
 	BossSkillManager* skill = nullptr;
+	int maxSkillCount[BOSS_SKILL_LIST] = { 0, };
+	int skillCount = 0;
 
 	void SetMove(Vector2 unitVector);
 	void SetPosDest() override;
@@ -58,18 +57,30 @@ private:
 	void Shot();
 	BulletData GetBulletData();
 
-	inline void ResetActDelay();
-	inline bool IsClearActDelay();
-	inline void ResetAttackDelay();
-	inline bool IsClearAttackDelay();
+	void ResetAttackDelay();
+	inline bool IsClearAttackDelay()
+	{
+		return (data.crntAttackDelay <= 0);
+	}
+	inline void ResetActDelay()
+	{
+		data.crntActDelay = data.actDelay;
+	}
+	inline bool IsClearActDelay()
+	{
+		return (data.crntActDelay <= 0);
+	}
 
 	void ShotByLine();
 	void ShotByCircle();
 	void ShotBySpiral();
 	void ShotBySector();
 	void ShotBySpread();
+
+	BossData GetBossData();
 public:
-	void Init(const RECT& rectDisplay);
+	Boss();
+	~Boss();
 	void Create();
 	void Paint(HDC hdc);
 	void Move() override;
@@ -109,10 +120,4 @@ public:
 	{
 		return data.damage_skill2;
 	}
-	RECT GetRectDisplay() const
-	{
-		return *rectDisplay;
-	}
 };
-
-BossData CreateBossData();

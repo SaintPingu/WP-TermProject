@@ -5,12 +5,9 @@
 #include "timer.h"
 #include "effect.h"
 #include "boss.h"
-
-void InitPaint(HWND hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBitmap, RECT& rectWindow);
-void ReleasePaint(HWND hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBitmap, RECT& rectWindow);
+#include "scene.h"
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-HINSTANCE hInst;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow){
 	srand((unsigned int)time(NULL));
@@ -18,7 +15,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	HWND hWnd;
 	MSG Message;
 	WNDCLASSEX WndClass{};
-	hInst = hInstance;
 
 	LPCTSTR lpszClass = L"Window Class Name";
 	LPCTSTR lpszWindowName = L"Pokemon Flight";
@@ -72,68 +68,31 @@ EnemyController* enemies = nullptr;
 EffectManager* effects = nullptr;
 GUIManager* gui = nullptr;
 Boss* boss = nullptr;
+SceneManager* sceneManager = nullptr;
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	PAINTSTRUCT ps;
-	HDC hdc, memDC;
-	HBITMAP hBitmap;
-
-	static RECT rectWindow;
-	static RECT rectDisplay;
-	static CImage bkground;
-
 	switch (uMsg)
 	{
 	case WM_CREATE:
 	{
-		gameData.stage = Stage::Fire;
-
-		bkground.Load(L"images\\background.png");
-		GetClientRect(hWnd, &rectWindow);
-
-		enemies = new EnemyController();
-		effects = new EffectManager();
-		boss = new Boss();
-
-		PlayerData playerData;
-		playerData.type = Type::Elec;
-		playerData.subType = Type::Fire;
-		player = new Player(playerData);
-
-		gui = new GUIManager(rectWindow);
-		rectDisplay = gui->GetRectDisplay();
-
-		player->Init(rectDisplay);
-		enemies->Init(rectDisplay);
-		boss->Init(rectDisplay);
-
-		SetTimer(hWnd, TIMERID_INVALIDATE, ELAPSE_INVALIDATE, T_Invalidate);
-		SetTimer(hWnd, TIMERID_ANIMATION, ELAPSE_ANIMATION, T_Animate);
-		SetTimer(hWnd, TIMERID_EFFECT, ELAPSE_EFFECT, T_Effect);
-		SetTimer(hWnd, TIMERID_GUI, ELAPSE_GUI, T_GUI);
-		SetTimer(hWnd, TIMERID_ANIMATION_BOSS, ELAPSE_ANIMATION_BOSS, T_AnimateBoss);
+		sceneManager = new SceneManager();
+		sceneManager->Init(hWnd);
+		sceneManager->MoveScene(hWnd, Scene::Battle);
 	}
 	break;
 	case WM_ERASEBKGND:
 		return FALSE;
 	case WM_PAINT:
 	{
-		InitPaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
-		bkground.Draw(memDC, rectWindow);
-		boss->Paint(memDC);
-		player->Paint(memDC);
-		enemies->Paint(memDC);
-		player->PaintSkill(memDC);
-		effects->Paint(memDC);
-		gui->Paint(memDC);
-		ReleasePaint(hWnd, ps, hdc, memDC, hBitmap, rectWindow);
+		sceneManager->Paint(hWnd);
 	}
 	break;
 	case WM_KEYDOWN:
-		CheckKeyDown(hWnd, wParam, gameData);
+		CheckKeyDown(hWnd, wParam);
 		break;
 	case WM_KEYUP:
-		CheckKeyUp(hWnd, wParam, gameData);
+		CheckKeyUp(hWnd, wParam);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -141,24 +100,4 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
-}
-
-void InitPaint(HWND hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBitmap, RECT& rectWindow)
-{
-	hdc = BeginPaint(hWnd, &ps);
-	memDC = CreateCompatibleDC(hdc);
-	hBitmap = CreateCompatibleBitmap(hdc, rectWindow.right, rectWindow.bottom);
-	SelectObject(memDC, hBitmap);
-	SelectObject(memDC, GetStockObject(WHITE_BRUSH));
-	Rectangle(memDC, 0, 0, rectWindow.right, rectWindow.bottom);
-	SetStretchBltMode(hdc, COLORONCOLOR);
-	SetStretchBltMode(memDC, COLORONCOLOR);
-}
-void ReleasePaint(HWND hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBitmap, RECT& rectWindow)
-{
-	BitBlt(hdc, 0, 0, rectWindow.right, rectWindow.bottom, memDC, 0, 0, SRCCOPY);
-	ValidateRect(hWnd, NULL);
-	DeleteDC(memDC);
-	DeleteObject(hBitmap);
-	EndPaint(hWnd, &ps);
 }

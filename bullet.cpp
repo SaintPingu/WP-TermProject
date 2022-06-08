@@ -4,11 +4,13 @@
 #include "player.h"
 #include "effect.h"
 #include "boss.h"
+#include "scene.h"
 
 extern Player* player;
 extern EnemyController* enemies;
 extern Boss* boss;
 extern EffectManager* effects;
+extern SceneManager* sceneManager;
 
 BulletController::Bullet::Bullet(POINT center, POINT bulletSize, const BulletData& data)
 {
@@ -33,7 +35,7 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, const BulletDat
 }
 
 
-void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage, const RECT& rectWindow)
+void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage)
 {
 	if (isRotateImg == false)
 	{
@@ -46,8 +48,9 @@ void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage, co
 		bulletImage.PaintRotation(hdc, vPoints);
 	}
 }
-bool BulletController::Bullet::Move(const RECT& rectDisplay)
+bool BulletController::Bullet::Move()
 {
+	const RECT rectDisplay = sceneManager->GetRectDisplay();
 	float moveX = 0;
 	float moveY = 0;
 	switch (dir)
@@ -122,6 +125,8 @@ bool BulletController::Bullet::Move(const RECT& rectDisplay)
 			return false;
 		}
 		break;
+	default:
+		break;
 	}
 
 	switch (dir)
@@ -142,15 +147,11 @@ bool BulletController::Bullet::Move(const RECT& rectDisplay)
 			return false;
 		}
 		break;
+	default:
+		break;
 	}
 
 	return true;
-}
-bool BulletController::Bullet::IsCollide(const RECT& rect) const
-{
-	RECT notuse = { 0, };
-	RECT rectBody = (RECT)rectRotBody;
-	return IntersectRect(&notuse, &rect, &rectBody);
 }
 
 POINT BulletController::Bullet::GetPos() const
@@ -163,19 +164,33 @@ POINT BulletController::Bullet::GetPos() const
 
 
 
-BulletController::BulletController(const RECT& rectDisplay, const ObjectImage& bulletImage)
+
+
+
+
+
+
+
+
+BulletController::BulletController(const ObjectImage& bulletImage)
 {
-	this->rectDisplay = &rectDisplay;
 	this->bulletImage = bulletImage;
 
 	bulletSize = bulletImage.GetBodySize();
+}
+BulletController::~BulletController()
+{
+	for (Bullet* bullet : bullets)
+	{
+		delete bullet;
+	}
 }
 
 void BulletController::Paint(HDC hdc)
 {
 	for (Bullet* bullet : bullets)
 	{
-		bullet->Paint(hdc, bulletImage, *rectDisplay);
+		bullet->Paint(hdc, bulletImage);
 	}
 }
 
@@ -211,7 +226,7 @@ void PlayerBullet::Move()
 			}
 			BulletController::Pop(i);
 		}
-		else if(bullets.at(i)->Move(*rectDisplay) == false)
+		else if(bullets.at(i)->Move() == false)
 		{
 			BulletController::Pop(i);
 		}
@@ -226,7 +241,7 @@ void EnemyBullet::Move()
 			player->Hit(bullets.at(i)->GetDamage(), bullets.at(i)->GetType(), bullets.at(i)->GetPos());
 			BulletController::Pop(i);
 		}
-		else if (bullets.at(i)->Move(*rectDisplay) == false)
+		else if (bullets.at(i)->Move() == false)
 		{
 			BulletController::Pop(i);
 		}

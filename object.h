@@ -28,11 +28,11 @@ public:
 
 	bool IsCollide(const RECT& rectSrc, RECT* lprcDst = nullptr) const;
 
-	inline FRECT GetRectBody() const
+	inline constexpr FRECT GetRectBody() const
 	{
 		return rectBody;
 	}
-	inline Vector2 GetPosCenter() const
+	inline constexpr Vector2 GetPosCenter() const
 	{
 		return posCenter;
 	}
@@ -45,8 +45,6 @@ public:
 		return rectBody.bottom - rectBody.top;
 	}
 };
-
-Vector2 Lerp(Vector2 src, Vector2 dst, float alpha);
 
 inline float GetRadius(float x, float y)
 {
@@ -61,6 +59,7 @@ public:
 	virtual void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc) abstract;
 	virtual void Move(HWND hWnd, int timerID) abstract;
 	virtual void Stop(Dir dir) abstract;
+
 	inline void StartMove()
 	{
 		isMove = true;
@@ -81,6 +80,7 @@ private:
 	bool isMove = false;
 public:
 	virtual void Move() abstract;
+
 	inline void StartMove()
 	{
 		isMove = true;
@@ -93,7 +93,4 @@ public:
 	{
 		return isMove;
 	}
-	
 };
-
-float CalculateDamage(float damage, Type destType, Type srcType);

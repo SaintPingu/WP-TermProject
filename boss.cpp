@@ -6,32 +6,13 @@
 #include "effect.h"
 #include "interface.h"
 #include "skill.h"
+#include "scene.h"
 
 extern GameData gameData;
 extern Player* player;
 extern EffectManager* effects;
+extern SceneManager* sceneManager;
 
-inline void Boss::ResetAttackDelay()
-{
-	const int index = static_cast<int>(act);
-	if (index >= BOSS_BULLET_LIST)
-	{
-		return;
-	}
-	data.crntAttackDelay = data.attackDelay[index];
-}
-inline bool Boss::IsClearAttackDelay()
-{
-	return (data.crntAttackDelay <= 0);
-}
-inline void Boss::ResetActDelay()
-{
-	data.crntActDelay = data.actDelay;
-}
-inline bool Boss::IsClearActDelay()
-{
-	return (data.crntActDelay <= 0);
-}
 void Boss::SetMove(Vector2 unitVector)
 {
 	this->unitVector = unitVector;
@@ -43,12 +24,12 @@ void Boss::Death()
 }
 void Boss::StartAttack()
 {
-	//act = static_cast<BossAct>(rand() % 6);
+	//act = static_cast<BossAct>(rand() % 7);
+	act = BossAct::Skill1;
 	if (data.type != Type::Dark)
 	{
 		SetAction(Action::Attack, data.frameNum_Atk);
 	}
-	act = BossAct::Skill2;
 
 	switch (act)
 	{
@@ -103,7 +84,7 @@ void Boss::Shot()
 }
 BulletData Boss::GetBulletData()
 {
-	int index = static_cast<int>(act);
+	const int index = static_cast<int>(act);
 	if (index >= BOSS_BULLET_LIST)
 	{
 		assert(0);
@@ -116,11 +97,20 @@ BulletData Boss::GetBulletData()
 
 	return bulletData;
 }
-
-
-void Boss::Init(const RECT& rectDisplay)
+void Boss::ResetAttackDelay()
 {
-	this->rectDisplay = &rectDisplay;
+	const int index = static_cast<int>(act);
+	if (index >= BOSS_BULLET_LIST)
+	{
+		return;
+	}
+	data.crntAttackDelay = data.attackDelay[index];
+}
+
+
+Boss::Boss()
+{
+	const RECT rectDisplay = sceneManager->GetRectDisplay();
 
 	ObjectImage imgBullet;
 	image = new ObjectImage();
@@ -156,23 +146,33 @@ void Boss::Init(const RECT& rectDisplay)
 		break;
 	}
 
-	bullets = new EnemyBullet(rectDisplay, imgBullet);
+	bullets = new EnemyBullet(imgBullet);
 	maxSkillCount[static_cast<unsigned int>(BossAct::Line)] = INT_MAX;
 	maxSkillCount[static_cast<unsigned int>(BossAct::Circle)] = 10;
 	maxSkillCount[static_cast<unsigned int>(BossAct::Spiral)] = 360;
 	maxSkillCount[static_cast<unsigned int>(BossAct::Sector)] = 15;
 	maxSkillCount[static_cast<unsigned int>(BossAct::Spread)] = 720;
 }
+Boss::~Boss()
+{
+	if (skill != nullptr)
+	{
+		delete skill;
+	}
+	delete image;
+	delete bullets;
+}
+
 void Boss::Create()
 {
-	data = CreateBossData();
+	data = GetBossData();
+	data.isCreated = true;
 	skill = new BossSkillManager();
 
 	Vector2 posCenter = { WINDOWSIZE_X / 2 , -300 };
 	GameObject::Init(*image, posCenter);
 	SetMove(Vector2::Down());
 
-	data.isCreated = true;
 }
 void Boss::SetPosDest()
 {
@@ -180,6 +180,8 @@ void Boss::SetPosDest()
 	{
 		return;
 	}
+
+	const RECT rectDisplay = sceneManager->GetRectDisplay();
 
 	posDest = Vector2::GetDest(GetPosCenter(), unitVector, data.speed);
 	if (act == BossAct::Idle)
@@ -203,7 +205,7 @@ void Boss::SetPosDest()
 
 		const RECT rectBody = GetRectBody();
 		const int minXPos = bullets->GetBulletSize().x * 4;
-		const int maxXPos = rectDisplay->right - minXPos;
+		const int maxXPos = rectDisplay.right - minXPos;
 		const Vector2 posCenter = GetPosCenter();
 
 		if (posCenter.x < minXPos)
@@ -282,7 +284,7 @@ void Boss::CheckAttackDelay()
 	}
 	else if (act != BossAct::Idle)
 	{
-		data.crntAttackDelay -= ELAPSE_INVALIDATE;
+		data.crntAttackDelay -= ELAPSE_BATTLE_INVALIDATE;
 		if (IsClearAttackDelay() == true)
 		{
 			Shot();
@@ -298,7 +300,7 @@ void Boss::CheckActDelay()
 	}
 	else if (IsMove() == false && act == BossAct::Idle)
 	{
-		data.crntActDelay -= ELAPSE_INVALIDATE;
+		data.crntActDelay -= ELAPSE_BATTLE_INVALIDATE;
 		if (IsClearActDelay() == true)
 		{
 			StartAttack();
@@ -327,7 +329,7 @@ bool Boss::CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effec
 			const int maxYPos = rectBody.top + 30;
 			if (maxYPos < rectSrc.top)
 			{
-				int randHit = rand() % 12;
+				const int randHit = rand() % 12;
 				if (randHit != 0)
 				{
 					return false;
@@ -336,7 +338,7 @@ bool Boss::CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effec
 		}
 
 		effects->CreateHitEffect(effectPoint, hitType);
-		float calDamage = CalculateDamage(damage, GetType(), hitType);
+		const float calDamage = CalculateDamage(damage, GetType(), hitType);
 		if (Hit(calDamage) == true)
 		{
 			Death();
@@ -422,7 +424,7 @@ void Boss::ShotByLine()
 {
 	constexpr int bulletCount = 7;
 
-	BulletData bulletData = GetBulletData();
+	const BulletData bulletData = GetBulletData();
 
 	const RECT rectBody = GetRectBody();
 	const int bulletSizeX = bullets->GetBulletSize().x;
@@ -442,7 +444,7 @@ void Boss::ShotByCircle()
 {
 	constexpr int bulletCount = 36;
 
-	BulletData bulletData = GetBulletData();
+	const BulletData bulletData = GetBulletData();
 
 	const POINT bulletPos = GetPosCenter();
 
@@ -456,7 +458,7 @@ void Boss::ShotByCircle()
 }
 void Boss::ShotBySpiral()
 {
-	BulletData bulletData = GetBulletData();
+	const BulletData bulletData = GetBulletData();
 
 	const RECT rectBody = GetRectBody();
 	POINT bulletPos = { 0, };
@@ -480,7 +482,7 @@ void Boss::ShotBySector()
 {
 	constexpr int bulletCount = 12;
 
-	BulletData bulletData = GetBulletData();
+	const BulletData bulletData = GetBulletData();
 
 	const RECT rectBody = GetRectBody();
 	POINT bulletPos = { 0, };
@@ -499,20 +501,20 @@ void Boss::ShotBySector()
 }
 void Boss::ShotBySpread()
 {
-	BulletData bulletData = GetBulletData();
+	const BulletData bulletData = GetBulletData();
 
 	const RECT rectBody = GetRectBody();
 	POINT bulletPos = { 0, };
 	bulletPos.y = rectBody.bottom;
 	bulletPos.x = rectBody.left + ((rectBody.right - rectBody.left) / 2);
 
-	int rotation = 30 + (rand() % 300);
+	const int rotation = 30 + (rand() % 300);
 
 	Vector2 unitVector = Rotate(Vector2::Up(), rotation);
 	bullets->CreateBullet(bulletPos, bulletData, unitVector);
 }
 
-BossData CreateBossData()
+BossData Boss::GetBossData()
 {
 	BossData bossData;
 
@@ -540,7 +542,7 @@ BossData CreateBossData()
 		bossData.damage = 2;
 		bossData.damage_skill1 = 4.5f;
 		bossData.damage_skill2 = 0.5f;
-		bossData.actDelay = 1500;
+		bossData.actDelay = 1250;
 
 		bossData.frameNum_IdleMax = 2;
 		bossData.frameNum_Atk = 1;
@@ -568,7 +570,7 @@ BossData CreateBossData()
 		bossData.damage = 2;
 		bossData.damage_skill1 = 7.5f;
 		bossData.damage_skill2 = 15.0f;
-		bossData.actDelay = 1250;
+		bossData.actDelay = 1500;
 
 		bossData.frameNum_IdleMax = 1;
 		bossData.frameNum_Atk = 1;
@@ -582,7 +584,7 @@ BossData CreateBossData()
 		bossData.damage = 5;
 		bossData.damage_skill1 = 4.5f;
 		bossData.damage_skill2 = 2.5f;
-		bossData.actDelay = 1750;
+		bossData.actDelay = 1500;
 
 		bossData.frameNum_IdleMax = 14;
 		bossData.frameNum_Atk = 0;
@@ -590,8 +592,7 @@ BossData CreateBossData()
 		bossData.frameNum_AtkRev = 0;
 		break;
 	}
-	bossData.crntActDelay = 0; // debug
-	//bossData.crntActDelay = bossData.actDelay;
+	bossData.crntActDelay = bossData.actDelay;
 
 	return bossData;
 }

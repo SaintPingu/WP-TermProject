@@ -21,7 +21,7 @@
 #define WINVER 0x6000
 
 enum class Difficulty { Easy = 0, Normal, Hard };
-enum class Scene { Start = 0, Loading, Lobby, Stage, Battle };
+enum class Scene { Title = 0, Lobby, Stage, SpecificStage, Battle };
 enum class Stage { Empty = 0, Fire, Water, Elec, Dark };
 enum class Action { Idle = 0, Attack, Hurt, Death };
 
@@ -265,6 +265,14 @@ struct Vector2 {
 
 		return axisNormalized;
 	}
+
+	static Vector2 Lerp(const Vector2& src, const Vector2& dst, float alpha)
+	{
+		Vector2 transform;
+		transform.x = (src.x * (1 - alpha)) + (dst.x * alpha);
+		transform.y = (src.y * (1 - alpha)) + (dst.y * alpha);
+		return transform;
+	}
 };
 
 typedef struct FRECT {
@@ -295,9 +303,8 @@ void CheckOverflowSub(BYTE& lhs, const BYTE& rhs);
 bool SATIntersect(const FRECT& rectSrc, const Vector2 vSrc[4]);
 void ScaleRect(FRECT& rect, float scaleX, float scaleY);
 FRECT GetRect(const Vector2& posCenter, float radius);
-void Round(float& num, int digit);
-bool IsFractionalZero(float num);
-
+bool IntersectRect2(const RECT& rect1, const RECT& rect2);
+float CalculateDamage(float damage, Type destType, Type srcType);
 
 template <typename T>
 inline constexpr int GetSign(T num)

@@ -30,11 +30,18 @@ protected:
 	Vector2 posDest = { 0, };
 	Vector2 unitVector = { 0, };
 
+	void Paint(HDC hdc, int spriteRow);
 	Dir GetDir() const;
 	virtual void SetPosDest() abstract override;
-	inline void ResetAttackDelay();
-	inline bool IsClearAttackDelay() const;
-	void Paint(HDC hdc, int spriteRow);
+
+	inline void ResetAttackDelay()
+	{
+		data.crntAttackDelay = data.attackDelay;
+	}
+	inline bool IsClearAttackDelay() const
+	{
+		return (data.crntAttackDelay <= 0);
+	}
 public:
 	Enemy(ObjectImage& image, Vector2 pos, EnemyData data);
 	virtual void Paint(HDC hdc) abstract;
@@ -96,7 +103,8 @@ private:
 
 	void Pop(size_t& index);
 public:
-	void Init(const RECT& rectDisplay);
+	EnemyController();
+	~EnemyController();
 	void CreateCheckMelee();
 	void CreateCheckRange();
 	void Paint(HDC hdc);
@@ -104,9 +112,17 @@ public:
 	void Animate();
 	bool CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint);
 	void CheckHitAll(const RECT& rectSrc, float damage, Type hitType);
-	void CheckAttackDelay();
+
 	void CreateBullet(POINT center, const BulletData& data, Vector2 unitVector);
 	void CreateBullet(POINT center, const BulletData& data, Dir dir);
-	void DestroyCollideBullet(const RECT& rect);
 	void MoveBullets();
+	void DestroyCollideBullet(const RECT& rect);
+
+	inline void CheckAttackDelay()
+	{
+		for (Enemy* enemy : enemies)
+		{
+			enemy->CheckAttackDelay();
+		}
+	}
 };

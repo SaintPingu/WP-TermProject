@@ -4,32 +4,23 @@
 #include "image.h"
 #include "timer.h"
 #include "boss.h"
+#include "scene.h"
+
+#define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000 ? 1 : 0))
+#define KEYUP(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000 ? 0 : 1))
+
+#define MOVE_UP VK_UP
+#define MOVE_LEFT VK_LEFT
+#define MOVE_DOWN VK_DOWN
+#define MOVE_RIGHT VK_RIGHT
 
 extern GameData gameData;
 extern Player* player;
 extern Boss* boss;
+extern SceneManager* sceneManager;
 
-void GameStart(HWND hWnd, GameData& data, Player& player)
+void CheckKeyDown(HWND hWnd, const WPARAM& wParam)
 {
-	data.isGameStart = true;
-
-}
-void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData)
-{
-	if (gameData.isGameStart == false)
-	{
-		switch (wParam)
-		{
-		case _T('s'):
-		case _T('S'):
-			gameData.isGameStart = true;
-			break;
-		}
-
-		InvalidateRect(hWnd, NULL, FALSE);
-		return;
-	}
-
 	switch (wParam)
 	{
 	case _T('H'):
@@ -47,75 +38,72 @@ void CheckKeyDown(HWND hWnd, const WPARAM& wParam, GameData& gameData)
 	}
 
 	bool isMove = false;
-	if (KEYDOWN(KEY_LEFT))
+	if (KEYDOWN(MOVE_LEFT))
 	{
 		player->Stop(Dir::Right);
 		player->SetDirection(Dir::Left);
 		isMove = true;
 	}
-	if (KEYDOWN(KEY_RIGHT))
+	if (KEYDOWN(MOVE_RIGHT))
 	{
-		if (wParam != KEY_LEFT)
+		if (wParam != MOVE_LEFT)
 		{
 			player->Stop(Dir::Left);
 			player->SetDirection(Dir::Right);
 			isMove = true;
 		}
 	}
-	if (KEYDOWN(KEY_UP))
+	if (KEYDOWN(MOVE_UP))
 	{
 		player->Stop(Dir::Down);
 		player->SetDirection(Dir::Up);
 		isMove = true;
 	}
-	if (KEYDOWN(KEY_DOWN))
+	if (KEYDOWN(MOVE_DOWN))
 	{
-		if (wParam != KEY_UP)
+		if (wParam != MOVE_UP)
 		{
 			player->Stop(Dir::Up);
 			player->SetDirection(Dir::Down);
 			isMove = true;
 		}
 	}
+
 	if (isMove == true)
 	{
-		player->SetMove(hWnd, TIMERID_MOVE_PLAYER, ELAPSE_MOVE_PLAYER, T_MovePlayer);
+		player->SetMove(hWnd, TIMERID_BATTLE_MOVE_PLAYER, ELAPSE_BATTLE_MOVE_PLAYER, T_Battle_MovePlayer);
 	}
 }
-void CheckKeyUp(HWND hWnd, const WPARAM& wParam, GameData& gameData)
+void CheckKeyUp(HWND hWnd, const WPARAM& wParam)
 {
-	if (gameData.isGameStart == false)
-	{
-		return;
-	}
-	else if (player->IsMove() == true)
+	if (player->IsMove() == true)
 	{
 		switch (wParam)
 		{
-		case KEY_LEFT:
+		case MOVE_LEFT:
 			player->Stop(Dir::Left);
-			if (KEYDOWN(KEY_RIGHT))
+			if (KEYDOWN(MOVE_RIGHT))
 			{
 				player->SetDirection(Dir::Right);
 			}
 			break;
-		case KEY_RIGHT:
+		case MOVE_RIGHT:
 			player->Stop(Dir::Right);
-			if (KEYDOWN(KEY_LEFT))
+			if (KEYDOWN(MOVE_LEFT))
 			{
 				player->SetDirection(Dir::Left);
 			}
 			break;
-		case KEY_UP:
+		case MOVE_UP:
 			player->Stop(Dir::Up);
-			if (KEYDOWN(KEY_DOWN))
+			if (KEYDOWN(MOVE_DOWN))
 			{
 				player->SetDirection(Dir::Down);
 			}
 			break;
-		case KEY_DOWN:
+		case MOVE_DOWN:
 			player->Stop(Dir::Down);
-			if (KEYDOWN(KEY_UP))
+			if (KEYDOWN(MOVE_UP))
 			{
 				player->SetDirection(Dir::Up);
 			}
@@ -242,7 +230,7 @@ GUIManager::GUIManager(const RECT& rectWindow)
 	constexpr int corrValue = 5;
 	iconMoveMaxY = (rectMoveBar.top - (pokemonIconSize.y / 2)) + corrValue;
 	iconMoveMinY = (rectMoveBar.bottom + (pokemonIconSize.y / 2));
-	iconMoveAmount = (moveBarHeight / fieldLength) / ELAPSE_GUI;
+	iconMoveAmount = (moveBarHeight / fieldLength) / ELAPSE_BATTLE_GUI;
 
 	mainGUI->Load(_T("images\\battleGUI.png"), { 500, 80 });
 	gagueGUI_main->Load(_T("images\\gauge.png"), { 130, 130 });
@@ -251,7 +239,7 @@ GUIManager::GUIManager(const RECT& rectWindow)
 	gagueGUI_mp->Load(_T("images\\gauge_mp.png"), { 130, 130 });
 	moveBarGUI->Load(_T("images\\moveBar.png"), { 20, 223 });
 
-	hurtGUI_Fire.gui->Load(_T("images\\frame_hurt_fire.png"), { 317, 564 }, 0x00);
+	hurtGUI_Fire.gui->Load(_T("images\\frame_hurt_fire.png"), { 700, 1000 }, 0x00);
 	hurtGUI_Water.gui->Load(_T("images\\frame_hurt_water.png"), { 239, 371 }, 0x00);
 	hurtGUI_Elec.gui->Load(_T("images\\frame_hurt_elec.png"), { 239, 371 }, 0x00);
 	hurtGUI_Dark.gui->Load(_T("images\\frame_hurt_dark.png"), { 239, 371 }, 0x00);

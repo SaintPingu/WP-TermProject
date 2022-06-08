@@ -1,7 +1,4 @@
 #pragma once
-// Rotate Rectangle -> Get 3 Point
-// Draw at memDC (Transparent)
-// PlgBlt at hdc (Rotation)
 
 static const COLORREF transRGB = RGB(145, 91, 145);
 const HBRUSH transBrush = CreateSolidBrush(transRGB);

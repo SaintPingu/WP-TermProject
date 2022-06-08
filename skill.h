@@ -48,6 +48,7 @@ public:
 };
 
 
+
 class BossSkillManager {
 private:
 	typedef struct SkillData {
@@ -59,24 +60,43 @@ private:
 		bool isHitOnce = false;
 
 	}SkillData;
+	typedef struct DarkSkillData {
+		const Vector2* posOrigin = nullptr;
+		float rotationDegree = 0.0f;
+		float radius = 0.0f;
+
+		inline constexpr Vector2 GetPosCenter() const
+		{
+			Vector2 vector = ::Rotate(Vector2::Down(), rotationDegree) * radius;
+			return *posOrigin + vector;
+		}
+		inline constexpr Vector2 GetRotatePos(float degree)
+		{
+			rotationDegree += degree;
+			return GetPosCenter();
+		}
+	}DarkSkillData;
 
 	class Effect : public ISprite {
 	private:
 		EffectImage imgSkill;
 		FRECT rectDraw = { -1, };
 		Vector2 posCenter = { 0, };
+
 		Vector2 unitVector_imgRotation = Vector2::Down();
 		Vector2 unitVector_direction = Vector2::Zero();
-
-		SkillData data;
+		
+		SkillData skillData;
+		DarkSkillData darkSkillData;
 
 		bool Move();
 	public:
-		Effect(const EffectImage& imgSkill, const FRECT rectDraw, SkillData data = {});
-		Effect(const EffectImage& imgSkill, const Vector2 pos, SkillData data = {});
-		Effect(const EffectImage& imgSkill, const Vector2 pos, float rotationDegree, SkillData data = {});
-		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, SkillData data);
-		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, Vector2 unitVector_direction, SkillData data);
+		Effect(const EffectImage& imgSkill, const FRECT rectDraw, SkillData skillData = {});
+		Effect(const EffectImage& imgSkill, const Vector2 pos, SkillData skillData = {});
+		Effect(const EffectImage& imgSkill, const Vector2 pos, float rotationDegree, SkillData skillData = {});
+		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, const SkillData& skillData);
+		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, Vector2 unitVector_direction, const SkillData& skillData);
+		Effect(const EffectImage& imgSkill, const SkillData& skillData, const DarkSkillData& darkSkillData);
 		void Paint(HDC hdc) const;
 		bool Animate();
 
@@ -85,10 +105,14 @@ private:
 		{
 			imgSkill.IncreaseAlpha(alpha);
 		}
+		inline void ReduceAlpha(BYTE alpha)
+		{
+			imgSkill.ReduceAlpha(alpha);
+		}
 		bool RotateToPlayer(float t);
 		inline void Rotate(float degree)
 		{
-			data.isRotated = true;
+			skillData.isRotated = true;
 			unitVector_imgRotation = ::Rotate(unitVector_imgRotation, degree);
 		}
 		inline Vector2 GetUnitVector_ImgRotation() const
@@ -101,7 +125,7 @@ private:
 		}
 		inline float GetDamage() const
 		{
-			return data.damage;
+			return skillData.damage;
 		}
 		inline FRECT GetRectDraw() const
 		{
@@ -113,11 +137,11 @@ private:
 		}
 		inline int GetRotationCount() const
 		{
-			return data.rotationCount;
+			return skillData.rotationCount;
 		}
 		inline void ActiveDamage(bool active)
 		{
-			this->data.isActiveDamage = active;
+			this->skillData.isActiveDamage = active;
 		}
 		inline void SetPosCenter(Vector2 pos)
 		{
@@ -132,6 +156,9 @@ private:
 	EffectImage imgSkill1_Warning;
 	EffectImage imgSkill2;
 	EffectImage imgSkill2_Warning;
+
+	const int dark_Skill1Count = 10;
+	Vector2* posOrigins = nullptr;
 
 	std::vector<Effect>warningEffects;
 	std::vector<Effect>skillEffects;
@@ -149,8 +176,14 @@ private:
 	void Skill1_Fire();
 	void Skill2_Fire_Create();
 	void Skill2_Fire();
+
+	void Skill1_Dark_Create();
+	void Skill1_Dark();
+	void Skill2_Dark_Create();
+	void Skill2_Dark();
 public:
 	BossSkillManager();
+	~BossSkillManager();
 	void Paint(HDC hdc);
 	void Animate();
 

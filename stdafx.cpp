@@ -275,22 +275,79 @@ FRECT GetRect(const Vector2& posCenter, float radius)
 	return rect;
 }
 
-void Round(float& num, int digit)
+bool IntersectRect2(const RECT& rect1, const RECT& rect2)
 {
-	for (int i = 0; i < digit; ++i)
-	{
-		num *= 10;
-	}
-	num = std::round(num);
-	for (int i = 0; i < digit; ++i)
-	{
-		num /= 10;
-	}
+	RECT notuse = { 0, };
+	return IntersectRect(&notuse, &rect1, &rect2);
 }
-bool IsFractionalZero(float num)
-{
-	int integer = num;
-	float fractionalPart = num - integer;
 
-	return (fractionalPart < 0.001) ? true : false;
+float CalculateDamage(float damage, Type destType, Type srcType)
+{
+	switch (destType)
+	{
+	case Type::Elec:
+		switch (srcType)
+		{
+		case Type::Elec:
+			damage /= 1.35f;
+			break;
+		case Type::Water:
+			damage /= 1.25f;
+			break;
+		case Type::Fire:
+			damage *= 1.15f;
+			break;
+		case Type::Dark:
+			break;
+		default:
+			assert(0);
+			break;
+		}
+		break;
+	case Type::Fire:
+		switch (srcType)
+		{
+		case Type::Fire:
+			damage /= 1.35f;
+			break;
+		case Type::Elec:
+			damage /= 1.25f;
+			break;
+		case Type::Water:
+			damage *= 1.15f;
+			break;
+		case Type::Dark:
+			break;
+		default:
+			assert(0);
+			break;
+		}
+		break;
+	case Type::Water:
+		switch (srcType)
+		{
+		case Type::Water:
+			damage /= 1.35f;
+			break;
+		case Type::Fire:
+			damage /= 1.25f;
+			break;
+		case Type::Elec:
+			damage *= 1.15f;
+			break;
+		case Type::Dark:
+			break;
+		default:
+			assert(0);
+			break;
+		}
+		break;
+	case Type::Dark:
+		break;
+	default:
+		assert(0);
+		break;
+	}
+
+	return damage;
 }

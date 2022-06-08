@@ -11,6 +11,7 @@ extern GameData gameData;
 extern Player* player;
 extern Boss* boss;
 extern EffectManager* effects;
+extern EnemyController* enemies;
 
 Enemy::Enemy(ObjectImage& image, Vector2 pos, EnemyData data) : GameObject(image, pos)
 {
@@ -81,8 +82,8 @@ void Melee::SetPosDest()
 		return;
 	}
 
-	Vector2 posCenter = GetPosCenter();
-	Vector2 vectorToPlayer = posCenter - player->GetPosCenter();
+	const Vector2 posCenter = GetPosCenter();
+	const Vector2 vectorToPlayer = posCenter - player->GetPosCenter();
 
 	const float radius = GetRadius(vectorToPlayer.x, vectorToPlayer.y);
 
@@ -103,15 +104,6 @@ void Range::SetPosDest()
 	{
 		StopMove();
 	}
-}
-
-inline void Enemy::ResetAttackDelay()
-{
-	data.crntAttackDelay = data.attackDelay;
-}
-inline bool Enemy::IsClearAttackDelay() const
-{
-	return (data.crntAttackDelay <= 0);
 }
 
 void Enemy::Paint(HDC hdc, int spriteRow)
@@ -250,7 +242,7 @@ void Enemy::Animate()
 
 bool Melee::CheckCollidePlayer()
 {
-	RECT rectBody = GetRectBody();
+	const RECT rectBody = GetRectBody();
 	if (player->IsCollide(rectBody) == true)
 	{
 		StopMove();
@@ -276,7 +268,7 @@ void Melee::CheckAttackDelay()
 {
 	if (IsMove() == false)
 	{
-		data.crntAttackDelay -= ELAPSE_INVALIDATE;
+		data.crntAttackDelay -= ELAPSE_BATTLE_INVALIDATE;
 		if (IsClearAttackDelay() == true)
 		{
 			StartMove();
@@ -287,7 +279,7 @@ void Range::CheckAttackDelay()
 {
 	if (IsMove() == false)	
 	{
-		data.crntAttackDelay -= ELAPSE_INVALIDATE;
+		data.crntAttackDelay -= ELAPSE_BATTLE_INVALIDATE;
 		if (IsClearAttackDelay() == true)
 		{
 			Fire();
@@ -296,7 +288,6 @@ void Range::CheckAttackDelay()
 	}
 }
 
-extern EnemyController* enemies;
 void Range::Fire()
 {
 	SetAction(Action::Attack, data.frameNum_Atk);
@@ -333,7 +324,7 @@ void EnemyController::Pop(size_t& index)
 	enemies[index--] = enemies.back();
 	enemies.pop_back();
 }
-void EnemyController::Init(const RECT& rectDisplay)
+EnemyController::EnemyController()
 {
 	ObjectImage imgRangeBullet;
 	switch (gameData.stage)
@@ -498,8 +489,17 @@ void EnemyController::Init(const RECT& rectDisplay)
 	meleeData.hp += randHP_Melee;
 	rangeData.hp += randHP_Range;
 
-	bullets = new EnemyBullet(rectDisplay, imgRangeBullet);
+	bullets = new EnemyBullet(imgRangeBullet);
 }
+EnemyController::~EnemyController()
+{
+	for (Enemy* enemy : enemies)
+	{
+		delete enemy;
+	}
+	delete bullets;
+}
+
 
 void EnemyController::CreateCheckMelee()
 {
@@ -508,7 +508,7 @@ void EnemyController::CreateCheckMelee()
 		return;
 	}
 
-	delay_Melee += ELAPSE_INVALIDATE;
+	delay_Melee += ELAPSE_BATTLE_INVALIDATE;
 	if (delay_Melee < createDelay_Melee)
 	{
 		return;
@@ -531,7 +531,7 @@ void EnemyController::CreateCheckRange()
 		return;
 	}
 
-	delay_Range += ELAPSE_INVALIDATE;
+	delay_Range += ELAPSE_BATTLE_INVALIDATE;
 	if (delay_Range < createDelay_Range)
 	{
 		return;
@@ -541,8 +541,8 @@ void EnemyController::CreateCheckRange()
 	for (int i = 0; i < createAmount_Range; ++i)
 	{
 		rangeData.maxYPos = (rand() % 100) + 50;
-		float xPos = (rand() % (WINDOWSIZE_X - 100)) + 50;
-		float yPos = -(rand() % 100);
+		const float xPos = (rand() % (WINDOWSIZE_X - 100)) + 50;
+		const float yPos = -(rand() % 100);
 
 		Range* enemy = new Range(imgRange, { xPos, yPos }, rangeData);
 		enemies.emplace_back(enemy);
@@ -578,8 +578,8 @@ bool EnemyController::CheckHit(const RECT& rectSrc, float damage, Type hitType, 
 		if (enemies.at(i)->IsCollide(rectSrc) == true)
 		{
 			effects->CreateHitEffect(effectPoint, hitType);
-			float calDamage = CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
-			if (enemies.at(i)->Hit(calDamage) == true)
+			const float calDamage = CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
+			if (enemies.at(i)->Hit(damage) == true)
 			{
 				EnemyController::Pop(i);
 			}
@@ -598,7 +598,7 @@ void EnemyController::CheckHitAll(const RECT& rectSrc, float damage, Type hitTyp
 			POINT effectPoint = enemies.at(i)->GetPosCenter();
 			GetRandEffectPoint(effectPoint);
 			effects->CreateHitEffect(effectPoint, hitType);
-			float calDamage = CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
+			const float calDamage = CalculateDamage(damage, enemies.at(i)->GetType(), hitType);
 			if (enemies.at(i)->Hit(calDamage) == true)
 			{
 				EnemyController::Pop(i);
@@ -607,13 +607,6 @@ void EnemyController::CheckHitAll(const RECT& rectSrc, float damage, Type hitTyp
 	}
 }
 
-void EnemyController::CheckAttackDelay()
-{
-	for (Enemy* enemy : enemies)
-	{
-		enemy->CheckAttackDelay();
-	}
-}
 void EnemyController::CreateBullet(POINT center, const BulletData& data, Vector2 unitVector)
 {
 	bullets->CreateBullet(center, data, unitVector);

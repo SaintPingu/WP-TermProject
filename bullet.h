@@ -26,10 +26,14 @@ protected:
 		Bullet(POINT center, POINT bulletSize, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet = false);
 		~Bullet() {};
 
-		void Paint(HDC hdc, const ObjectImage& bulletImage, const RECT& rectWindow);
-		bool Move(const RECT& rectWindow);
-		bool IsCollide(const RECT& rect) const;
+		void Paint(HDC hdc, const ObjectImage& bulletImage);
+		bool Move();
 
+		POINT GetPos() const;
+		inline bool IsCollide(const RECT& rect) const
+		{
+			return IntersectRect2(rect, rectBody);
+		}
 		inline float GetDamage() const
 		{
 			return data.damage;
@@ -50,16 +54,14 @@ protected:
 		{
 			return isSkillBullet;
 		}
-		POINT GetPos() const;
 	};
 
-	BulletController(const RECT& rectDisplay, const ObjectImage& bulletImage);
+	BulletController(const ObjectImage& bulletImage);
+	~BulletController();
 
 	std::vector<Bullet*> bullets;
 	ObjectImage bulletImage;
 	POINT bulletSize = { 0, };
-
-	const RECT* rectDisplay = nullptr;
 
 	void Pop(size_t& index);
 public:
@@ -75,12 +77,12 @@ public:
 
 class PlayerBullet : public BulletController {
 public:
-	PlayerBullet(const RECT& rectDisplay, const ObjectImage& bulletImage) : BulletController(rectDisplay, bulletImage) {};
+	PlayerBullet(const ObjectImage& bulletImage) : BulletController(bulletImage) {};
 	void Move() override;
 };
 class EnemyBullet : public BulletController {
 public:
-	EnemyBullet(const RECT& rectDisplay, const ObjectImage& bulletImage) : BulletController(rectDisplay, bulletImage) {};
+	EnemyBullet(const ObjectImage& bulletImage) : BulletController(bulletImage) {};
 	void Move() override;
 	POINT GetBulletSize() const
 	{
