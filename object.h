@@ -13,9 +13,9 @@ protected:
 	Dir direction = Dir::Empty;
 
 	GameObject() {};
-	GameObject(ObjectImage& image, Vector2 pos);
-	void Init(ObjectImage& image, Vector2 pos);
-	void SetPos(Vector2 pos);
+	GameObject(ObjectImage& image, const Vector2& pos);
+	void Init(ObjectImage& image, const Vector2& pos);
+	void SetPos(const Vector2& pos);
 
 	inline const ObjectImage& GetImage()
 	{
@@ -23,8 +23,8 @@ protected:
 	}
 
 public:
-	void Paint(HDC hdc, const RECT* rectImage = nullptr);
-	FRECT GetRectBody(Vector2 pos) const;
+	void Paint(const HDC& hdc, const RECT* rectImage = nullptr);
+	FRECT GetRectBody(const Vector2& pos) const;
 
 	bool IsCollide(const RECT& rectSrc, RECT* lprcDst = nullptr) const;
 
@@ -56,8 +56,8 @@ private:
 	virtual void SetPosDest() abstract;
 	bool isMove = false;
 public:
-	virtual void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc) abstract;
-	virtual void Move(HWND hWnd, int timerID) abstract;
+	virtual void SetMove(const HWND& hWnd, int timerID, int elpase, const TIMERPROC& timerProc) abstract;
+	virtual void Move(const HWND& hWnd, int timerID) abstract;
 	virtual void Stop(Dir dir) abstract;
 
 	inline void StartMove()

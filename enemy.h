@@ -30,7 +30,7 @@ protected:
 	Vector2 posDest = { 0, };
 	Vector2 unitVector = { 0, };
 
-	void Paint(HDC hdc, int spriteRow);
+	void Paint(const HDC& hdc, int spriteRow);
 	Dir GetDir() const;
 	virtual void SetPosDest() abstract override;
 
@@ -43,8 +43,8 @@ protected:
 		return (data.crntAttackDelay <= 0);
 	}
 public:
-	Enemy(ObjectImage& image, Vector2 pos, EnemyData data);
-	virtual void Paint(HDC hdc) abstract;
+	Enemy(ObjectImage& image, const Vector2& pos, const EnemyData& data);
+	virtual void Paint(const HDC& hdc) abstract;
 	virtual void Move() override;
 	virtual void CheckAttackDelay() abstract;
 
@@ -63,8 +63,8 @@ private:
 	void SetPosDest();
 	bool CheckCollidePlayer();
 public:
-	Melee(ObjectImage& image, Vector2 pos, EnemyData data) : Enemy(image, pos, data) {};
-	void Paint(HDC hdc) override;
+	Melee(ObjectImage& image, const Vector2& pos, const EnemyData& data) : Enemy(image, pos, data) {};
+	void Paint(const HDC& hdc) override;
 	void Move() override;
 	void CheckAttackDelay() override;
 };
@@ -76,8 +76,8 @@ private:
 	void SetPosDest();
 	void Fire();
 public:
-	Range(ObjectImage& image, Vector2 pos, EnemyData data) : Enemy(image, pos, data) {};
-	void Paint(HDC hdc) override;
+	Range(ObjectImage& image, const Vector2& pos, const EnemyData& data) : Enemy(image, pos, data) {};
+	void Paint(const HDC& hdc) override;
 	void Move() override;
 	void CheckAttackDelay() override;
 };
@@ -110,11 +110,11 @@ public:
 	void Paint(HDC hdc);
 	void Move();
 	void Animate();
-	bool CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint);
+	bool CheckHit(const RECT& rectSrc, float damage, Type hitType, const POINT& effectPoint);
 	void CheckHitAll(const RECT& rectSrc, float damage, Type hitType);
 
-	void CreateBullet(POINT center, const BulletData& data, Vector2 unitVector);
-	void CreateBullet(POINT center, const BulletData& data, Dir dir);
+	void CreateBullet(const POINT& center, const BulletData& data, const Vector2& unitVector);
+	void CreateBullet(const POINT& center, const BulletData& data, Dir dir);
 	void MoveBullets();
 	void DestroyCollideBullet(const RECT& rect);
 

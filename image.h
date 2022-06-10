@@ -11,13 +11,13 @@ private:
 protected:
 	RECT rectImage = { 0, };
 	POINT drawSize = { 0, };
-	void Load(const WCHAR* fileName, POINT imgSize, BYTE alpha = 0xff);
-	void Paint(HDC hdc, const RECT& rectDraw, const RECT& rectImage) const;
+	void Load(const WCHAR* fileName, const POINT& imgSize, BYTE alpha = 0xff);
+	void Paint(const HDC& hdc, const RECT& rectDraw, const RECT& rectImage) const;
 	float scaleX = 1;
 	float scaleY = 1;
 
 public:
-	void PaintRotation(HDC hdc, Vector2 vPoints[4], const RECT* rectImage = nullptr) const;
+	void PaintRotation(const HDC& hdc, Vector2 vPoints[4], const RECT* rectImage = nullptr) const;
 	void SetAlpha(BYTE alpha);
 
 	inline RECT GetRectImage() const
@@ -54,9 +54,9 @@ private:
 	bool isScaled = false;
 
 public:
-	void Load(const WCHAR* fileName, POINT imgSize, POINT bodyDrawPoint = { 0, 0 }, POINT bodySize = { 0, 0 });
-	void Paint(HDC hdc, const RECT& rectBody, const RECT* rectImage = nullptr) const;
-	void Paint(const RECT& rectDest, HDC hdc) const;
+	void Load(const WCHAR* fileName, const POINT& imgSize, const POINT& bodyDrawPoint = { 0, 0 }, const POINT& bodySize = { 0, 0 });
+	void Paint(const HDC& hdc, const RECT& rectBody, const RECT* rectImage = nullptr) const;
+	void Paint(const RECT& rectDest, const HDC& hdc) const;
 	void ScaleImage(float scaleX, float scaleY);
 	
 	inline POINT GetBodyDrawPoint() const
@@ -73,9 +73,9 @@ class EffectImage : public Image {
 private:
 	int maxFrame = 0;
 public:
-	void Load(const WCHAR* fileName, POINT imgSize, int maxFrame = 0, BYTE alpha = 0xff);
-	void Paint(HDC hdc, POINT drawPoint, const RECT* rectImage = nullptr) const;
-	void Paint(HDC hdc, const RECT& rectDest, const RECT* rectImage = nullptr) const;
+	void Load(const WCHAR* fileName, const POINT& imgSize, int maxFrame = 0, BYTE alpha = 0xff);
+	void Paint(const HDC& hdc, const POINT& drawPoint, const RECT* rectImage = nullptr) const;
+	void Paint(const HDC& hdc, const RECT& rectDest, const RECT* rectImage = nullptr) const;
 	void ScaleImage(float scaleX, float scaleY);
 
 	inline int GetMaxFrame() const
@@ -87,10 +87,10 @@ public:
 
 class GUIImage : public Image {
 public:
-	void Load(const WCHAR* fileName, POINT imgSize, BYTE alpha = 0xff);
-	void Paint(HDC hdc, const RECT& rectDest);
-	void PaintBlack(HDC hdc, const RECT& rectDest);
-	void PaintGauge(HDC hdc, const RECT& rectDest, float current, float max);
+	void Load(const WCHAR* fileName, const POINT& imgSize, BYTE alpha = 0xff);
+	void Paint(const HDC& hdc, const RECT& rectDest);
+	void PaintBlack(const HDC& hdc, const RECT& rectDest);
+	void PaintGauge(const HDC& hdc, const RECT& rectDest, float current, float max);
 };
 
 

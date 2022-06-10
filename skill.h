@@ -9,7 +9,7 @@ private:
 		Type type;
 	public:
 		Effect(const EffectImage& imgSkill, Type type);
-		void Paint(HDC hdc, const RECT& rectBody) const;
+		void Paint(const HDC& hdc, const RECT& rectBody) const;
 		bool Animate();
 
 		inline int GetFrame() const
@@ -36,7 +36,7 @@ public:
 	SkillManager();
 
 	void UseSkill();
-	void Paint(HDC hdc) const;
+	void Paint(const HDC& hdc) const;
 	void Animate();
 
 	void ActiveSkill(Skill skill);
@@ -91,16 +91,17 @@ private:
 
 		bool Move();
 	public:
-		Effect(const EffectImage& imgSkill, const FRECT rectDraw, SkillData skillData = {});
-		Effect(const EffectImage& imgSkill, const Vector2 pos, SkillData skillData = {});
-		Effect(const EffectImage& imgSkill, const Vector2 pos, float rotationDegree, SkillData skillData = {});
-		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, const SkillData& skillData);
-		Effect(const EffectImage& imgSkill, const Vector2 pos, Vector2 unitVector_imgRotation, Vector2 unitVector_direction, const SkillData& skillData);
+		Effect(const EffectImage& imgSkill, const FRECT rectDraw, const SkillData& skillData = {});
+		Effect(const EffectImage& imgSkill, const Vector2& pos, const SkillData& skillData = {});
+		Effect(const EffectImage& imgSkill, const Vector2& pos, float rotationDegree, const SkillData& skillData = {});
+		Effect(const EffectImage& imgSkill, const Vector2& pos, const Vector2& unitVector_imgRotation, const SkillData& skillData);
+		Effect(const EffectImage& imgSkill, const Vector2& pos, const Vector2& unitVector_imgRotation, const Vector2& unitVector_direction, const SkillData& skillData);
 		Effect(const EffectImage& imgSkill, const SkillData& skillData, const DarkSkillData& darkSkillData);
 		void Paint(HDC hdc) const;
 		bool Animate();
 
-		RECT GetRectBody() const;
+		RECT GetRectBody() const;	
+		bool RotateToPlayer(float t);
 		inline void IncreaseAlpha(BYTE alpha)
 		{
 			imgSkill.IncreaseAlpha(alpha);
@@ -109,41 +110,40 @@ private:
 		{
 			imgSkill.ReduceAlpha(alpha);
 		}
-		bool RotateToPlayer(float t);
 		inline void Rotate(float degree)
 		{
 			skillData.isRotated = true;
 			unitVector_imgRotation = ::Rotate(unitVector_imgRotation, degree);
 		}
-		inline Vector2 GetUnitVector_ImgRotation() const
+		inline constexpr Vector2 GetUnitVector_ImgRotation() const
 		{
 			return unitVector_imgRotation;
 		}
-		inline Vector2 GetPosCenter() const
+		inline constexpr Vector2 GetPosCenter() const
 		{
 			return posCenter;
 		}
-		inline float GetDamage() const
+		inline constexpr float GetDamage() const
 		{
 			return skillData.damage;
 		}
-		inline FRECT GetRectDraw() const
+		inline constexpr FRECT GetRectDraw() const
 		{
 			return rectDraw;
 		}
-		inline int GetFrame() const
+		inline constexpr int GetFrame() const
 		{
 			return frame;
 		}
-		inline int GetRotationCount() const
+		inline constexpr int GetRotationCount() const
 		{
 			return skillData.rotationCount;
 		}
-		inline void ActiveDamage(bool active)
+		inline constexpr void ActiveDamage(bool active)
 		{
 			this->skillData.isActiveDamage = active;
 		}
-		inline void SetPosCenter(Vector2 pos)
+		inline constexpr void SetPosCenter(const Vector2& pos)
 		{
 			this->posCenter = pos;
 		}
@@ -184,7 +184,8 @@ private:
 public:
 	BossSkillManager();
 	~BossSkillManager();
-	void Paint(HDC hdc);
+
+	void Paint(const HDC& hdc);
 	void Animate();
 
 	void UseSkill();

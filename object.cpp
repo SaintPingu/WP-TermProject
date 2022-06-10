@@ -4,14 +4,14 @@
 
 extern GameData gameData;
 
-GameObject::GameObject(ObjectImage& image, Vector2 pos)
+GameObject::GameObject(ObjectImage& image, const Vector2& pos)
 {
 	this->image = &image;
 	bodySize = this->image->GetBodySize();
 
 	SetPos(pos);
 }
-void GameObject::Init(ObjectImage& image, Vector2 pos)
+void GameObject::Init(ObjectImage& image, const Vector2& pos)
 {
 	this->image = &image;
 	bodySize = this->image->GetBodySize();
@@ -19,7 +19,7 @@ void GameObject::Init(ObjectImage& image, Vector2 pos)
 	SetPos(pos);
 }
 
-void GameObject::SetPos(Vector2 pos)
+void GameObject::SetPos(const Vector2& pos)
 {
 	posCenter.x = pos.x;
 	posCenter.y = pos.y;
@@ -30,20 +30,13 @@ void GameObject::SetPos(Vector2 pos)
 	rectBody.bottom = rectBody.top + bodySize.y;
 }
 
-
-
-
-
-
-
-
-void GameObject::Paint(HDC hdc, const RECT* rectImage)
+void GameObject::Paint(const HDC& hdc, const RECT* rectImage)
 {
 	image->Paint(hdc, rectBody, rectImage);
 	
 }
 
-FRECT GameObject::GetRectBody(Vector2 pos) const
+FRECT GameObject::GetRectBody(const Vector2& pos) const
 {
 	FRECT rectBody = { 0, };
 	rectBody.left = pos.x - ((float)bodySize.x / 2);

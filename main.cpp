@@ -6,6 +6,7 @@
 #include "effect.h"
 #include "boss.h"
 #include "scene.h"
+#include "sound.h"
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -69,6 +70,7 @@ EffectManager* effects = nullptr;
 GUIManager* gui = nullptr;
 Boss* boss = nullptr;
 SceneManager* sceneManager = nullptr;
+SoundManager* soundManager = nullptr;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {

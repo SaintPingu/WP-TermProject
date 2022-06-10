@@ -6,10 +6,12 @@
 #include "effect.h"
 #include "interface.h"
 #include "scene.h"
+#include "sound.h"
 
 extern GUIManager* gui;
 extern EffectManager* effects;
 extern SceneManager* sceneManager;
+extern SoundManager* soundManager;
 
 Player::Player(Type type, Type subType)
 {
@@ -44,7 +46,7 @@ Player::Player(Type type, Type subType)
 		bulletImage.Load(_T("images\\bullet_ice.png"), { 7,15 });
 		bulletImage.ScaleImage(0.9f, 0.9f);
 
-		playerData.maxhp = 70;
+		playerData.maxhp = 60;
 		playerData.maxmp = 120;
 		playerData.mp = 40;
 		playerData.speed = 2.5f;
@@ -59,7 +61,7 @@ Player::Player(Type type, Type subType)
 		bulletImage.Load(_T("images\\bullet_fire.png"), { 11,16 });
 		bulletImage.ScaleImage(0.9f, 0.9f);
 
-		playerData.maxhp = 55;
+		playerData.maxhp = 50;
 		playerData.maxmp = 100;
 		playerData.mp = 20;
 		playerData.speed = 3;
@@ -73,7 +75,7 @@ Player::Player(Type type, Type subType)
 		break;
 	}
 	//playerData.maxhp = 1000000; // debug
-	//data.mp = 100; // debug
+	//playerData.mp = 100; // debug
 	playerData.hp = playerData.maxhp;
 
 	switch (playerData.subType)
@@ -168,6 +170,17 @@ void Player::PaintSkill(HDC hdc)
 	skillManager->Paint(hdc);
 }
 
+
+void Player::Death()
+{
+	GameObject::SetPos({ WINDOWSIZE_X / 2, 10000 });
+	playerData.isDeath = true;
+	playerData.hp = 0;
+
+	soundManager->StopEffectSound();
+	soundManager->PlayEffectSound(EffectSound::Loss);
+	soundManager->StopBGMSound();
+}
 void Player::SetPosDest()
 {
 	const int movementAmount = playerData.speed * 2;
@@ -240,7 +253,7 @@ void Player::SetDirection(Dir inputDir)
 	StopMove();
 }
 
-void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
+void Player::SetMove(const HWND& hWnd, int timerID, int elpase, const TIMERPROC& timerProc)
 {
 	if (playerData.isDeath == true)
 	{
@@ -264,7 +277,7 @@ void Player::SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc)
 	StartMove();
 }
 
-void Player::Move(HWND hWnd, int timerID)
+void Player::Move(const HWND& hWnd, int timerID)
 {
 	Vector2 posCenter = GetPosCenter();
 	Vector2 posNext = Vector2::Lerp(posCenter, posDest, alpha);
@@ -426,7 +439,7 @@ void Player::CheckShot()
 		ResetShotDelay();
 	}
 }
-void Player::CreateSubBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet)
+void Player::CreateSubBullet(const POINT& center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet)
 {
 	subBullets->CreateBullet(center, data, unitVector, isRotateImg, isSkillBullet);
 }
@@ -445,12 +458,32 @@ void Player::Hit(float damage, Type hitType, POINT effectPoint)
 	effects->CreateHitEffect(effectPoint, hitType);
 	gui->DisplayHurtFrame(hitType);
 
+	if (playerData.isInvincible == true)
+	{
+		return;
+	}
+
 	damage = CalculateDamage(damage, playerData.type, hitType);
 	if ((playerData.hp -= damage) <= 0)
 	{
-		GameObject::SetPos({ -100, -100 });
-		playerData.isDeath = true;
+		Player::Death();
 		effects->CreateHitEffect(GetPosCenter(), playerData.type);
+	}
+
+	switch (hitType)
+	{
+	case Type::Elec:
+		soundManager->PlayHitSound(HitSound::Elec);
+		break;
+	case Type::Fire:
+		soundManager->PlayHitSound(HitSound::Fire);
+		break;
+	case Type::Water:
+		soundManager->PlayHitSound(HitSound::Water);
+		break;
+	case Type::Dark:
+		soundManager->PlayHitSound(HitSound::Dark);
+		break;
 	}
 }
 

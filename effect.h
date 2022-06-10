@@ -2,15 +2,16 @@
 #include "image.h"
 
 enum class EffectType { Empty = 0, Explode_Fire, Explode_Water, Explode_Elec, Cloud_Fire, Cloud_Water, Cloud_Elec };
+class Boss;
 
 class EffectManager {
 private:
 	class Effect : public ISprite {
 	private:
 		const EffectImage* effectImage;
-		POINT pos;
+		POINT pos = { 0, };
 	public:
-		Effect(const EffectImage& effectImage, POINT pos);
+		Effect(const EffectImage& effectImage, const POINT& pos);
 		void Paint(HDC hdc) const;
 		bool Animate();
 	};
@@ -29,9 +30,12 @@ private:
 public:
 	EffectManager();
 	void Paint(HDC hdc) const;
-	void CreateHitEffect(POINT pos, Type type);
-	void CreateExplodeEffect(POINT pos, Type type);
+	void CreateHitEffect(const POINT& pos, Type type);
+	void CreateExplodeEffect(const POINT& pos, Type type);
 	void Animate();
+
+	void CreateBossDeathEffect(const Boss& boss);
+	void CreateBossExplosionEffect(const Boss& boss);
 };
 
 void GetRandEffectPoint(POINT& effectPoint);

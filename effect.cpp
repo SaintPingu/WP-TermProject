@@ -1,5 +1,9 @@
 #include "stdafx.h"
 #include "effect.h"
+#include "boss.h"
+#include "sound.h"
+
+extern SoundManager* soundManager;
 
 EffectManager::EffectManager()
 {
@@ -19,7 +23,7 @@ EffectManager::EffectManager()
 	cloud_water.ScaleImage(0.9f, 0.9f);
 	cloud_dark.Load(_T("images\\sprite_cloud_dark.png"), { 56, 64 }, 11);
 }
-EffectManager::Effect::Effect(const EffectImage& effectImage, POINT pos)
+EffectManager::Effect::Effect(const EffectImage& effectImage, const POINT& pos)
 {
 	this->effectImage = &effectImage;
 	this->pos = pos;
@@ -33,7 +37,7 @@ void EffectManager::Paint(HDC hdc) const
 	}
 }
 
-void EffectManager::CreateHitEffect(POINT pos, Type type)
+void EffectManager::CreateHitEffect(const POINT& pos, Type type)
 {
 	switch (type)
 	{
@@ -54,7 +58,7 @@ void EffectManager::CreateHitEffect(POINT pos, Type type)
 		break;
 	}
 }
-void EffectManager::CreateExplodeEffect(POINT pos, Type type)
+void EffectManager::CreateExplodeEffect(const POINT& pos, Type type)
 {
 	switch (type)
 	{
@@ -111,4 +115,70 @@ void GetRandEffectPoint(POINT& effectPoint)
 	constexpr int range = 20;
 	effectPoint.x += (rand() % range) - (range / 2);
 	effectPoint.y += (rand() % range) - (range / 2);
+}
+void EffectManager::CreateBossDeathEffect(const Boss& boss)
+{
+	const EffectImage* effectImage = nullptr;
+	switch (boss.GetType())
+	{
+	case Type::Elec:
+		effectImage = &cloud_elec;
+		break;
+	case Type::Fire:
+		effectImage = &cloud_fire;
+		break;
+	case Type::Water:
+		effectImage = &cloud_water;
+		break;
+	case Type::Dark:
+		effectImage = &cloud_dark;
+		break;
+	default:
+		assert(0);
+		break;
+	}
+
+	const FRECT rectBoss = boss.GetRectBody();
+	const int width = boss.GetBodyWidth();
+	const int height = boss.GetBodyHeight();
+	for (int i = 0; i < 10; ++i)
+	{
+		const int randX = rectBoss.left + (rand() % width);
+		const int randY = rectBoss.top + (rand() % height);
+		const POINT pos = { randX, randY };
+		effects.emplace_back(*effectImage, pos);
+	}
+	soundManager->PlayEffectSound(EffectSound::Explosion);
+}
+void EffectManager::CreateBossExplosionEffect(const Boss& boss)
+{
+	static EffectImage* effectImage = nullptr;
+	if (effectImage != nullptr)
+	{
+		delete effectImage;
+	}
+	effectImage = new EffectImage();
+
+	switch (boss.GetType())
+	{
+	case Type::Elec:
+		*effectImage = cloud_elec;
+		break;
+	case Type::Fire:
+		*effectImage = cloud_fire;
+		break;
+	case Type::Water:
+		*effectImage = cloud_water;
+		break;
+	case Type::Dark:
+		*effectImage = cloud_dark;
+		break;
+	default:
+		assert(0);
+		break;
+	}
+
+	effectImage->ScaleImage(10.0f, 10.0f);
+	effects.emplace_back(*effectImage, boss.GetPosCenter());
+	soundManager->PlayEffectSound(EffectSound::Explosion);
 }

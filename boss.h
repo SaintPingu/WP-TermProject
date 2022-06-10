@@ -38,7 +38,7 @@ typedef struct BossData {
 
 class Boss : public GameObject, public IAnimatable, public IMovable {
 private:
-	BossData data;
+	BossData bossData;
 	ObjectImage* image = nullptr;
 	EnemyBullet* bullets = nullptr;
 	BossAct act = BossAct::Idle;
@@ -49,8 +49,9 @@ private:
 	BossSkillManager* skill = nullptr;
 	int maxSkillCount[BOSS_SKILL_LIST] = { 0, };
 	int skillCount = 0;
+	int deathFrame = 30;
 
-	void SetMove(Vector2 unitVector);
+	void SetMove(const Vector2& unitVector);
 	void SetPosDest() override;
 	void Death();
 	void StartAttack();
@@ -60,15 +61,15 @@ private:
 	void ResetAttackDelay();
 	inline bool IsClearAttackDelay()
 	{
-		return (data.crntAttackDelay <= 0);
+		return (bossData.crntAttackDelay <= 0);
 	}
 	inline void ResetActDelay()
 	{
-		data.crntActDelay = data.actDelay;
+		bossData.crntActDelay = bossData.actDelay;
 	}
 	inline bool IsClearActDelay()
 	{
-		return (data.crntActDelay <= 0);
+		return (bossData.crntActDelay <= 0);
 	}
 
 	void ShotByLine();
@@ -90,34 +91,37 @@ public:
 	void Animate() override;
 	void AnimateSkill();
 	bool CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint = { -1, });
-	bool Hit(float damage);
 
-	inline void ReSetBossAct()
+	inline constexpr void ReSetBossAct()
 	{
 		act = BossAct::Idle;
 	}
-	inline Type GetType() const
+	inline constexpr Type GetType() const
 	{
-		return data.type;
+		return bossData.type;
 	}
-	inline bool IsCreated() const
+	inline constexpr bool IsCreated() const
 	{
-		return data.isCreated;
+		return bossData.isCreated;
 	}
-	inline BossAct GetAct() const
+	inline constexpr bool IsDeath() const
+	{
+		return bossData.isDeath;
+	}
+	inline constexpr BossAct GetAct() const
 	{
 		return act;
 	}
-	inline void SetAct(BossAct act)
+	inline constexpr void SetAct(BossAct act)
 	{
 		this->act = act;
 	}
-	inline float GetDamage_Skill1() const
+	inline constexpr float GetDamage_Skill1() const
 	{
-		return data.damage_skill1;
+		return bossData.damage_skill1;
 	}
-	inline float GetDamage_Skill2() const
+	inline constexpr float GetDamage_Skill2() const
 	{
-		return data.damage_skill2;
+		return bossData.damage_skill2;
 	}
 };

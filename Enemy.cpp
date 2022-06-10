@@ -6,14 +6,16 @@
 #include "effect.h"
 #include "interface.h"
 #include "boss.h"
+#include "sound.h"
 
 extern GameData gameData;
 extern Player* player;
 extern Boss* boss;
 extern EffectManager* effects;
 extern EnemyController* enemies;
+extern SoundManager* soundManager;
 
-Enemy::Enemy(ObjectImage& image, Vector2 pos, EnemyData data) : GameObject(image, pos)
+Enemy::Enemy(ObjectImage& image, const Vector2& pos, const EnemyData& data) : GameObject(image, pos)
 {
 	StartMove();
 	this->data = data;
@@ -106,17 +108,17 @@ void Range::SetPosDest()
 	}
 }
 
-void Enemy::Paint(HDC hdc, int spriteRow)
+void Enemy::Paint(const HDC& hdc, int spriteRow)
 {
 	const RECT rectImage = ISprite::GetRectImage(GetImage(), frame, spriteRow);
 	GameObject::Paint(hdc, &rectImage);
 }
-void Melee::Paint(HDC hdc)
+void Melee::Paint(const HDC& hdc)
 {
 	const int spriteRow = GetSpriteRow();
 	Enemy::Paint(hdc, spriteRow);
 }
-void Range::Paint(HDC hdc)
+void Range::Paint(const HDC& hdc)
 {
 	constexpr int spriteRow = 0;
 	Enemy::Paint(hdc, spriteRow);
@@ -321,6 +323,7 @@ void Range::Fire()
 void EnemyController::Pop(size_t& index)
 {
 	effects->CreateExplodeEffect(enemies.at(index)->GetPosCenter(), enemies.at(index)->GetType());
+	soundManager->PlayEffectSound(EffectSound::Explosion);
 	enemies[index--] = enemies.back();
 	enemies.pop_back();
 }
@@ -340,7 +343,7 @@ EnemyController::EnemyController()
 		createDelay_Melee = 1500;
 		createDelay_Range = 3000;
 		createAmount_Melee = 6;
-		createAmount_Range = 7;
+		createAmount_Range = 6;
 
 		meleeData.hp = 5;
 		meleeData.speed = 1.5f;
@@ -571,7 +574,7 @@ void EnemyController::Animate()
 		enemy->Animate();
 	}
 }
-bool EnemyController::CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint)
+bool EnemyController::CheckHit(const RECT& rectSrc, float damage, Type hitType, const POINT& effectPoint)
 {
 	for (size_t i = 0;i<enemies.size();++i)
 	{
@@ -607,11 +610,11 @@ void EnemyController::CheckHitAll(const RECT& rectSrc, float damage, Type hitTyp
 	}
 }
 
-void EnemyController::CreateBullet(POINT center, const BulletData& data, Vector2 unitVector)
+void EnemyController::CreateBullet(const POINT& center, const BulletData& data, const Vector2& unitVector)
 {
 	bullets->CreateBullet(center, data, unitVector);
 }
-void EnemyController::CreateBullet(POINT center, const BulletData& data, Dir dir)
+void EnemyController::CreateBullet(const POINT& center, const BulletData& data, Dir dir)
 {
 	bullets->CreateBullet(center, data, dir);
 }

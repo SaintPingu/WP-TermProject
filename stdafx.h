@@ -6,6 +6,8 @@
 #include <tchar.h>
 #include <gdiplus.h>
 #include <atlImage.h>
+#include <mmsystem.h>
+#include <fmod.hpp>
 #include <cmath>
 #include <vector>
 #include <cassert>
@@ -189,7 +191,7 @@ struct Vector2 {
 	{
 		return { (LONG)x, (LONG)y };
 	}
-	inline constexpr Vector2 operator=(const POINT& rhs) const
+	inline constexpr Vector2 operator=(const POINT& rhs)
 	{
 		return { static_cast<float>(rhs.x), static_cast<float>(rhs.y) };
 	}

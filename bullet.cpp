@@ -12,7 +12,7 @@ extern Boss* boss;
 extern EffectManager* effects;
 extern SceneManager* sceneManager;
 
-BulletController::Bullet::Bullet(POINT center, POINT bulletSize, const BulletData& data)
+BulletController::Bullet::Bullet(const POINT& center, const POINT& bulletSize, const BulletData& data)
 {
 	this->data = data;
 
@@ -22,7 +22,7 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, const BulletDat
 	rectBody.bottom = rectBody.top + bulletSize.y;
 	rectRotBody = rectBody;
 }
-BulletController::Bullet::Bullet(POINT center, POINT bulletSize, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet) : Bullet(center, bulletSize, data)
+BulletController::Bullet::Bullet(const POINT& center, const POINT& bulletSize, const BulletData& data, const Vector2& unitVector, bool isRotateImg, bool isSkillBullet) : Bullet(center, bulletSize, data)
 {
 	this->dir = Dir::Empty;
 	this->unitVector = unitVector;
@@ -35,7 +35,7 @@ BulletController::Bullet::Bullet(POINT center, POINT bulletSize, const BulletDat
 }
 
 
-void BulletController::Bullet::Paint(HDC hdc, const ObjectImage& bulletImage)
+void BulletController::Bullet::Paint(const HDC& hdc, const ObjectImage& bulletImage)
 {
 	if (isRotateImg == false)
 	{
@@ -194,12 +194,12 @@ void BulletController::Paint(HDC hdc)
 	}
 }
 
-void BulletController::CreateBullet(POINT center, const BulletData& data, Dir dir)
+void BulletController::CreateBullet(const POINT& center, const BulletData& data, Dir dir)
 {
 	Bullet* bullet = new Bullet(center, bulletSize, data, dir);
 	bullets.emplace_back(bullet);
 }
-void BulletController::CreateBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet)
+void BulletController::CreateBullet(const POINT& center, const BulletData& data, const Vector2& unitVector, bool isRotateImg, bool isSkillBullet)
 {
 	Bullet* bullet = new Bullet(center, bulletSize, data, unitVector, isRotateImg, isSkillBullet);
 	bullets.emplace_back(bullet);
@@ -219,10 +219,6 @@ void PlayerBullet::Move()
 			if (bullets.at(i)->IsSkillBullet() == false)
 			{
 				player->AddMP(0.15f);
-			}
-			else
-			{
-				int a = 5;
 			}
 			BulletController::Pop(i);
 		}

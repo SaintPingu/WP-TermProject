@@ -8,6 +8,7 @@ typedef struct tagGameData {
 	Stage stage = Stage::Empty;
 
 	bool isShowHitbox = false;
+	bool isShowDrawBox = false;
 }GameData;
 
 class GUIManager {
@@ -57,11 +58,11 @@ private:
 	HurtGUI hurtGUI_Dark;
 public:
 	GUIManager(const RECT& rectWindow);
-	void Paint(HDC hdc);
+	void Paint(const HDC& hdc);
 	void Update();
 	RECT GetRectDisplay() const;
 	void DisplayHurtFrame(Type type);
 };
 
-void CheckKeyDown(HWND hWnd, const WPARAM& wParam);
-void CheckKeyUp(HWND hWnd, const WPARAM& wParam);
+void CheckKeyDown(const HWND& hWnd, const WPARAM& wParam);
+void CheckKeyUp(const HWND& hWnd, const WPARAM& wParam);

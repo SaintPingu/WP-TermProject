@@ -6,6 +6,7 @@
 #include "effect.h"
 #include "boss.h"
 #include "timer.h"
+#include "sound.h"
 
 extern GameData gameData;
 extern Player* player;
@@ -13,6 +14,7 @@ extern EnemyController* enemies;
 extern EffectManager* effects;
 extern GUIManager* gui;
 extern Boss* boss;
+extern SoundManager* soundManager;
 
 void SceneManager::StartPaint(const HWND& hWnd, PAINTSTRUCT& ps, HDC& hdc, HDC& memDC, HBITMAP& hBitmap, RECT& rectWindow) const
 {
@@ -67,7 +69,7 @@ void SceneManager::LoadScene(const HWND& hWnd)
 		bkground.Load(L"images\\background.png");
 		gameData.stage = Stage::Dark;
 
-		player = new Player(Type::Elec, Type::Fire);
+		player = new Player(Type::Fire, Type::Water);
 		player->Init();
 		enemies = new EnemyController();
 		effects = new EffectManager();
@@ -81,12 +83,17 @@ void SceneManager::LoadScene(const HWND& hWnd)
 		SetTimer(hWnd, TIMERID_BATTLE_EFFECT, ELAPSE_BATTLE_EFFECT, T_Battle_Effect);
 		SetTimer(hWnd, TIMERID_BATTLE_GUI, ELAPSE_BATTLE_GUI, T_Battle_GUI);
 		SetTimer(hWnd, TIMERID_BATTLE_ANIMATION_BOSS, ELAPSE_BATTLE_ANIMATION_BOSS, T_Battle_AnimateBoss);
+
+		soundManager->PlayBGMSound(BGMSound::Battle, 1.0f, true);
+		soundManager->PlayEffectSound(EffectSound::Shot, 0.5f, true);
 		break;
 	}
 }
 
 void SceneManager::Init(const HWND& hWnd)
 {
+	soundManager = new SoundManager();
+
 	GetClientRect(hWnd, &rectWindow);
 	rectDisplay = rectWindow;
 }

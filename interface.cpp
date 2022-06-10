@@ -19,12 +19,21 @@ extern Player* player;
 extern Boss* boss;
 extern SceneManager* sceneManager;
 
-void CheckKeyDown(HWND hWnd, const WPARAM& wParam)
+void CheckKeyDown(const HWND& hWnd, const WPARAM& wParam)
 {
 	switch (wParam)
 	{
 	case _T('H'):
 		gameData.isShowHitbox = !gameData.isShowHitbox;
+		break;
+	case _T('J'):
+		gameData.isShowDrawBox = !gameData.isShowDrawBox;
+		break;
+	case _T('K'):
+		player->Heal();
+		break;
+	case _T('I'):
+		player->InvincibleMode(true);
 		break;
 	case _T('Q'):
 		player->ActiveSkill(Skill::Identity);
@@ -74,7 +83,7 @@ void CheckKeyDown(HWND hWnd, const WPARAM& wParam)
 		player->SetMove(hWnd, TIMERID_BATTLE_MOVE_PLAYER, ELAPSE_BATTLE_MOVE_PLAYER, T_Battle_MovePlayer);
 	}
 }
-void CheckKeyUp(HWND hWnd, const WPARAM& wParam)
+void CheckKeyUp(const HWND& hWnd, const WPARAM& wParam)
 {
 	if (player->IsMove() == true)
 	{
@@ -115,7 +124,7 @@ void CheckKeyUp(HWND hWnd, const WPARAM& wParam)
 GUIManager::GUIManager(const RECT& rectWindow)
 {
 	//constexpr int fieldLength = 720; // 1m/s
-	constexpr int fieldLength = 1;
+	constexpr int fieldLength = 360;
 
 	constexpr int main_guiHeight = 80;
 
@@ -245,7 +254,7 @@ GUIManager::GUIManager(const RECT& rectWindow)
 	hurtGUI_Dark.gui->Load(_T("images\\frame_hurt_dark.png"), { 239, 371 }, 0x00);
 }
 
-void GUIManager::Paint(HDC hdc)
+void GUIManager::Paint(const HDC& hdc)
 {
 	mainGUI->Paint(hdc, rectMain);
 
@@ -281,7 +290,7 @@ void GUIManager::Update()
 	hurtGUI_Elec.ReduceAlpha();
 	hurtGUI_Dark.ReduceAlpha();
 
-	if (isIconStop == true)
+	if (isIconStop == true || player->IsDeath() == true)
 	{
 		return;
 	}

@@ -23,6 +23,7 @@ typedef struct PlayerData {
 	float damage_Q = 0; // per sec
 
 	bool isDeath = false;
+	bool isInvincible = false;
 }PlayerData;
 
 class Player : public GameObject, public IControllable, public IAnimatable {
@@ -41,6 +42,7 @@ private:
 	SubPokemon subPokemon = SubPokemon::Null;
 	ObjectImage img_subPokemon{};
 
+	void Death();
 	void SetPosDest() override;
 	inline bool IsClearShotDelay() const
 	{
@@ -58,15 +60,15 @@ public:
 	void PaintSkill(HDC hdc);
 
 	void SetDirection(Dir dir);
-	void SetMove(HWND hWnd, int timerID, int elpase, TIMERPROC timerProc) override;
-	void Move(HWND hWnd, int timerID) override;
+	void SetMove(const HWND& hWnd, int timerID, int elpase, const TIMERPROC& timerProc) override;
+	void Move(const HWND& hWnd, int timerID) override;
 	void Stop(Dir dir) override;
 	void CheckCollideWindow(Vector2& pos) const;
 
 	void Animate() override;
 	void CheckShot();
 	void Shot();
-	void CreateSubBullet(POINT center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet = false);
+	void CreateSubBullet(const POINT& center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet = false);
 	void Hit(float damage, Type hitType, POINT effectPoint = { -1, });
 
 
@@ -79,7 +81,7 @@ public:
 	}
 	inline float GetDamage_WE() const
 	{
-		return playerData.subDamage;
+		return (playerData.subDamage / 1.75f);
 	}
 	inline Type GetType() const
 	{
@@ -129,5 +131,18 @@ public:
 		}
 		playerData.mp -= amount;
 		return true;
+	}
+	void InvincibleMode(bool active)
+	{
+		playerData.isInvincible = active;
+	}
+	inline bool IsDeath() const
+	{
+		return playerData.isDeath;
+	}
+
+	inline void Heal()
+	{
+		playerData.hp = playerData.maxhp;
 	}
 };

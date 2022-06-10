@@ -7,28 +7,34 @@
 #include "interface.h"
 #include "skill.h"
 #include "scene.h"
+#include "sound.h"
 
 extern GameData gameData;
 extern Player* player;
 extern EffectManager* effects;
 extern SceneManager* sceneManager;
+extern SoundManager* soundManager;
 
-void Boss::SetMove(Vector2 unitVector)
+void Boss::SetMove(const Vector2& unitVector)
 {
 	this->unitVector = unitVector;
 	StartMove();
 }
 void Boss::Death()
 {
-	data.isDeath = true;
+	bossData.hp = 0;
+	bossData.isDeath = true;
+	player->InvincibleMode(true);
+
+	soundManager->StopEffectSound();
 }
 void Boss::StartAttack()
 {
-	//act = static_cast<BossAct>(rand() % 7);
-	act = BossAct::Skill1;
-	if (data.type != Type::Dark)
+	act = static_cast<BossAct>(rand() % 7);
+	//act = BossAct::Skill1;
+	if (bossData.type != Type::Dark)
 	{
-		SetAction(Action::Attack, data.frameNum_Atk);
+		SetAction(Action::Attack, bossData.frameNum_Atk);
 	}
 
 	switch (act)
@@ -91,9 +97,9 @@ BulletData Boss::GetBulletData()
 	}
 
 	BulletData bulletData;
-	bulletData.bulletType = data.type;
-	bulletData.damage = data.damage;
-	bulletData.speed = data.bulletSpeed[index];
+	bulletData.bulletType = bossData.type;
+	bulletData.damage = bossData.damage;
+	bulletData.speed = bossData.bulletSpeed[index];
 
 	return bulletData;
 }
@@ -104,7 +110,7 @@ void Boss::ResetAttackDelay()
 	{
 		return;
 	}
-	data.crntAttackDelay = data.attackDelay[index];
+	bossData.crntAttackDelay = bossData.attackDelay[index];
 }
 
 
@@ -165,14 +171,16 @@ Boss::~Boss()
 
 void Boss::Create()
 {
-	data = GetBossData();
-	data.isCreated = true;
+	bossData = GetBossData();
+	bossData.isCreated = true;
 	skill = new BossSkillManager();
 
 	Vector2 posCenter = { WINDOWSIZE_X / 2 , -300 };
 	GameObject::Init(*image, posCenter);
 	SetMove(Vector2::Down());
 
+	soundManager->StopBGMSound();
+	soundManager->PlayBGMSound(BGMSound::Battle_Boss, 1.0f, true);
 }
 void Boss::SetPosDest()
 {
@@ -183,7 +191,7 @@ void Boss::SetPosDest()
 
 	const RECT rectDisplay = sceneManager->GetRectDisplay();
 
-	posDest = Vector2::GetDest(GetPosCenter(), unitVector, data.speed);
+	posDest = Vector2::GetDest(GetPosCenter(), unitVector, bossData.speed);
 	if (act == BossAct::Idle)
 	{
 		const RECT rectBody = GetRectBody();
@@ -194,7 +202,7 @@ void Boss::SetPosDest()
 		if (posDest.y > maxYPos)
 		{
 			StopMove();
-			data.speed = 5;
+			bossData.speed = 5;
 		}
 	}
 	else if (act == BossAct::Line)
@@ -242,7 +250,12 @@ void Boss::SetPosDest()
 
 void Boss::Paint(HDC hdc)
 {
-	if (data.isCreated == false)
+	constexpr int disappearFrame = -3;
+	if (bossData.isCreated == false)
+	{
+		return;
+	}
+	else if (deathFrame < disappearFrame)
 	{
 		return;
 	}
@@ -256,16 +269,22 @@ void Boss::Paint(HDC hdc)
 
 void Boss::Move()
 {
-	if (data.isCreated == false)
+	if (bossData.isCreated == false)
 	{
 		return;
 	}
+
 	bullets->Move();
+
+	if (bossData.isDeath == true)
+	{
+		return;
+	}
 
 	const RECT rectBody = GetRectBody();
 	if (player->IsCollide(rectBody) == true)
 	{
-		player->Hit(data.damage / 10, GetType());
+		player->Hit(bossData.damage / 10, GetType());
 	}
 
 	if (IsMove() == false)
@@ -278,13 +297,17 @@ void Boss::Move()
 }
 void Boss::CheckAttackDelay()
 {
-	if (data.isCreated == false)
+	if (bossData.isCreated == false)
+	{
+		return;
+	}
+	else if (bossData.isDeath == true)
 	{
 		return;
 	}
 	else if (act != BossAct::Idle)
 	{
-		data.crntAttackDelay -= ELAPSE_BATTLE_INVALIDATE;
+		bossData.crntAttackDelay -= ELAPSE_BATTLE_INVALIDATE;
 		if (IsClearAttackDelay() == true)
 		{
 			Shot();
@@ -294,13 +317,17 @@ void Boss::CheckAttackDelay()
 }
 void Boss::CheckActDelay()
 {
-	if (data.isCreated == false)
+	if (bossData.isCreated == false)
+	{
+		return;
+	}
+	else if (bossData.isDeath == true)
 	{
 		return;
 	}
 	else if (IsMove() == false && act == BossAct::Idle)
 	{
-		data.crntActDelay -= ELAPSE_BATTLE_INVALIDATE;
+		bossData.crntActDelay -= ELAPSE_BATTLE_INVALIDATE;
 		if (IsClearActDelay() == true)
 		{
 			StartAttack();
@@ -311,6 +338,15 @@ void Boss::CheckActDelay()
 
 bool Boss::CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint)
 {
+	if (bossData.isCreated == false)
+	{
+		return false;
+	}
+	else if (bossData.isDeath == true)
+	{
+		return false;
+	}
+
 	RECT rectInter = { 0, };
 	if (GameObject::IsCollide(rectSrc, &rectInter) == true)
 	{
@@ -339,19 +375,10 @@ bool Boss::CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effec
 
 		effects->CreateHitEffect(effectPoint, hitType);
 		const float calDamage = CalculateDamage(damage, GetType(), hitType);
-		if (Hit(calDamage) == true)
+		if ((bossData.hp -= calDamage) <= 0)
 		{
 			Death();
 		}
-		return true;
-	}
-
-	return false;
-}
-bool Boss::Hit(float damage)
-{
-	if ((data.hp -= damage) <= 0)
-	{
 		return true;
 	}
 
@@ -364,6 +391,21 @@ void Boss::Animate()
 	{
 		return;
 	}
+	else if (bossData.isDeath == true)
+	{
+		if (--deathFrame > 0)
+		{
+			effects->CreateBossDeathEffect(*this);
+		}
+		else if(deathFrame == -1)
+		{
+			soundManager->PlayEffectSound(EffectSound::Win);
+			soundManager->StopBGMSound();
+
+			effects->CreateBossExplosionEffect(*this);
+		}
+		return;
+	}	
 	else if (isRevFrame == true)
 	{
 		--frame;
@@ -376,11 +418,11 @@ void Boss::Animate()
 	switch (GetAction())
 	{
 	case Action::Idle:
-		if (frame > data.frameNum_IdleMax)
+		if (frame > bossData.frameNum_IdleMax)
 		{
-			if (data.type == Type::Dark)
+			if (bossData.type == Type::Dark)
 			{
-				frame = data.frameNum_Idle;
+				frame = bossData.frameNum_Idle;
 			}
 			else
 			{
@@ -388,24 +430,24 @@ void Boss::Animate()
 				--frame;
 			}
 		}
-		else if (frame < data.frameNum_Idle)
+		else if (frame < bossData.frameNum_Idle)
 		{
 			isRevFrame = false;
 			++frame;
 		}
 		break;
 	case Action::Attack:
-		if (frame > data.frameNum_AtkMax)
+		if (frame > bossData.frameNum_AtkMax)
 		{
 			isRevFrame = true;
 			--frame;
 		}
-		else if (isRevFrame == true && frame < data.frameNum_AtkRev)
+		else if (isRevFrame == true && frame < bossData.frameNum_AtkRev)
 		{
 			isRevFrame = false;
-			if (data.type != Type::Dark)
+			if (bossData.type != Type::Dark)
 			{
-				SetAction(Action::Idle, data.frameNum_Idle);
+				SetAction(Action::Idle, bossData.frameNum_Idle);
 			}
 		}
 		break;
@@ -416,6 +458,15 @@ void Boss::Animate()
 }
 void Boss::AnimateSkill()
 {
+	if (IsCreated() == false)
+	{
+		return;
+	}
+	else if (IsDeath() == true)
+	{
+		return;
+	}
+
 	skill->Animate();
 }
 
@@ -538,7 +589,7 @@ BossData Boss::GetBossData()
 	case Stage::Elec:
 		bossData.type = Type::Elec;
 
-		bossData.hp = 5000;
+		bossData.hp = 3500;
 		bossData.damage = 2;
 		bossData.damage_skill1 = 4.5f;
 		bossData.damage_skill2 = 0.5f;
@@ -566,7 +617,7 @@ BossData Boss::GetBossData()
 	case Stage::Fire:
 		bossData.type = Type::Fire;
 
-		bossData.hp = 5000;
+		bossData.hp = 4000;
 		bossData.damage = 2;
 		bossData.damage_skill1 = 7.5f;
 		bossData.damage_skill2 = 15.0f;
@@ -580,7 +631,7 @@ BossData Boss::GetBossData()
 	case Stage::Dark:
 		bossData.type = Type::Dark;
 
-		bossData.hp = 5000;
+		bossData.hp = 6500;
 		bossData.damage = 5;
 		bossData.damage_skill1 = 4.5f;
 		bossData.damage_skill2 = 2.5f;
