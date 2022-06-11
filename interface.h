@@ -5,7 +5,7 @@ class GUIImage;
 typedef struct tagGameData {
 	bool isBattleStart = false;
 	Difficulty difficulty = Difficulty::Easy;
-	Stage stage = Stage::Empty;
+	StageElement stage = StageElement::Null;
 
 	bool isShowHitbox = false;
 	bool isShowDrawBox = false;
@@ -25,6 +25,7 @@ private:
 	float iconMoveMinY = 0;
 	float iconMoveAmount = 0;
 	bool isIconStop = false;
+	bool isClearPhase = false;
 
 	const BYTE hurtGUI_alpha = 0x90;
 
@@ -59,9 +60,18 @@ private:
 public:
 	GUIManager(const RECT& rectWindow);
 	void Paint(const HDC& hdc);
-	void Update();
+	void Update(const HWND& hWnd);
 	RECT GetRectDisplay() const;
 	void DisplayHurtFrame(Type type);
+	
+	inline constexpr bool IsFieldEnd()
+	{
+		return isIconStop;
+	}
+	inline constexpr void SkipField()
+	{
+		rectPokemonIcon.top = iconMoveMaxY;
+	}
 };
 
 void CheckKeyDown(const HWND& hWnd, const WPARAM& wParam);

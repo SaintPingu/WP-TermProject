@@ -14,6 +14,7 @@ extern Boss* boss;
 extern EffectManager* effects;
 extern EnemyController* enemies;
 extern SoundManager* soundManager;
+extern GUIManager* gui;
 
 Enemy::Enemy(ObjectImage& image, const Vector2& pos, const EnemyData& data) : GameObject(image, pos)
 {
@@ -332,33 +333,33 @@ EnemyController::EnemyController()
 	ObjectImage imgRangeBullet;
 	switch (gameData.stage)
 	{
-	case Stage::Elec:
+	case StageElement::Elec:
 		meleeData.type = Type::Elec;
 		rangeData.type = Type::Elec;
-		imgMelee.Load(L"images\\sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
+		imgMelee.Load(L"images\\battle\\sprite_beedrill.png", { 33,33 }, { 7,6 }, { 21,22 });
 		imgMelee.ScaleImage(1.2f, 1.2f);
-		imgRange.Load(L"images\\sprite_zapdos.png", { 58,58 }, { 12,12 }, { 36,46 });
-		imgRangeBullet.Load(L"images\\bullet_zapdos.png", { 14,14 });
+		imgRange.Load(L"images\\battle\\sprite_zapdos.png", { 58,58 }, { 12,12 }, { 36,46 });
+		imgRangeBullet.Load(L"images\\battle\\bullet_zapdos.png", { 14,14 });
 		imgRangeBullet.ScaleImage(0.9f, 0.9f);
 		createDelay_Melee = 1500;
 		createDelay_Range = 3000;
 		createAmount_Melee = 6;
 		createAmount_Range = 6;
 
-		meleeData.hp = 5;
+		meleeData.hp = 6;
 		meleeData.speed = 1.5f;
 		meleeData.attackDelay = 1000;
-		meleeData.damage = 2;
+		meleeData.damage = 3;
 
 		meleeData.frameNum_Idle = 0;
 		meleeData.frameNum_IdleMax = 2;
 		meleeData.frameNum_Atk = 3;
 		meleeData.frameNum_AtkMax = 4;
 
-		rangeData.hp = 4.25f;
+		rangeData.hp = 4.75f;
 		rangeData.speed = 2;
 		rangeData.attackDelay = 2000;
-		rangeData.damage = 1;
+		rangeData.damage = 2.25f;
 
 		rangeData.frameNum_Idle = 0;
 		rangeData.frameNum_IdleMax = 2;
@@ -368,14 +369,14 @@ EnemyController::EnemyController()
 		rangeData.bulletSpeed = 4;
 		meleeData.frameNum_AtkRev = 3;
 		break;
-	case Stage::Water:
+	case StageElement::Water:
 		meleeData.type = Type::Water;
 		rangeData.type = Type::Water;
-		imgMelee.Load(L"images\\sprite_wingull.png", { 34,33 }, { 4,6 }, { 28,22 });
+		imgMelee.Load(L"images\\battle\\sprite_wingull.png", { 34,33 }, { 4,6 }, { 28,22 });
 		imgMelee.ScaleImage(1.2f, 1.2f);
-		imgRange.Load(L"images\\sprite_seadra.png", { 29,31 }, { 3,3 }, { 25,28 });
+		imgRange.Load(L"images\\battle\\sprite_seadra.png", { 29,31 }, { 3,3 }, { 25,28 });
 		imgRange.ScaleImage(1.2f, 1.2f);
-		imgRangeBullet.Load(L"images\\bullet_seadra.png", { 14,14 });
+		imgRangeBullet.Load(L"images\\battle\\bullet_seadra.png", { 14,14 });
 		imgRangeBullet.ScaleImage(1.2f, 1.2f);
 
 		createDelay_Melee = 1150;
@@ -386,7 +387,7 @@ EnemyController::EnemyController()
 		meleeData.hp = 2.85f;
 		meleeData.speed = 2;
 		meleeData.attackDelay = 700;
-		meleeData.damage = 1.5f;
+		meleeData.damage = 2.5f;
 
 		meleeData.frameNum_Idle = 0;
 		meleeData.frameNum_IdleMax = 2;
@@ -397,7 +398,7 @@ EnemyController::EnemyController()
 		rangeData.hp = 5;
 		rangeData.speed = 0.7f;
 		rangeData.attackDelay = 2000;
-		rangeData.damage = 1.8f;
+		rangeData.damage = 2.8f;
 
 		rangeData.frameNum_Idle = 0;
 		rangeData.frameNum_IdleMax = 2;
@@ -406,14 +407,14 @@ EnemyController::EnemyController()
 		rangeData.frameNum_AtkRev = 3;
 		rangeData.bulletSpeed = 3;
 		break;
-	case Stage::Fire:
+	case StageElement::Fire:
 		meleeData.type = Type::Fire;
 		rangeData.type = Type::Fire;
-		imgMelee.Load(L"images\\sprite_ledyba.png", { 37,37 }, { 6,6 }, { 27,27 });
+		imgMelee.Load(L"images\\battle\\sprite_ledyba.png", { 37,37 }, { 6,6 }, { 27,27 });
 		imgMelee.ScaleImage(1.2f, 1.2f);
-		imgRange.Load(L"images\\sprite_latias.png", { 44,34 }, { 2,4 }, { 42,29 });
+		imgRange.Load(L"images\\battle\\sprite_latias.png", { 44,34 }, { 2,4 }, { 42,29 });
 		imgRange.ScaleImage(1.3f, 1.3f);
-		imgRangeBullet.Load(L"images\\bullet_latias.png", { 14,14 });
+		imgRangeBullet.Load(L"images\\battle\\bullet_latias.png", { 14,14 });
 		imgRangeBullet.ScaleImage(0.8f, 0.8f);
 
 		createDelay_Melee = 2000;
@@ -421,10 +422,10 @@ EnemyController::EnemyController()
 		createAmount_Melee = 6;
 		createAmount_Range = 5;
 
-		meleeData.hp = 7;
+		meleeData.hp = 6;
 		meleeData.speed = 1.65f;
 		meleeData.attackDelay = 1250;
-		meleeData.damage = 1.2f;
+		meleeData.damage = 2.0f;
 
 		meleeData.frameNum_Idle = 0;
 		meleeData.frameNum_IdleMax = 1;
@@ -432,10 +433,10 @@ EnemyController::EnemyController()
 		meleeData.frameNum_AtkMax = 5;
 		meleeData.frameNum_AtkRev = 5;
 
-		rangeData.hp = 7.25f;
+		rangeData.hp = 6.25f;
 		rangeData.speed = 0.5f;
 		rangeData.attackDelay = 1250;
-		rangeData.damage = 0.75f;
+		rangeData.damage = 3.0f;
 
 		rangeData.frameNum_Idle = 0;
 		rangeData.frameNum_IdleMax = 0;
@@ -444,14 +445,14 @@ EnemyController::EnemyController()
 		rangeData.frameNum_AtkRev = 2;
 		rangeData.bulletSpeed = 3.5f;
 		break;
-	case Stage::Dark:
+	case StageElement::Dark:
 		meleeData.type = Type::Dark;
 		rangeData.type = Type::Dark;
-		imgMelee.Load(L"images\\sprite_crobat.png", { 40,30 }, { 5,7 }, { 32,19 });
+		imgMelee.Load(L"images\\battle\\sprite_crobat.png", { 40,30 }, { 5,7 }, { 32,19 });
 		imgMelee.ScaleImage(1.1f, 1.1f);
-		imgRange.Load(L"images\\sprite_aerodactyl.png", { 40,40 }, { 6,9 }, { 30,27 });
+		imgRange.Load(L"images\\battle\\sprite_aerodactyl.png", { 40,40 }, { 6,9 }, { 30,27 });
 		imgRange.ScaleImage(1.5f, 1.5f);
-		imgRangeBullet.Load(L"images\\bullet_aerodactyl.png", { 10,10 });
+		imgRangeBullet.Load(L"images\\battle\\bullet_aerodactyl.png", { 10,10 });
 		imgRangeBullet.ScaleImage(1.6f, 1.6f);
 
 		createDelay_Melee = 2000;
@@ -462,7 +463,7 @@ EnemyController::EnemyController()
 		meleeData.hp = 4.0f;
 		meleeData.speed = 2.25f;
 		meleeData.attackDelay = 850;
-		meleeData.damage = 0.8f;
+		meleeData.damage = 2.0f;
 
 		meleeData.frameNum_Idle = 0;
 		meleeData.frameNum_IdleMax = 2;
@@ -473,7 +474,7 @@ EnemyController::EnemyController()
 		rangeData.hp = 8.5f;
 		rangeData.speed = 0.75f;
 		rangeData.attackDelay = 2000;
-		rangeData.damage = 1.25f;
+		rangeData.damage = 3.0f;
 
 		rangeData.frameNum_Idle = 0;
 		rangeData.frameNum_IdleMax = 2;
@@ -510,6 +511,10 @@ void EnemyController::CreateCheckMelee()
 	{
 		return;
 	}
+	else if (gui->IsFieldEnd() == true)
+	{
+		return;
+	}
 
 	delay_Melee += ELAPSE_BATTLE_INVALIDATE;
 	if (delay_Melee < createDelay_Melee)
@@ -530,6 +535,10 @@ void EnemyController::CreateCheckMelee()
 void EnemyController::CreateCheckRange()
 {
 	if (boss->IsCreated() == true)
+	{
+		return;
+	}
+	else if (gui->IsFieldEnd() == true)
 	{
 		return;
 	}

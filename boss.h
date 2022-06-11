@@ -88,7 +88,7 @@ public:
 	void CheckAttackDelay();
 	void CheckActDelay();
 
-	void Animate() override;
+	void Animate(const HWND& hWnd);
 	void AnimateSkill();
 	bool CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effectPoint = { -1, });
 
@@ -123,5 +123,9 @@ public:
 	inline constexpr float GetDamage_Skill2() const
 	{
 		return bossData.damage_skill2;
+	}
+	inline constexpr void KillBoss()
+	{
+		bossData.hp = 1.0f;
 	}
 };

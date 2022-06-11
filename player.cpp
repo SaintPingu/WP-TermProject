@@ -27,8 +27,8 @@ Player::Player(Type type, Type subType)
 	{
 	case Type::Elec:
 		pokemon = Pokemon::Thunder;
-		img_pokemon.Load(_T("images\\sprite_thunder.png"), { 53, 48 }, { 19, 10 }, { 17,24 });
-		bulletImage.Load(_T("images\\bullet_elec_main.png"), { 5,16 });
+		img_pokemon.Load(_T("images\\battle\\sprite_thunder.png"), { 53, 48 }, { 19, 10 }, { 17,24 });
+		bulletImage.Load(_T("images\\battle\\bullet_elec_main.png"), { 5,16 });
 
 		playerData.maxhp = 40;
 		playerData.maxmp = 80;
@@ -41,24 +41,24 @@ Player::Player(Type type, Type subType)
 		break;
 	case Type::Water:
 		pokemon = Pokemon::Articuno;
-		img_pokemon.Load(_T("images\\sprite_articuno.png"), { 69, 69 }, { 29, 28 }, { 13,23 });
+		img_pokemon.Load(_T("images\\battle\\sprite_articuno.png"), { 69, 69 }, { 29, 28 }, { 13,23 });
 		img_pokemon.ScaleImage(1.2f, 1.2f);
-		bulletImage.Load(_T("images\\bullet_ice.png"), { 7,15 });
+		bulletImage.Load(_T("images\\battle\\bullet_ice.png"), { 7,15 });
 		bulletImage.ScaleImage(0.9f, 0.9f);
 
-		playerData.maxhp = 60;
+		playerData.maxhp = 65;
 		playerData.maxmp = 120;
 		playerData.mp = 40;
 		playerData.speed = 2.5f;
 		playerData.damage = 1.25f;
-		playerData.damage_Q = 3.85f / damagePerSec;
+		playerData.damage_Q = 4.0f / damagePerSec;
 		playerData.bulletSpeed = 6;
 		playerData.shotDelay = 110;
 		break;
 	case Type::Fire:
 		pokemon = Pokemon::Moltres;
-		img_pokemon.Load(_T("images\\sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,28 });
-		bulletImage.Load(_T("images\\bullet_fire.png"), { 11,16 });
+		img_pokemon.Load(_T("images\\battle\\sprite_moltres.png"), { 83, 75 }, { 35, 25 }, { 15,28 });
+		bulletImage.Load(_T("images\\battle\\bullet_fire.png"), { 11,16 });
 		bulletImage.ScaleImage(0.9f, 0.9f);
 
 		playerData.maxhp = 50;
@@ -66,7 +66,7 @@ Player::Player(Type type, Type subType)
 		playerData.mp = 20;
 		playerData.speed = 3;
 		playerData.damage = 1.35f;
-		playerData.damage_Q = 15.5f / damagePerSec;
+		playerData.damage_Q = 12.5f / damagePerSec;
 		playerData.bulletSpeed = 7;
 		playerData.shotDelay = 100;
 		break;
@@ -74,30 +74,28 @@ Player::Player(Type type, Type subType)
 		assert(0);
 		break;
 	}
-	//playerData.maxhp = 1000000; // debug
-	//playerData.mp = 100; // debug
 	playerData.hp = playerData.maxhp;
 
 	switch (playerData.subType)
 	{
 	case Type::Elec:
 		subPokemon = SubPokemon::Pikachu;
-		img_subPokemon.Load(L"images\\sub_pikachu.png", { 23,25 });
-		subBulletImage.Load(_T("images\\bullet_elec.png"), { 11,30 });
+		img_subPokemon.Load(L"images\\battle\\sub_pikachu.png", { 23,25 });
+		subBulletImage.Load(_T("images\\battle\\bullet_elec.png"), { 11,30 });
 		subBulletImage.ScaleImage(0.7f, 0.7f);
 		playerData.subDamage = 1.0f;
 		break;
 	case Type::Water:
 		subPokemon = SubPokemon::Squirtle;
-		img_subPokemon.Load(L"images\\sub_squirtle.png", { 17,24 });
-		subBulletImage.Load(_T("images\\bullet_water.png"), { 8,24 });
+		img_subPokemon.Load(L"images\\battle\\sub_squirtle.png", { 17,24 });
+		subBulletImage.Load(_T("images\\battle\\bullet_water.png"), { 8,24 });
 		subBulletImage.ScaleImage(0.8f, 0.7f);
 		playerData.subDamage = 1.1f;
 		break;
 	case Type::Fire:
 		subPokemon = SubPokemon::Charmander;
-		img_subPokemon.Load(L"images\\sub_charmander.png", { 18,23 });
-		subBulletImage.Load(_T("images\\bullet_flame.png"), { 8,16 });
+		img_subPokemon.Load(L"images\\battle\\sub_charmander.png", { 18,23 });
+		subBulletImage.Load(_T("images\\battle\\bullet_flame.png"), { 8,16 });
 		subBulletImage.ScaleImage(0.7f, 0.7f);
 		playerData.subDamage = 1.2f;
 		break;
@@ -367,10 +365,14 @@ void Player::CheckCollideWindow(Vector2& pos) const
 	pos.y += corrValue.y;
 }
 
-void Player::Animate()
+void Player::Animate(const HWND& hWnd)
 {
 	if (playerData.isDeath == true)
 	{
+		if (--deathFrame == 0)
+		{
+			sceneManager->StartLoading(hWnd);
+		}
 		return;
 	}
 	else if (isRevFrame == true)

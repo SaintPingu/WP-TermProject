@@ -9,6 +9,8 @@
 #include "scene.h"
 #include "sound.h"
 
+#include "battle.h"
+
 extern GameData gameData;
 extern Player* player;
 extern Boss* boss;
@@ -16,6 +18,8 @@ extern EnemyController* enemies;
 extern EffectManager* effects;
 extern SceneManager* sceneManager;
 extern SoundManager* soundManager;
+
+extern Battle battle;
 
 SkillManager::Effect::Effect(const EffectImage& imgSkill, Type type)
 {
@@ -77,15 +81,15 @@ SkillManager::SkillManager()
 	switch (type)
 	{
 	case Type::Elec:
-		imgSkill_Elec_Q.Load(_T("images\\sprite_skill_elec.png"), { 34,226 }, 10, 0xdf);
+		imgSkill_Elec_Q.Load(_T("images\\battle\\sprite_skill_elec.png"), { 34,226 }, 10, 0xdf);
 		skillEffect = new Effect(imgSkill_Elec_Q, type);
 		break;
 	case Type::Fire:
-		imgSkill_Fire_Q.Load(_T("images\\sprite_skill_fire.png"), { 80,96 }, 50);
+		imgSkill_Fire_Q.Load(_T("images\\battle\\sprite_skill_fire.png"), { 80,96 }, 50);
 		skillEffect = new Effect(imgSkill_Fire_Q, type);
 		break;
 	case Type::Water:
-		imgSkill_Water_Q.Load(_T("images\\skill_water.png"), { 273,843 }, 50, 0xaf);
+		imgSkill_Water_Q.Load(_T("images\\battle\\skill_water.png"), { 273,843 }, 50, 0xaf);
 		skillEffect = new Effect(imgSkill_Water_Q, type);
 		break;
 	default:
@@ -252,12 +256,15 @@ void SkillManager::ActiveSkill(Skill skill)
 		switch (player->GetType())
 		{
 		case Type::Elec:
+			battle.ShakeMap(10);
 			soundManager->PlaySkillSound(SkillSound::Elec);
 			break;
 		case Type::Fire:
+			battle.ShakeMap(15);
 			soundManager->PlaySkillSound(SkillSound::Fire);
 			break;
 		case Type::Water:
+			battle.ShakeMap(20);
 			soundManager->PlaySkillSound(SkillSound::Water);
 			break;
 		default:
@@ -522,18 +529,6 @@ bool BossSkillManager::Effect::RotateToPlayer(float t)
 	constexpr int maxMove = 80;
 	skillData.isRotated = true;
 
-	const RECT rectBody = GetRectBody();
-	if (IntersectRect2(rectBody, player->GetRectBody()) == true)
-	{
-		Vector2 vPoints[4];
-		GetRotationPos(rectBody, unitVector_imgRotation, Vector2::Up(), vPoints);
-		if (SATIntersect(player->GetRectBody(), vPoints) == true)
-		{
-			player->Hit(skillData.damage, boss->GetType());
-			return false;
-		}
-	}
-
 	if (skillData.rotationCount++ < maxRotation)
 	{
 		::Rotate(posCenter, player->GetPosCenter(), unitVector_direction, t);
@@ -558,38 +553,38 @@ BossSkillManager::BossSkillManager()
 	switch (boss->GetType())
 	{
 	case Type::Elec:
-		imgSkill1.Load(_T("images\\sprite_boss_skill1_elec.png"), { 32,224 }, 9);
+		imgSkill1.Load(_T("images\\battle\\sprite_boss_skill1_elec.png"), { 32,224 }, 9);
 		imgSkill1.ScaleImage(1.0f, 6.0f);
-		imgSkill1_Warning.Load(_T("images\\boss_skill1_elec_warning.png"), { 31,223 }, 16, 0x10);
+		imgSkill1_Warning.Load(_T("images\\battle\\boss_skill1_elec_warning.png"), { 31,223 }, 16, 0x10);
 		imgSkill1_Warning.ScaleImage(1.0f, 6.0f);
-		imgSkill2.Load(_T("images\\sprite_boss_skill2_elec.png"), { 80,80 }, 15);
+		imgSkill2.Load(_T("images\\battle\\sprite_boss_skill2_elec.png"), { 80,80 }, 15);
 		imgSkill2.ScaleImage(0.5f, 0.5f);
-		imgSkill2_Warning.Load(_T("images\\boss_warning_circle.png"), { 79,79 }, 15, 0x00);
+		imgSkill2_Warning.Load(_T("images\\battle\\boss_warning_circle.png"), { 79,79 }, 15, 0x00);
 		imgSkill2_Warning.ScaleImage(0.5f, 0.5f);
 		break;
 	case Type::Water:
-		imgSkill1.Load(_T("images\\boss_skill1_water.png"), { 273,712 });
+		imgSkill1.Load(_T("images\\battle\\boss_skill1_water.png"), { 273,712 });
 		imgSkill1.ScaleImage(0.25f, 0.25f);
-		imgSkill2.Load(_T("images\\sprite_boss_skill2_water.png"), { 56,56 }, 14);
+		imgSkill2.Load(_T("images\\battle\\sprite_boss_skill2_water.png"), { 56,56 }, 14);
 		imgSkill2.ScaleImage(0.5f, 0.5f);
-		imgSkill2_Warning.Load(_T("images\\boss_warning_circle.png"), { 79,79 }, 15, 0x00);
+		imgSkill2_Warning.Load(_T("images\\battle\\boss_warning_circle.png"), { 79,79 }, 15, 0x00);
 		imgSkill2_Warning.ScaleImage(0.5f, 0.5f);
 		break;
 	case Type::Fire:
-		imgSkill1.Load(_T("images\\boss_skill1_fire.png"), { 17,30 });
+		imgSkill1.Load(_T("images\\battle\\boss_skill1_fire.png"), { 17,30 });
 		imgSkill1.ScaleImage(2.0f, 2.0f);
-		imgSkill2.Load(_T("images\\boss_skill2_fire.png"), { 173,230 });
+		imgSkill2.Load(_T("images\\battle\\boss_skill2_fire.png"), { 173,230 });
 		imgSkill2.ScaleImage(1.5f, 1.5f);
-		imgSkill2_Warning.Load(_T("images\\boss_skill2_fire_warning.png"), { 11,223 }, 8, 0x00);
+		imgSkill2_Warning.Load(_T("images\\battle\\boss_skill2_fire_warning.png"), { 11,223 }, 8, 0x00);
 		imgSkill2_Warning.ScaleImage(1.0f, 6.0f);
 		break;
 	case Type::Dark:
 		posOrigins = new Vector2[dark_Skill1Count];
-		imgSkill1.Load(_T("images\\bullet_boss_dark.png"), { 699,699 });
+		imgSkill1.Load(_T("images\\battle\\bullet_boss_dark.png"), { 699,699 });
 		imgSkill1.ScaleImage(0.05f, 0.05f);
-		imgSkill2.Load(_T("images\\boss_skill2_dark.png"), { 11,33 });
+		imgSkill2.Load(_T("images\\battle\\boss_skill2_dark.png"), { 11,33 });
 		imgSkill2.ScaleImage(1.5f, 1.5f);
-		imgSkill2_Warning.Load(_T("images\\boss_skill2_dark_warning.png"), { 100,100 }, 200, 0x50);
+		imgSkill2_Warning.Load(_T("images\\battle\\boss_skill2_dark_warning.png"), { 100,100 }, 200, 0x50);
 		imgSkill2_Warning.ScaleImage(3.0f, 3.0f);
 		break;	
 	default:
@@ -706,6 +701,7 @@ void BossSkillManager::Skill1_Elec()
 				if (isSoundPlayed == false)
 				{
 					isSoundPlayed = true;
+					battle.ShakeMap();
 					soundManager->PlayBossSound(BossSound::Elec_Laser);
 				}
 			}
@@ -784,6 +780,7 @@ void BossSkillManager::Skill2_Elec()
 			if (isSoundPlayed == false)
 			{
 				isSoundPlayed = true;
+				battle.ShakeMap();
 				soundManager->PlayEffectSound(EffectSound::Explosion);
 			}
 		}
@@ -847,6 +844,7 @@ void BossSkillManager::Skill1_Water()
 	}
 	else if (static_cast<int>(showCount) != prevShowCount)
 	{
+		battle.ShakeMap();
 		soundManager->PlayBossSound(BossSound::Water_Tsunami);
 	}
 
@@ -926,6 +924,7 @@ void BossSkillManager::Skill2_Water()
 			if (isSoundPlayed == false)
 			{
 				isSoundPlayed = true;
+				battle.ShakeMap();
 				soundManager->PlayBossSound(BossSound::Water_Splash);
 			}
 			skillEffects.emplace_back(imgSkill2, warningEffects.at(i).GetRectDraw(), skillData);
@@ -977,7 +976,7 @@ void BossSkillManager::Skill1_Fire()
 	static int creationCount = 0;
 	static int skillCount = 0;
 
-	if (creationCount <= creationMaxCount && crntSkillDelay <= 0)
+	if (creationCount < creationMaxCount && crntSkillDelay <= 0)
 	{
 		constexpr int ballCount = 2;
 
@@ -997,6 +996,7 @@ void BossSkillManager::Skill1_Fire()
 		SkillData skillData;
 		skillData.speed = 20.0f;
 		skillData.damage = boss->GetDamage_Skill1();
+		skillData.isHitOnce = true;
 		skillEffects.emplace_back(imgSkill1, posCenter, Vector2::Down(), vToPlayer, skillData);
 		
 		posCenter.x = rectBoss.left + (rand() % width);
@@ -1004,14 +1004,14 @@ void BossSkillManager::Skill1_Fire()
 		vToPlayer = (player->GetPosCenter() - posCenter).Normalized();
 		skillEffects.emplace_back(imgSkill1, posCenter, Vector2::Down(), vToPlayer, skillData);
 
+		battle.ShakeMap();
 		soundManager->PlayBossSound(BossSound::Fire_Ball);
 	}
 	--crntSkillDelay;
 
 	for (int i = 0; i < skillCount; ++i)
 	{
-		skillEffects.at(i).Animate();
-		if (skillEffects.at(i).RotateToPlayer(0.225f) == false)
+		if (skillEffects.at(i).Animate() == false || skillEffects.at(i).RotateToPlayer(0.225f) == false)
 		{
 			effects->CreateExplodeEffect(skillEffects.at(i).GetPosCenter(), Type::Fire);
 			skillEffects.erase(skillEffects.begin() + i--);
@@ -1046,6 +1046,7 @@ void BossSkillManager::Skill2_Fire()
 			skillEffects.emplace_back(imgSkill2, posCenter, Vector2::Down(), Vector2::Down(), skillData);
 			warningEffects.clear();
 
+			battle.ShakeMap(10);
 			soundManager->PlayBossSound(BossSound::Fire_Meteor);
 		}
 		else
@@ -1088,7 +1089,7 @@ void BossSkillManager::Skill1_Dark()
 	darkSkilldata.posOrigin = &posOrigins[creationCount];
 	darkSkilldata.rotationDegree = rand() % 45;
 
-	if (creationCount <= creationMaxCount && crntSkillDelay <= 0)
+	if (creationCount < creationMaxCount && crntSkillDelay <= 0)
 	{
 		constexpr int ballCount = 8;
 		crntSkillDelay = skillDelay;

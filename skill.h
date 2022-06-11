@@ -157,7 +157,7 @@ private:
 	EffectImage imgSkill2;
 	EffectImage imgSkill2_Warning;
 
-	const int dark_Skill1Count = 10;
+	const int dark_Skill1Count = 5;
 	Vector2* posOrigins = nullptr;
 
 	std::vector<Effect>warningEffects;

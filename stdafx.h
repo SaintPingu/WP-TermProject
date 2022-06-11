@@ -23,14 +23,15 @@
 #define WINVER 0x6000
 
 enum class Difficulty { Easy = 0, Normal, Hard };
-enum class Scene { Title = 0, Lobby, Stage, SpecificStage, Battle };
-enum class Stage { Empty = 0, Fire, Water, Elec, Dark };
+enum class Scene { Intro = 0, Town, Stage, Phase, Battle };
 enum class Action { Idle = 0, Attack, Hurt, Death };
 
 enum class Pokemon { Null = 0, Moltres, Articuno, Thunder };
 enum class SubPokemon { Null = 0, Pikachu = 0, Squirtle, Charmander };
 enum class Type { Empty = 0, Fire, Elec, Water, Dark };
 enum class Skill { Empty = 0, Identity, Sector, Circle };
+
+enum class StageElement { Water = 0, Fire, Elec, Dark, Town, Null };
 
 #define PI 3.141592
 #define DEGREE_TO_RADIAN(degree) ((PI/180) * (degree))
@@ -254,6 +255,13 @@ struct Vector2 {
 	{
 		return posCenter + (vector * speed);
 	}
+	static Vector2 Lerp(const Vector2& src, const Vector2& dst, float alpha)
+	{
+		Vector2 transform;
+		transform.x = (src.x * (1 - alpha)) + (dst.x * alpha);
+		transform.y = (src.y * (1 - alpha)) + (dst.y * alpha);
+		return transform;
+	}
 	// Linear transform to find the orthogonal vector of the edge
 	static Vector2 Get_Normalized_Proj_Axis(const Vector2& crntPoint, const Vector2& nextPoint)
 	{
@@ -266,14 +274,6 @@ struct Vector2 {
 		axisNormalized.y = axisY / magnitude;
 
 		return axisNormalized;
-	}
-
-	static Vector2 Lerp(const Vector2& src, const Vector2& dst, float alpha)
-	{
-		Vector2 transform;
-		transform.x = (src.x * (1 - alpha)) + (dst.x * alpha);
-		transform.y = (src.y * (1 - alpha)) + (dst.y * alpha);
-		return transform;
 	}
 };
 

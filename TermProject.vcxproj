@@ -19,10 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="battle.cpp" />
     <ClCompile Include="boss.cpp" />
     <ClCompile Include="bullet.cpp" />
     <ClCompile Include="effect.cpp" />
     <ClCompile Include="enemy.cpp" />
+    <ClCompile Include="intro.cpp" />
+    <ClCompile Include="phase.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="image.cpp" />
     <ClCompile Include="interface.cpp" />
@@ -31,6 +34,7 @@
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="skill.cpp" />
     <ClCompile Include="sound.cpp" />
+    <ClCompile Include="stage.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -38,12 +42,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="timer.cpp" />
+    <ClCompile Include="town.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="battle.h" />
     <ClInclude Include="boss.h" />
     <ClInclude Include="bullet.h" />
     <ClInclude Include="effect.h" />
     <ClInclude Include="enemy.h" />
+    <ClInclude Include="intro.h" />
+    <ClInclude Include="phase.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="image.h" />
     <ClInclude Include="interface.h" />
@@ -51,8 +59,10 @@
     <ClInclude Include="scene.h" />
     <ClInclude Include="skill.h" />
     <ClInclude Include="sound.h" />
+    <ClInclude Include="stage.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="timer.h" />
+    <ClInclude Include="town.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

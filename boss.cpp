@@ -9,11 +9,15 @@
 #include "scene.h"
 #include "sound.h"
 
+#include "phase.h"
+
 extern GameData gameData;
 extern Player* player;
 extern EffectManager* effects;
 extern SceneManager* sceneManager;
 extern SoundManager* soundManager;
+
+extern Phase phase;
 
 void Boss::SetMove(const Vector2& unitVector)
 {
@@ -24,9 +28,10 @@ void Boss::Death()
 {
 	bossData.hp = 0;
 	bossData.isDeath = true;
-	player->InvincibleMode(true);
+	player->InvincibleMode();
 
 	soundManager->StopEffectSound();
+	soundManager->StopBossSound();
 }
 void Boss::StartAttack()
 {
@@ -123,28 +128,28 @@ Boss::Boss()
 	
 	switch (gameData.stage)
 	{
-	case Stage::Elec:
-		image->Load(_T("images\\sprite_boss_elec.png"), { 73,68 }, { 3,7 }, { 69,50 });
+	case StageElement::Elec:
+		image->Load(_T("images\\battle\\sprite_boss_elec.png"), { 73,68 }, { 3,7 }, { 69,50 });
 		image->ScaleImage(4, 4);
-		imgBullet.Load(_T("images\\bullet_boss_elec.png"), { 400,400 });
+		imgBullet.Load(_T("images\\battle\\bullet_boss_elec.png"), { 400,400 });
 		imgBullet.ScaleImage(0.05f, 0.05f);
 		break;
-	case Stage::Water:
-		image->Load(_T("images\\sprite_boss_water.png"), { 65,41 }, { 2,3 }, { 63,36 });
+	case StageElement::Water:
+		image->Load(_T("images\\battle\\sprite_boss_water.png"), { 65,41 }, { 2,3 }, { 63,36 });
 		image->ScaleImage(4, 4);
-		imgBullet.Load(_T("images\\bullet_boss_water.png"), { 400,400 });
+		imgBullet.Load(_T("images\\battle\\bullet_boss_water.png"), { 400,400 });
 		imgBullet.ScaleImage(0.05f, 0.05f);
 		break;
-	case Stage::Fire:
-		image->Load(_T("images\\sprite_boss_fire.png"), { 54,44 }, { 6,12 }, { 44,29 });
+	case StageElement::Fire:
+		image->Load(_T("images\\battle\\sprite_boss_fire.png"), { 54,44 }, { 6,12 }, { 44,29 });
 		image->ScaleImage(6, 6);
-		imgBullet.Load(_T("images\\bullet_boss_fire.png"), { 400,400 });
+		imgBullet.Load(_T("images\\battle\\bullet_boss_fire.png"), { 400,400 });
 		imgBullet.ScaleImage(0.05f, 0.05f);
 		break;
-	case Stage::Dark:
-		image->Load(_T("images\\sprite_boss_dark.png"), { 110,110 }, { 20,30 }, { 67,50 });
+	case StageElement::Dark:
+		image->Load(_T("images\\battle\\sprite_boss_dark.png"), { 110,110 }, { 20,30 }, { 67,50 });
 		image->ScaleImage(5, 5);
-		imgBullet.Load(_T("images\\bullet_boss_dark.png"), { 700,700 });
+		imgBullet.Load(_T("images\\battle\\bullet_boss_dark.png"), { 700,700 });
 		imgBullet.ScaleImage(0.03f, 0.03f);
 		break;
 	default:
@@ -385,8 +390,10 @@ bool Boss::CheckHit(const RECT& rectSrc, float damage, Type hitType, POINT effec
 	return false;
 }
 
-void Boss::Animate()
+void Boss::Animate(const HWND& hWnd)
 {
+	constexpr int loadingFrame = -40;
+
 	if (IsCreated() == false)
 	{
 		return;
@@ -403,6 +410,11 @@ void Boss::Animate()
 			soundManager->StopBGMSound();
 
 			effects->CreateBossExplosionEffect(*this);
+		}
+		else if (deathFrame == loadingFrame)
+		{
+			phase.ClearPhase();
+			sceneManager->StartLoading(hWnd);
 		}
 		return;
 	}	
@@ -586,13 +598,14 @@ BossData Boss::GetBossData()
 	bossData.frameNum_Idle = 0;
 	switch (gameData.stage)
 	{
-	case Stage::Elec:
+	case StageElement::Elec:
 		bossData.type = Type::Elec;
 
-		bossData.hp = 3500;
-		bossData.damage = 2;
-		bossData.damage_skill1 = 4.5f;
-		bossData.damage_skill2 = 0.5f;
+		bossData.hp = 6000;
+		//bossData.hp = 100;
+		bossData.damage = 3.0f;
+		bossData.damage_skill1 = 15.5f;
+		bossData.damage_skill2 = 2.5f;
 		bossData.actDelay = 1250;
 
 		bossData.frameNum_IdleMax = 2;
@@ -600,11 +613,12 @@ BossData Boss::GetBossData()
 		bossData.frameNum_AtkMax = 5;
 		bossData.frameNum_AtkRev = 5;
 		break;
-	case Stage::Water:
+	case StageElement::Water:
 		bossData.type = Type::Water;
 
-		bossData.hp = 5000;
-		bossData.damage = 2;
+		bossData.hp = 4000;
+		//bossData.hp = 100;
+		bossData.damage = 2.0f;
 		bossData.damage_skill1 = 4.5f;
 		bossData.damage_skill2 = 2.5f;
 		bossData.actDelay = 1750;
@@ -614,11 +628,12 @@ BossData Boss::GetBossData()
 		bossData.frameNum_AtkMax = 3;
 		bossData.frameNum_AtkRev = 3;
 		break;
-	case Stage::Fire:
+	case StageElement::Fire:
 		bossData.type = Type::Fire;
 
-		bossData.hp = 4000;
-		bossData.damage = 2;
+		bossData.hp = 5000;
+		//bossData.hp = 100;
+		bossData.damage = 2.5f;
 		bossData.damage_skill1 = 7.5f;
 		bossData.damage_skill2 = 15.0f;
 		bossData.actDelay = 1500;
@@ -628,14 +643,15 @@ BossData Boss::GetBossData()
 		bossData.frameNum_AtkMax = 6;
 		bossData.frameNum_AtkRev = 6;
 		break;
-	case Stage::Dark:
+	case StageElement::Dark:
 		bossData.type = Type::Dark;
 
-		bossData.hp = 6500;
-		bossData.damage = 5;
-		bossData.damage_skill1 = 4.5f;
-		bossData.damage_skill2 = 2.5f;
-		bossData.actDelay = 1500;
+		bossData.hp = 7000;
+		//bossData.hp = 100;
+		bossData.damage = 5.0f;
+		bossData.damage_skill1 = 6.5f;
+		bossData.damage_skill2 = 7.5f;
+		bossData.actDelay = 1150;
 
 		bossData.frameNum_IdleMax = 14;
 		bossData.frameNum_Atk = 0;

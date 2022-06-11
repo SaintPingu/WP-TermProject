@@ -37,6 +37,7 @@ private:
 
 	SkillManager* skillManager = nullptr;
 	int skillCount = 0;
+	int deathFrame = 40;
 
 	Pokemon pokemon = Pokemon::Null;
 	SubPokemon subPokemon = SubPokemon::Null;
@@ -65,7 +66,7 @@ public:
 	void Stop(Dir dir) override;
 	void CheckCollideWindow(Vector2& pos) const;
 
-	void Animate() override;
+	void Animate(const HWND& hWnd);
 	void CheckShot();
 	void Shot();
 	void CreateSubBullet(const POINT& center, const BulletData& data, Vector2 unitVector, bool isRotateImg, bool isSkillBullet = false);
@@ -132,9 +133,9 @@ public:
 		playerData.mp -= amount;
 		return true;
 	}
-	void InvincibleMode(bool active)
+	void InvincibleMode()
 	{
-		playerData.isInvincible = active;
+		playerData.isInvincible = !playerData.isInvincible;
 	}
 	inline bool IsDeath() const
 	{
@@ -144,5 +145,9 @@ public:
 	inline void Heal()
 	{
 		playerData.hp = playerData.maxhp;
+	}
+	inline void FullMP()
+	{
+		playerData.mp = playerData.maxmp;
 	}
 };

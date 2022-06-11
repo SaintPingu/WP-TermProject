@@ -254,6 +254,7 @@ void BulletController::DestroyCollideBullet(const RECT& rect)
 	{
 		if (bullets.at(i)->IsCollide(rect) == true)
 		{
+			effects->CreateHitEffect(bullets.at(i)->GetPos(), bullets.at(i)->GetType());
 			BulletController::Pop(i);
 		}
 	}

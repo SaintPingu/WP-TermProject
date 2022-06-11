@@ -17,9 +17,19 @@ SoundManager::SoundManager()
 	FMOD_RESULT result = FMOD_OK;
 
 	// bgmSound
-	result = FMOD_System_CreateSound(soundSystem, "Sounds\\Bgm_battle_field.mp3", FMOD_LOOP_NORMAL, 0, &bgmSoundList[static_cast<int>(BGMSound::Battle)]);
+	result = FMOD_System_CreateSound(soundSystem, "Sounds\\bgm_intro.wav", FMOD_LOOP_NORMAL, 0, &bgmSoundList[static_cast<int>(BGMSound::Intro)]);
 	CheckResult(result);
-	result = FMOD_System_CreateSound(soundSystem, "Sounds\\Bgm_battle_boss.mp3", FMOD_LOOP_NORMAL, 0, &bgmSoundList[static_cast<int>(BGMSound::Battle_Boss)]);
+	result = FMOD_System_CreateSound(soundSystem, "Sounds\\bgm_town1.wav", FMOD_LOOP_NORMAL, 0, &bgmSoundList[static_cast<int>(BGMSound::Town1)]);
+	CheckResult(result);
+	result = FMOD_System_CreateSound(soundSystem, "Sounds\\bgm_town2.mp3", FMOD_LOOP_NORMAL, 0, &bgmSoundList[static_cast<int>(BGMSound::Town2)]);
+	CheckResult(result);
+	result = FMOD_System_CreateSound(soundSystem, "Sounds\\bgm_stage.wav", FMOD_LOOP_NORMAL, 0, &bgmSoundList[static_cast<int>(BGMSound::Stage)]);
+	CheckResult(result);
+	result = FMOD_System_CreateSound(soundSystem, "Sounds\\bgm_battle_field.mp3", FMOD_LOOP_NORMAL, 0, &bgmSoundList[static_cast<int>(BGMSound::Battle)]);
+	CheckResult(result);
+	result = FMOD_System_CreateSound(soundSystem, "Sounds\\bgm_battle_boss.mp3", FMOD_LOOP_NORMAL, 0, &bgmSoundList[static_cast<int>(BGMSound::Battle_Boss)]);
+	CheckResult(result);
+	result = FMOD_System_CreateSound(soundSystem, "Sounds\\bgm_ending.wav", FMOD_LOOP_NORMAL, 0, &bgmSoundList[static_cast<int>(BGMSound::Ending)]);
 	CheckResult(result);
 
 	// effectSound

@@ -49,7 +49,7 @@ public:
 	virtual void CheckAttackDelay() abstract;
 
 	int GetSpriteRow();
-	void Animate() override;
+	void Animate();
 	bool Hit(float damage);
 
 	inline Type GetType() const
@@ -118,6 +118,10 @@ public:
 	void MoveBullets();
 	void DestroyCollideBullet(const RECT& rect);
 
+	inline bool IsEmenyClear()
+	{
+		return enemies.empty();
+	}
 	inline void CheckAttackDelay()
 	{
 		for (Enemy* enemy : enemies)

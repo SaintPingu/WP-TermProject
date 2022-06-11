@@ -8,6 +8,12 @@
 #include "scene.h"
 #include "sound.h"
 
+#include "intro.h"
+#include "town.h"
+#include "stage.h"
+#include "phase.h"
+#include "battle.h"
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow){
@@ -63,6 +69,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	return Message.wParam;
 }
 
+
+Intro intro;
+Loading loading;
+Town town;
+Stage stage;
+Phase phase;
+Battle battle;
+
+Cloud cloud[4];
+Logo logo;
+Menu menu;
+CImage glowing_black;
+
 GameData gameData;
 Player* player = nullptr;
 EnemyController* enemies = nullptr;
@@ -80,7 +99,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		sceneManager = new SceneManager();
 		sceneManager->Init(hWnd);
-		sceneManager->MoveScene(hWnd, Scene::Battle);
 	}
 	break;
 	case WM_ERASEBKGND:

@@ -1,10 +1,16 @@
 #include "stdafx.h"
 #include "interface.h"
 #include "player.h"
+#include "enemy.h"
 #include "image.h"
 #include "timer.h"
 #include "boss.h"
 #include "scene.h"
+#include "sound.h"
+
+#include "town.h"
+#include "stage.h"
+#include "phase.h"
 
 #define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000 ? 1 : 0))
 #define KEYUP(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000 ? 0 : 1))
@@ -16,115 +22,181 @@
 
 extern GameData gameData;
 extern Player* player;
+extern EnemyController* enemies;
 extern Boss* boss;
+extern GUIManager* gui;
 extern SceneManager* sceneManager;
+extern SoundManager* soundManager;
+
+extern Town town;
+extern Stage stage;
+extern Phase phase;
 
 void CheckKeyDown(const HWND& hWnd, const WPARAM& wParam)
 {
-	switch (wParam)
+	if (sceneManager->GetScene() == Scene::Town || sceneManager->GetScene() == Scene::Stage)
 	{
-	case _T('H'):
-		gameData.isShowHitbox = !gameData.isShowHitbox;
-		break;
-	case _T('J'):
-		gameData.isShowDrawBox = !gameData.isShowDrawBox;
-		break;
-	case _T('K'):
-		player->Heal();
-		break;
-	case _T('I'):
-		player->InvincibleMode(true);
-		break;
-	case _T('Q'):
-		player->ActiveSkill(Skill::Identity);
-		break;
-	case _T('W'):
-		player->ActiveSkill(Skill::Sector);
-		break;
-	case _T('E'):
-		player->ActiveSkill(Skill::Circle);
-		break;
-	}
-
-	bool isMove = false;
-	if (KEYDOWN(MOVE_LEFT))
-	{
-		player->Stop(Dir::Right);
-		player->SetDirection(Dir::Left);
-		isMove = true;
-	}
-	if (KEYDOWN(MOVE_RIGHT))
-	{
-		if (wParam != MOVE_LEFT)
+		if (wParam == 'h' || wParam == 'H')
 		{
-			player->Stop(Dir::Left);
-			player->SetDirection(Dir::Right);
-			isMove = true;
+			town._allHide = !town._allHide;
+			stage._allHide = !stage._allHide;
 		}
 	}
-	if (KEYDOWN(MOVE_UP))
+	else if (sceneManager->GetScene() == Scene::Phase)
 	{
-		player->Stop(Dir::Down);
-		player->SetDirection(Dir::Up);
-		isMove = true;
-	}
-	if (KEYDOWN(MOVE_DOWN))
-	{
-		if (wParam != MOVE_UP)
+		if (wParam == VK_BACK)
 		{
-			player->Stop(Dir::Up);
-			player->SetDirection(Dir::Down);
-			isMove = true;
+			sceneManager->MoveScene(hWnd, Scene::Stage);
+		}
+		else if (wParam == VK_ADD)
+		{
+			phase.ClearPhase();
 		}
 	}
-
-	if (isMove == true)
+	else if (sceneManager->GetScene() == Scene::Battle)
 	{
-		player->SetMove(hWnd, TIMERID_BATTLE_MOVE_PLAYER, ELAPSE_BATTLE_MOVE_PLAYER, T_Battle_MovePlayer);
+		switch (wParam)
+		{
+		case _T('H'):
+			gameData.isShowHitbox = !gameData.isShowHitbox;
+			break;
+		case _T('J'):
+			gameData.isShowDrawBox = !gameData.isShowDrawBox;
+			break;
+		case _T('O'):
+			player->Heal();
+			break;
+		case _T('P'):
+			player->FullMP();
+			break;
+		case _T('I'):
+			player->InvincibleMode();
+			break;
+		case VK_SUBTRACT:
+			boss->KillBoss();
+			break;
+		case VK_BACK:
+			gui->SkipField();
+			break;
+		case _T('Q'):
+			player->ActiveSkill(Skill::Identity);
+			break;
+		case _T('W'):
+			player->ActiveSkill(Skill::Sector);
+			break;
+		case _T('E'):
+			player->ActiveSkill(Skill::Circle);
+			break;
+		}
+
+		bool isMove = false;
+		if (KEYDOWN(MOVE_LEFT))
+		{
+			player->Stop(Dir::Right);
+			player->SetDirection(Dir::Left);
+			isMove = true;
+		}
+		if (KEYDOWN(MOVE_RIGHT))
+		{
+			if (wParam != MOVE_LEFT)
+			{
+				player->Stop(Dir::Left);
+				player->SetDirection(Dir::Right);
+				isMove = true;
+			}
+		}
+		if (KEYDOWN(MOVE_UP))
+		{
+			player->Stop(Dir::Down);
+			player->SetDirection(Dir::Up);
+			isMove = true;
+		}
+		if (KEYDOWN(MOVE_DOWN))
+		{
+			if (wParam != MOVE_UP)
+			{
+				player->Stop(Dir::Up);
+				player->SetDirection(Dir::Down);
+				isMove = true;
+			}
+		}
+
+		if (isMove == true)
+		{
+			player->SetMove(hWnd, TIMERID_BATTLE_MOVE_PLAYER, ELAPSE_BATTLE_MOVE_PLAYER, T_Battle_MovePlayer);
+		}
 	}
 }
 void CheckKeyUp(const HWND& hWnd, const WPARAM& wParam)
 {
-	if (player->IsMove() == true)
+	if (sceneManager->GetScene() == Scene::Town)
 	{
-		switch (wParam)
+		if (wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_UP || wParam == VK_DOWN)
 		{
-		case MOVE_LEFT:
-			player->Stop(Dir::Left);
-			if (KEYDOWN(MOVE_RIGHT))
+			town.StopPlayer();
+		}
+	}
+	else if (sceneManager->GetScene() == Scene::Battle)
+	{
+		if (player->IsMove() == true)
+		{
+			switch (wParam)
 			{
-				player->SetDirection(Dir::Right);
+			case MOVE_LEFT:
+				player->Stop(Dir::Left);
+				if (KEYDOWN(MOVE_RIGHT))
+				{
+					player->SetDirection(Dir::Right);
+				}
+				break;
+			case MOVE_RIGHT:
+				player->Stop(Dir::Right);
+				if (KEYDOWN(MOVE_LEFT))
+				{
+					player->SetDirection(Dir::Left);
+				}
+				break;
+			case MOVE_UP:
+				player->Stop(Dir::Up);
+				if (KEYDOWN(MOVE_DOWN))
+				{
+					player->SetDirection(Dir::Down);
+				}
+				break;
+			case MOVE_DOWN:
+				player->Stop(Dir::Down);
+				if (KEYDOWN(MOVE_UP))
+				{
+					player->SetDirection(Dir::Up);
+				}
+				break;
 			}
-			break;
-		case MOVE_RIGHT:
-			player->Stop(Dir::Right);
-			if (KEYDOWN(MOVE_LEFT))
-			{
-				player->SetDirection(Dir::Left);
-			}
-			break;
-		case MOVE_UP:
-			player->Stop(Dir::Up);
-			if (KEYDOWN(MOVE_DOWN))
-			{
-				player->SetDirection(Dir::Down);
-			}
-			break;
-		case MOVE_DOWN:
-			player->Stop(Dir::Down);
-			if (KEYDOWN(MOVE_UP))
-			{
-				player->SetDirection(Dir::Up);
-			}
-			break;
 		}
 	}
 }
 
 GUIManager::GUIManager(const RECT& rectWindow)
 {
-	//constexpr int fieldLength = 720; // 1m/s
-	constexpr int fieldLength = 360;
+	const int crntPhase = phase.GetPhase();
+	int fieldLength = 0;
+	switch (crntPhase)
+	{
+	case 0:
+		fieldLength = 360;
+		break;
+	case 1:
+		fieldLength = 480;
+		break;
+	case 2:
+		fieldLength = 600;
+		break;
+	case 3:
+		fieldLength = 720;
+		break;
+	default:
+		assert(0);
+		break;
+	}
 
 	constexpr int main_guiHeight = 80;
 
@@ -153,34 +225,34 @@ GUIManager::GUIManager(const RECT& rectWindow)
 	switch (player->GetType())
 	{
 	case Type::Elec:
-		icon_Q->Load(_T("images\\icon_elec_Q.png"), { 35, 35 });
-		icon_pokemon->Load(_T("images\\icon_thunder.png"), { 480, 480 });
-		gaugeMoveBarGUI->Load(_T("images\\gague_bar_elec.png"), { 14, 217 });
+		icon_Q->Load(_T("images\\battle\\icon_elec_Q.png"), { 35, 35 });
+		icon_pokemon->Load(_T("images\\battle\\icon_thunder.png"), { 480, 480 });
+		gaugeMoveBarGUI->Load(_T("images\\battle\\gague_bar_elec.png"), { 14, 217 });
 		break;
 	case Type::Water:
-		icon_Q->Load(_T("images\\icon_water_Q.png"), { 260, 260 });
-		icon_pokemon->Load(_T("images\\icon_articuno.png"), { 480, 480 });
-		gaugeMoveBarGUI->Load(_T("images\\gague_bar_water.png"), { 14, 217 });
+		icon_Q->Load(_T("images\\battle\\icon_water_Q.png"), { 260, 260 });
+		icon_pokemon->Load(_T("images\\battle\\icon_articuno.png"), { 480, 480 });
+		gaugeMoveBarGUI->Load(_T("images\\battle\\gague_bar_water.png"), { 14, 217 });
 		break;
 	case Type::Fire:
-		icon_Q->Load(_T("images\\icon_fire_Q.png"), { 130, 130 });
-		icon_pokemon->Load(_T("images\\icon_moltres.png"), { 480, 480 });
-		gaugeMoveBarGUI->Load(_T("images\\gague_bar_fire.png"), { 14, 217 });
+		icon_Q->Load(_T("images\\battle\\icon_fire_Q.png"), { 130, 130 });
+		icon_pokemon->Load(_T("images\\battle\\icon_moltres.png"), { 480, 480 });
+		gaugeMoveBarGUI->Load(_T("images\\battle\\gague_bar_fire.png"), { 14, 217 });
 		break;
 	}
 	switch (player->GetSubType())
 	{
 	case Type::Elec:
-		icon_W->Load(_T("images\\icon_elec_W.png"), { 130, 130 });
-		icon_E->Load(_T("images\\icon_elec_E.png"), { 130, 130 });
+		icon_W->Load(_T("images\\battle\\icon_elec_W.png"), { 130, 130 });
+		icon_E->Load(_T("images\\battle\\icon_elec_E.png"), { 130, 130 });
 		break;
 	case Type::Water:
-		icon_W->Load(_T("images\\icon_water_W.png"), { 130, 130 });
-		icon_E->Load(_T("images\\icon_water_E.png"), { 130, 130 });
+		icon_W->Load(_T("images\\battle\\icon_water_W.png"), { 130, 130 });
+		icon_E->Load(_T("images\\battle\\icon_water_E.png"), { 130, 130 });
 		break;
 	case Type::Fire:
-		icon_W->Load(_T("images\\icon_fire_W.png"), { 130, 130 });
-		icon_E->Load(_T("images\\icon_fire_E.png"), { 130, 130 });
+		icon_W->Load(_T("images\\battle\\icon_fire_W.png"), { 130, 130 });
+		icon_E->Load(_T("images\\battle\\icon_fire_E.png"), { 130, 130 });
 		break;
 	}
 
@@ -241,17 +313,17 @@ GUIManager::GUIManager(const RECT& rectWindow)
 	iconMoveMinY = (rectMoveBar.bottom + (pokemonIconSize.y / 2));
 	iconMoveAmount = (moveBarHeight / fieldLength) / ELAPSE_BATTLE_GUI;
 
-	mainGUI->Load(_T("images\\battleGUI.png"), { 500, 80 });
-	gagueGUI_main->Load(_T("images\\gauge.png"), { 130, 130 });
-	gagueGUI_border->Load(_T("images\\gauge_border.png"), { 130, 130 });
-	gagueGUI_hp->Load(_T("images\\gauge_hp.png"), { 130, 130 });
-	gagueGUI_mp->Load(_T("images\\gauge_mp.png"), { 130, 130 });
-	moveBarGUI->Load(_T("images\\moveBar.png"), { 20, 223 });
+	mainGUI->Load(_T("images\\battle\\battleGUI.png"), { 500, 80 });
+	gagueGUI_main->Load(_T("images\\battle\\gauge.png"), { 130, 130 });
+	gagueGUI_border->Load(_T("images\\battle\\gauge_border.png"), { 130, 130 });
+	gagueGUI_hp->Load(_T("images\\battle\\gauge_hp.png"), { 130, 130 });
+	gagueGUI_mp->Load(_T("images\\battle\\gauge_mp.png"), { 130, 130 });
+	moveBarGUI->Load(_T("images\\battle\\moveBar.png"), { 20, 223 });
 
-	hurtGUI_Fire.gui->Load(_T("images\\frame_hurt_fire.png"), { 700, 1000 }, 0x00);
-	hurtGUI_Water.gui->Load(_T("images\\frame_hurt_water.png"), { 239, 371 }, 0x00);
-	hurtGUI_Elec.gui->Load(_T("images\\frame_hurt_elec.png"), { 239, 371 }, 0x00);
-	hurtGUI_Dark.gui->Load(_T("images\\frame_hurt_dark.png"), { 239, 371 }, 0x00);
+	hurtGUI_Fire.gui->Load(_T("images\\battle\\frame_hurt_fire.png"), { 700, 1000 }, 0x00);
+	hurtGUI_Water.gui->Load(_T("images\\battle\\frame_hurt_water.png"), { 239, 371 }, 0x00);
+	hurtGUI_Elec.gui->Load(_T("images\\battle\\frame_hurt_elec.png"), { 239, 371 }, 0x00);
+	hurtGUI_Dark.gui->Load(_T("images\\battle\\frame_hurt_dark.png"), { 239, 371 }, 0x00);
 }
 
 void GUIManager::Paint(const HDC& hdc)
@@ -270,7 +342,7 @@ void GUIManager::Paint(const HDC& hdc)
 	icon_W->Paint(hdc, rectSkill_W);
 	icon_E->Paint(hdc, rectSkill_E);
 
-	if (boss->IsCreated() == false)
+	if (isIconStop == false)
 	{
 		moveBarGUI->Paint(hdc, rectMoveBar);
 		gaugeMoveBarGUI->PaintGauge(hdc, rectGaugeMoveBar, iconMoveMinY - rectPokemonIcon.bottom, iconMoveMaxY);
@@ -283,27 +355,45 @@ void GUIManager::Paint(const HDC& hdc)
 	hurtGUI_Dark.gui->Paint(hdc, *rectWindow);
 }
 
-void GUIManager::Update()
+void GUIManager::Update(const HWND& hWnd)
 {
 	hurtGUI_Fire.ReduceAlpha();
 	hurtGUI_Water.ReduceAlpha();
 	hurtGUI_Elec.ReduceAlpha();
 	hurtGUI_Dark.ReduceAlpha();
 
-	if (isIconStop == true || player->IsDeath() == true)
+	int crntPhase = phase.GetPhase();
+	if (player->IsDeath() == true)
 	{
+		return;
+	}
+	else if (isIconStop == true)
+	{
+		if (crntPhase < 2 && isClearPhase == false && enemies->IsEmenyClear() == true)
+		{
+			isClearPhase = true;
+
+			phase.ClearPhase();
+			soundManager->StopEffectSound();
+			soundManager->StopBGMSound();
+			soundManager->PlayEffectSound(EffectSound::Win);
+			sceneManager->StartLoading(hWnd);
+		}
 		return;
 	}
 	rectPokemonIcon.top -= iconMoveAmount;
 	rectPokemonIcon.bottom -= iconMoveAmount;
-	if (rectPokemonIcon.top < iconMoveMaxY)
+	if (rectPokemonIcon.top <= iconMoveMaxY)
 	{
 		const int corrValue = rectPokemonIcon.top - iconMoveMaxY;
 		rectPokemonIcon.top += corrValue;
 		rectPokemonIcon.bottom += corrValue;
 		isIconStop = true;
 	
-		boss->Create();
+		if (crntPhase == 2)
+		{
+			boss->Create();
+		}
 	}
 }
 RECT GUIManager::GetRectDisplay() const

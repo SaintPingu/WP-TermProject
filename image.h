@@ -116,6 +116,4 @@ protected:
 		this->action = action;
 		this->isRevFrame = false;
 	}
-public:
-	virtual void Animate() abstract;
 };

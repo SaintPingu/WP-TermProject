@@ -1,14 +1,14 @@
 #pragma once
 
 enum class EffectSound { Win = 0, Loss, Shot, Shot_nLoop, Explosion };
-enum class BGMSound { Battle = 0, Battle_Boss };
+enum class BGMSound { Intro = 0, Town1, Town2, Stage, Battle, Battle_Boss, Ending };
 enum class SkillSound { Elec = 0, Fire, Water };
 enum class HitSound { Elec = 0, Fire, Water, Dark };
 enum class BossSound { Elec_Laser, Fire_Meteor, Fire_Ball, Water_Tsunami, Water_Splash, Dark };
 enum class SoundChannel { Bgm = 0, Effect, Skill, Boss };
 
 // has Channel
-#define SOUND_LIST_BGM 3
+#define SOUND_LIST_BGM 7
 #define SOUND_LIST_Effect 10
 #define SOUND_LIST_Skill 3
 #define SOUND_LIST_BOSS 6
